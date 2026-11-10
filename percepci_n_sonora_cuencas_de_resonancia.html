@@ -1,0 +1,1764 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cartografía Acústica — Placas de Resonancia y Pictogramas</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Google Fonts: Exclusivamente Montserrat -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@200;300;400;500;600;700&display=swap" rel="stylesheet">
+
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['Montserrat', 'sans-serif'],
+                    },
+                    colors: {
+                        signal: '#EAB308',
+                        signalBright: '#FACC15',
+                        plate: '#121110',
+                        sandLight: '#FAF6EE',
+                        sandMid: '#E8E2D5',
+                        sandWarm: '#D4CBB8'
+                    }
+                }
+            }
+        }
+    </script>
+
+    <style>
+        * {
+            box-sizing: border-box;
+            user-select: none;
+            font-family: 'Montserrat', sans-serif;
+        }
+        body, html {
+            margin: 0;
+            padding: 0;
+            width: 100%;
+            height: 100%;
+            overflow: hidden;
+            background-color: #121110;
+            color: #FAF6EE;
+            line-height: 1.7;
+            letter-spacing: 0.03em;
+        }
+
+        /* Lienzo de simulación de arena de cuarzo */
+        #sandCanvas {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 1;
+        }
+
+        /* Viñeta sutil de placa metálica negra mate como el afiche de referencia */
+        .plate-vignette {
+            position: absolute;
+            inset: 0;
+            z-index: 2;
+            pointer-events: none;
+            background:
+                radial-gradient(circle at 50% 50%, rgba(255, 250, 240, 0.015) 0%, rgba(12, 11, 10, 0.42) 76%, rgba(6, 5, 5, 0.85) 100%);
+        }
+
+        .ui-layer {
+            position: relative;
+            z-index: 10;
+            pointer-events: none;
+        }
+
+        .interactive {
+            pointer-events: auto;
+        }
+
+        .poster-shadow {
+            text-shadow: 0 3px 20px rgba(10, 9, 8, 0.96), 0 1px 6px rgba(0, 0, 0, 0.98);
+        }
+
+        /* Pantalla de Introducción (Etapa 0) con desenfoque editorial suave */
+        .intro-backdrop {
+            background: radial-gradient(circle at 50% 50%, rgba(18, 17, 16, 0.84) 0%, rgba(14, 13, 12, 0.95) 100%);
+            backdrop-filter: blur(8px);
+            transition: opacity 0.55s cubic-bezier(0.16, 1, 0.3, 1), visibility 0.55s;
+        }
+        .intro-backdrop.hidden-stage {
+            opacity: 0;
+            visibility: hidden;
+            pointer-events: none;
+        }
+
+        /* Tarjetas de Pictogramas en la Introducción */
+        .pictogram-card {
+            background: rgba(24, 22, 20, 0.72);
+            border: 1px solid rgba(234, 179, 8, 0.24);
+            transition: all 0.28s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+        .pictogram-card:hover {
+            border-color: rgba(234, 179, 8, 0.75);
+            background: rgba(32, 29, 26, 0.88);
+            transform: translateY(-2px);
+        }
+
+        /* Botones de filtro por Pictograma y Onda */
+        .filter-chip {
+            transition: all 0.24s cubic-bezier(0.16, 1, 0.3, 1);
+            border: 1px solid rgba(234, 179, 8, 0.28);
+            background: rgba(18, 17, 16, 0.78);
+            backdrop-filter: blur(8px);
+        }
+        .filter-chip:hover {
+            border-color: rgba(234, 179, 8, 0.85);
+            background: rgba(234, 179, 8, 0.12);
+        }
+        .filter-chip.active {
+            border-color: #EAB308;
+            background: #EAB308;
+            color: #121110;
+            font-weight: 600;
+        }
+        .filter-chip.active svg {
+            stroke: #121110;
+        }
+
+        /* Selector espacioso de Círculo de Intensidad (C1-C5) */
+        .ring-chip {
+            transition: all 0.22s ease;
+            border: 1px solid rgba(234, 179, 8, 0.22);
+            background: rgba(18, 17, 16, 0.76);
+            backdrop-filter: blur(6px);
+        }
+        .ring-chip:hover {
+            border-color: rgba(234, 179, 8, 0.8);
+            color: #FACC15;
+        }
+        .ring-chip.active {
+            border-color: #EAB308;
+            background: rgba(234, 179, 8, 0.22);
+            color: #FACC15;
+            font-weight: 600;
+        }
+
+        .nav-tab {
+            transition: all 0.25s ease;
+            position: relative;
+            padding-bottom: 4px;
+        }
+        .nav-tab.active {
+            font-weight: 600;
+            color: #EAB308;
+            opacity: 1 !important;
+        }
+        .nav-tab.active::after {
+            content: '';
+            position: absolute;
+            left: 0;
+            bottom: 0;
+            width: 100%;
+            height: 2px;
+            background-color: #EAB308;
+        }
+
+        /* Scrollbar sutil por si en pantallas pequeñas se requiere desplazarse en la portada */
+        ::-webkit-scrollbar {
+            width: 5px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #121110;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: rgba(234, 179, 8, 0.35);
+            border-radius: 3px;
+        }
+    </style>
+</head>
+<body class="w-screen h-screen overflow-hidden select-none">
+
+    <!-- LIENZO DE ARENA DE CUARZO Y CÍRCULOS DE INTENSIDAD -->
+    <canvas id="sandCanvas"></canvas>
+    <div class="plate-vignette"></div>
+
+    <!-- ==========================================================================
+         ETAPA 0: PANTALLA DE INTRODUCCIÓN EDITORIAL ESPACIOSA (PORTADA)
+         ========================================================================== -->
+    <section id="introModal" class="intro-backdrop fixed inset-0 z-40 flex items-center justify-center overflow-y-auto p-6 sm:p-12 md:p-16">
+        <div class="interactive max-w-5xl w-full my-auto bg-[#141311]/90 border border-[#EAB308]/30 rounded-2xl p-8 sm:p-12 md:p-16 shadow-2xl">
+            
+            <!-- Encabezado de Portada con Emblema Geométrico -->
+            <div class="flex flex-col md:flex-row items-start md:items-center justify-between gap-8 pb-10 border-b border-[#EAB308]/20">
+                <div class="flex items-center gap-6">
+                    <svg width="78" height="78" viewBox="-50 -50 100 100" class="shrink-0 overflow-visible">
+                        <polygon points="0,-42 42,0 0,42 -42,0" fill="none" stroke="#EAB308" stroke-width="1.6" opacity="0.9"/>
+                        <polygon points="-32,-32 32,-32 32,32 -32,32" fill="none" stroke="#EAB308" stroke-width="1.4" opacity="0.65" transform="rotate(22)"/>
+                        <polygon points="0,-38 33,19 -33,19" fill="none" stroke="#EAB308" stroke-width="1.3" opacity="0.5" transform="rotate(-15)"/>
+                        <circle cx="0" cy="0" r="6" fill="none" stroke="#EAB308" stroke-width="1.5"/>
+                    </svg>
+                    <div class="space-y-2">
+                        <p class="text-[11px] sm:text-xs font-semibold tracking-[0.28em] uppercase text-[#EAB308]">
+                            Cartografía Cimática · Visualización de Datos Fijos
+                        </p>
+                        <h1 class="text-2xl sm:text-4xl font-semibold tracking-[-0.01em] text-[#FAF6EE] leading-tight">
+                            Resonancia y Percepción en Arena
+                        </h1>
+                    </div>
+                </div>
+
+                <div class="text-left md:text-right space-y-1">
+                    <div class="text-xs font-medium tracking-[0.18em] uppercase text-[#EAB308]">
+                        62 Registros Totales Fijos
+                    </div>
+                    <div class="text-xs font-light tracking-[0.08em] text-[#FAF6EE]/70">
+                        Sotomayor (24) · Muelle Prat (20) · Buenos Aires (18)
+                    </div>
+                </div>
+            </div>
+
+            <!-- Explicación Editorial con Amplio Espacio de Lectura -->
+            <div class="py-10 grid grid-cols-1 lg:grid-cols-12 gap-10 items-start">
+                <div class="lg:col-span-5 space-y-5">
+                    <h2 class="text-sm font-semibold tracking-[0.2em] uppercase text-[#EAB308]">
+                        Cómo Leer la Visualización
+                    </h2>
+                    <p class="text-sm sm:text-[15px] font-light text-[#FAF6EE]/90 leading-[1.85]">
+                        Esta visualización traduce las percepciones obtenidas de las personas en <strong>patrones estacionarios de arena de cuarzo</strong> sobre una placa metálica negra, inspirada en las figuras acústicas de Chladni.
+                    </p>
+                    <p class="text-sm sm:text-[15px] font-light text-[#FAF6EE]/80 leading-[1.85]">
+                        Primero observarás la <strong> huella total fija de cada lugar</strong>. Al presionar sobre un territorio, podrás desglosar sus <strong>5 círculos concéntricos de intensidad</strong> y filtrar la arena según los <strong>4 pictogramas de cualidad de onda</strong>.
+                    </p>
+                </div>
+
+                <!-- Leyenda Visual de los 4 Pictogramas y sus Ondas -->
+                <div class="lg:col-span-7 space-y-4">
+                    <h3 class="text-xs font-semibold tracking-[0.2em] uppercase text-[#EAB308] mb-3">
+                        Los 4 Pictogramas y sus Geometrías de Onda
+                    </h3>
+
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                        <!-- 1. Naturaleza (Envolvente) -->
+                        <div class="pictogram-card rounded-xl p-5 flex items-start gap-4">
+                            <div class="w-11 h-11 rounded-lg bg-[#EAB308]/15 border border-[#EAB308]/40 flex items-center justify-center shrink-0 text-[#EAB308]">
+                                <svg class="w-6 h-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round">
+                                    <path d="M2 12c2.5-3 5.5-3 8 0s5.5 3 8 0 3.5-2 4-1"/>
+                                    <path d="M2 17c2.5-3 5.5-3 8 0s5.5 3 8 0 3.5-2 4-1"/>
+                                    <path d="M12 3c-3.5 2-5 5.5-2 8 3-2.5 1.5-6-2-8z"/>
+                                </svg>
+                            </div>
+                            <div class="space-y-1.5">
+                                <div class="text-xs font-semibold tracking-[0.12em] uppercase text-[#EAB308]">
+                                    1. Naturaleza · Envolvente
+                                </div>
+                                <p class="text-xs font-light text-[#FAF6EE]/80 leading-relaxed">
+                                    Viento costero, agua y entorno orgánico. Genera una <strong>onda armónica de 4 lóbulos</strong> ($n=4$).
+                                </p>
+                            </div>
+                        </div>
+
+                        <!-- 2. Tráfico y Motores (Intenso) -->
+                        <div class="pictogram-card rounded-xl p-5 flex items-start gap-4">
+                            <div class="w-11 h-11 rounded-lg bg-[#EAB308]/15 border border-[#EAB308]/40 flex items-center justify-center shrink-0 text-[#EAB308]">
+                                <svg class="w-6 h-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round">
+                                    <polyline points="2 12 6 12 9 4 13 20 16 9 19 15 22 12"/>
+                                </svg>
+                            </div>
+                            <div class="space-y-1.5">
+                                <div class="text-xs font-semibold tracking-[0.12em] uppercase text-[#EAB308]">
+                                    2. Tráfico y Motores · Intenso
+                                </div>
+                                <p class="text-xs font-light text-[#FAF6EE]/80 leading-relaxed">
+                                    Flujo vehicular y vibración mecánica urbana. Esculpe una <strong>estrella nodal de 6 puntas</strong> ($n=6$).
+                                </p>
+                            </div>
+                        </div>
+
+                        <!-- 3. Murmullo Humano (Abierto) -->
+                        <div class="pictogram-card rounded-xl p-5 flex items-start gap-4">
+                            <div class="w-11 h-11 rounded-lg bg-[#EAB308]/15 border border-[#EAB308]/40 flex items-center justify-center shrink-0 text-[#EAB308]">
+                                <svg class="w-6 h-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round">
+                                    <circle cx="9" cy="9" r="3"/>
+                                    <path d="M4 19c0-2.8 2.2-5 5-5s5 2.2 5 5"/>
+                                    <path d="M16 7a4 4 0 0 1 0 6"/>
+                                    <path d="M19 4a8 8 0 0 1 0 12"/>
+                                </svg>
+                            </div>
+                            <div class="space-y-1.5">
+                                <div class="text-xs font-semibold tracking-[0.12em] uppercase text-[#EAB308]">
+                                    3. Murmullo Humano · Abierto
+                                </div>
+                                <p class="text-xs font-light text-[#FAF6EE]/80 leading-relaxed">
+                                    Voces, pasos y resonancia comunitaria abierta. Forma <strong>arcos bipolares abiertos</strong> ($n=2$).
+                                </p>
+                            </div>
+                        </div>
+
+                        <!-- 4. Puerto y Señales (Fugaz) -->
+                        <div class="pictogram-card rounded-xl p-5 flex items-start gap-4">
+                            <div class="w-11 h-11 rounded-lg bg-[#EAB308]/15 border border-[#EAB308]/40 flex items-center justify-center shrink-0 text-[#EAB308]">
+                                <svg class="w-6 h-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round">
+                                    <circle cx="12" cy="12" r="2.5"/>
+                                    <path d="M12 2v4M12 18v4M2 12h4M18 12h4"/>
+                                    <path d="M4.9 4.9l2.8 2.8M16.3 16.3l2.8 2.8M19.1 4.9l-2.8 2.8M7.7 16.3l-2.8 2.8"/>
+                                </svg>
+                            </div>
+                            <div class="space-y-1.5">
+                                <div class="text-xs font-semibold tracking-[0.12em] uppercase text-[#EAB308]">
+                                    4. Puerto y Señales · Fugaz
+                                </div>
+                                <p class="text-xs font-light text-[#FAF6EE]/80 leading-relaxed">
+                                    Bocinas portuarias, aves y pulsos breves. Dibuja una <strong>corona radial de 8 pétalos</strong> ($n=8$).
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Pie de Portada: Botón de Entrada a Etapa 1 -->
+            <div class="pt-8 border-t border-[#EAB308]/20 flex flex-col sm:flex-row items-center justify-between gap-6">
+                <div class="text-xs font-light text-[#FAF6EE]/70 tracking-[0.06em]">
+                    Paso 01 → Vista General de los Lugares &nbsp;·&nbsp; Paso 02 → Indagación por Círculos y Pictogramas
+                </div>
+                <button onclick="closeIntroAndEnterOverview()" class="px-8 py-4 rounded-xl bg-[#EAB308] text-[#121110] text-xs sm:text-sm font-bold tracking-[0.18em] uppercase hover:bg-[#FACC15] transition-all shadow-xl">
+                    Ingresar a la Visualización Total →
+                </button>
+            </div>
+        </div>
+    </section>
+
+    <!-- TARJETA FLOTANTE DE INSPECCIÓN DE PERSONA O DE ZONA (Con amplio margen y lectura limpia) -->
+    <div id="hoverCard" class="fixed z-30 pointer-events-none hidden bg-[#121110]/95 border border-[#EAB308]/80 rounded-xl px-6 py-5 max-w-sm shadow-2xl backdrop-blur-md">
+        <div class="flex items-center justify-between gap-4 border-b border-[#EAB308]/25 pb-2.5 mb-3">
+            <span id="hcHeaderLeft" class="text-[11px] font-bold tracking-[0.2em] uppercase text-[#EAB308]">PERSONA #01</span>
+            <span id="hcHeaderRight" class="text-[10px] font-medium tracking-[0.15em] uppercase text-[#FAF6EE]/80">CÍRCULO 4 · ALTA</span>
+        </div>
+        <div id="hcBodyText" class="text-xs sm:text-[13px] font-light leading-[1.75] text-[#FAF6EE] mb-3.5">
+            "Sensación envolvente constante que rebota entre las fachadas."
+        </div>
+        <div class="flex items-center justify-between text-[10px] font-semibold tracking-[0.14em] uppercase text-[#EAB308] pt-1">
+            <span id="hcFooterLeft">Pictograma: Naturaleza</span>
+            <span id="hcFooterRight">Clic para aislar</span>
+        </div>
+    </div>
+
+    <!-- ==========================================================================
+         CAPA EDITORIAL PRINCIPAL (ETAPA 1 Y ETAPA 2) — MÁRGENES AMPLIOS Y RESPIRABLES
+         ========================================================================== -->
+    <div id="mainUiContainer" class="ui-layer w-full h-full flex flex-col justify-between p-7 sm:p-11 lg:px-16 lg:py-12 transition-opacity duration-300">
+
+        <!-- CABECERA ESPACIOSA: EMBLEMA + TÍTULO (IZQUIERDA) / FILTROS CON PICTOGRAMA (DERECHA) -->
+        <header class="w-full flex flex-col xl:flex-row items-start justify-between gap-8">
+
+            <!-- Bloque Izquierdo: Emblema Poligonal + Estado Actual + Botones de Navegación -->
+            <div class="interactive flex flex-wrap items-center gap-6">
+                <div onclick="returnToOverview()" class="cursor-pointer group flex items-center gap-5" title="Volver a la Vista General">
+                    <svg id="harmonicEmblem" width="72" height="72" viewBox="-50 -50 100 100" class="overflow-visible transition-transform duration-300 group-hover:scale-105 shrink-0">
+                        <!-- Polígonos dinámicos según las proporciones fijas -->
+                    </svg>
+                    <div class="poster-shadow space-y-1.5">
+                        <div id="headerBreadcrumb" class="text-[10px] sm:text-[11px] font-semibold tracking-[0.26em] uppercase text-[#EAB308]/85">
+                            ETAPA 01 · VISTA GENERAL DE LUGARES
+                        </div>
+                        <div id="headerMainStatus" class="text-sm sm:text-lg font-semibold tracking-[0.06em] uppercase text-[#FAF6EE]">
+                            Representación Total Fija · 62 Personas
+                        </div>
+                        <div id="headerSubStatus" class="text-xs font-light tracking-[0.06em] text-[#FAF6EE]/75 max-w-md leading-relaxed">
+                            Selecciona un lugar en la placa para desglosar sus 5 círculos y filtrar por pictograma.
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Botones de Acción Superior (Volver a Totales / Abrir Portada Intro / Vista Limpia) -->
+                <div class="flex flex-wrap items-center gap-3 ml-0 sm:ml-2">
+                    <button id="backToOverviewBtn" onclick="returnToOverview()" class="hidden px-4 py-2.5 rounded-lg bg-[#EAB308] text-[#121110] text-[11px] font-bold tracking-[0.16em] uppercase hover:bg-[#FACC15] transition-all shadow-lg">
+                        ← Volver a Lugares Totales
+                    </button>
+                    <button onclick="openIntroScreen()" class="px-3.5 py-2 rounded-lg border border-[#EAB308]/35 bg-[#121110]/80 text-[#EAB308] text-[10px] font-semibold tracking-[0.16em] uppercase hover:border-[#EAB308] transition-all">
+                        Guía / Pictogramas
+                    </button>
+                    <button id="cleanViewBtn" onclick="toggleCleanView()" class="px-3.5 py-2 rounded-lg border border-[#FAF6EE]/20 bg-[#121110]/80 text-[#FAF6EE]/80 text-[10px] font-medium tracking-[0.14em] uppercase hover:border-[#EAB308] hover:text-[#EAB308] transition-all">
+                        Vista Limpia
+                    </button>
+                </div>
+            </div>
+
+            <!-- Bloque Derecho: Controles de Indagación con Pictogramas (Visibles en ETAPA 2) -->
+            <div id="level2Controls" class="interactive hidden flex-col items-start xl:items-end gap-5 w-full xl:w-auto">
+
+                <!-- 1. FILTRO POR PICTOGRAMA / CUALIDAD DE ONDA -->
+                <div class="flex flex-col xl:items-end gap-2.5 w-full">
+                    <span class="text-[10px] font-semibold tracking-[0.22em] uppercase text-[#EAB308]/85 poster-shadow">
+                        1. Aislar por Pictograma y Cualidad de Onda:
+                    </span>
+                    <div class="flex flex-wrap xl:justify-end gap-2.5">
+                        <!-- Botón Total del Lugar -->
+                        <button onclick="setWaveFilter('todas')" id="wf-todas" class="filter-chip active px-4 py-2.5 rounded-lg text-[11px] tracking-[0.12em] uppercase text-[#EAB308] flex items-center gap-2.5">
+                            <span>Total Lugar</span>
+                            <span class="opacity-80">(<span id="wfCount-todas">24</span>)</span>
+                        </button>
+
+                        <!-- Pictograma 1: Naturaleza (Envolvente) -->
+                        <button onclick="setWaveFilter('envolvente')" id="wf-envolvente" class="filter-chip px-4 py-2.5 rounded-lg text-[11px] tracking-[0.12em] uppercase text-[#EAB308] flex items-center gap-2.5">
+                            <svg class="w-4 h-4 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <path d="M2 13c2.5-3 5.5-3 8 0s5.5 3 8 0 3.5-2 4-1"/>
+                                <path d="M12 3c-3.5 2-5 5.5-2 8 3-2.5 1.5-6-2-8z"/>
+                            </svg>
+                            <span>Naturaleza · Envolvente</span>
+                            <span class="opacity-80">(<span id="wfCount-envolvente">11</span>)</span>
+                        </button>
+
+                        <!-- Pictograma 2: Tráfico y Motores (Intenso) -->
+                        <button onclick="setWaveFilter('intensa')" id="wf-intensa" class="filter-chip px-4 py-2.5 rounded-lg text-[11px] tracking-[0.12em] uppercase text-[#EAB308] flex items-center gap-2.5">
+                            <svg class="w-4 h-4 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <polyline points="2 12 6 12 9 4 13 20 16 9 19 15 22 12"/>
+                            </svg>
+                            <span>Tráfico · Intensa</span>
+                            <span class="opacity-80">(<span id="wfCount-intensa">7</span>)</span>
+                        </button>
+
+                        <!-- Pictograma 3: Murmullo Humano (Abierto) -->
+                        <button onclick="setWaveFilter('abierta')" id="wf-abierta" class="filter-chip px-4 py-2.5 rounded-lg text-[11px] tracking-[0.12em] uppercase text-[#EAB308] flex items-center gap-2.5">
+                            <svg class="w-4 h-4 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <circle cx="9" cy="9" r="3"/>
+                                <path d="M4 19c0-2.8 2.2-5 5-5s5 2.2 5 5"/>
+                                <path d="M17 7a5 5 0 0 1 0 8"/>
+                            </svg>
+                            <span>Voces · Abierta</span>
+                            <span class="opacity-80">(<span id="wfCount-abierta">4</span>)</span>
+                        </button>
+
+                        <!-- Pictograma 4: Puerto y Señales (Fugaz) -->
+                        <button onclick="setWaveFilter('fugaz')" id="wf-fugaz" class="filter-chip px-4 py-2.5 rounded-lg text-[11px] tracking-[0.12em] uppercase text-[#EAB308] flex items-center gap-2.5">
+                            <svg class="w-4 h-4 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <circle cx="12" cy="12" r="2.5"/>
+                                <path d="M12 2v4M12 18v4M2 12h4M18 12h4"/>
+                                <path d="M5 5l3 3M16 16l3 3M19 5l-3 3M8 16l-3 3"/>
+                            </svg>
+                            <span>Puerto · Fugaz</span>
+                            <span class="opacity-80">(<span id="wfCount-fugaz">2</span>)</span>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- 2. FILTRO POR CÍRCULO DE INTENSIDAD (1 al 5) -->
+                <div class="flex flex-col xl:items-end gap-2 w-full">
+                    <span class="text-[10px] font-semibold tracking-[0.22em] uppercase text-[#EAB308]/80 poster-shadow">
+                        2. Aislar por Círculo del Instrumento (Intensidad 1 a 5):
+                    </span>
+                    <div class="flex flex-wrap xl:justify-end gap-2">
+                        <button onclick="setRingFilter(0)" id="rf-0" class="ring-chip active px-3.5 py-1.5 rounded-md text-[10px] tracking-[0.12em] uppercase text-[#EAB308]">
+                            Todos (C1–C5)
+                        </button>
+                        <button onclick="setRingFilter(1)" id="rf-1" class="ring-chip px-3.5 py-1.5 rounded-md text-[10px] tracking-[0.12em] uppercase text-[#EAB308]">
+                            C1 · Muy Baja (<span id="rfCount-1">2</span>)
+                        </button>
+                        <button onclick="setRingFilter(2)" id="rf-2" class="ring-chip px-3.5 py-1.5 rounded-md text-[10px] tracking-[0.12em] uppercase text-[#EAB308]">
+                            C2 · Baja (<span id="rfCount-2">4</span>)
+                        </button>
+                        <button onclick="setRingFilter(3)" id="rf-3" class="ring-chip px-3.5 py-1.5 rounded-md text-[10px] tracking-[0.12em] uppercase text-[#EAB308]">
+                            C3 · Media (<span id="rfCount-3">6</span>)
+                        </button>
+                        <button onclick="setRingFilter(4)" id="rf-4" class="ring-chip px-3.5 py-1.5 rounded-md text-[10px] tracking-[0.12em] uppercase text-[#EAB308]">
+                            C4 · Alta (<span id="rfCount-4">7</span>)
+                        </button>
+                        <button onclick="setRingFilter(5)" id="rf-5" class="ring-chip px-3.5 py-1.5 rounded-md text-[10px] tracking-[0.12em] uppercase text-[#EAB308]">
+                            C5 · Máxima (<span id="rfCount-5">5</span>)
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Banner cuando se aísla a una persona específica -->
+                <div id="personIsolationBanner" class="hidden items-center gap-3 bg-[#EAB308]/15 border border-[#EAB308] rounded-lg px-4 py-2 text-[11px] tracking-[0.14em] uppercase text-[#FAF6EE]">
+                    <span id="isolatedPersonLabel">Aislando Persona #01</span>
+                    <button onclick="clearIsolatedPerson()" class="ml-2 font-bold text-[#EAB308] hover:underline">
+                        [ Restaurar Grupo ✕ ]
+                    </button>
+                </div>
+            </div>
+        </header>
+
+        <!-- PIE DE PÁGINA EDITORIAL ESPACIOSO (ESTética AFICHE SOUND IMAGE) -->
+        <footer id="editorialFooter" class="w-full flex flex-col lg:flex-row items-start lg:items-end justify-between gap-10 transition-opacity duration-300">
+
+            <!-- Bloque Tipográfico Inferior Izquierdo con Generoso Interlineado -->
+            <div class="poster-shadow max-w-2xl space-y-4">
+                <div class="space-y-1.5 leading-[1.35]">
+                    <div id="posterTitle" class="text-xl sm:text-3xl font-semibold tracking-[0.01em] text-[#EAB308]">
+                        Representación Total de Lugares
+                    </div>
+                    <div id="posterLine2" class="text-sm sm:text-xl font-normal tracking-[0.02em] text-[#FAF6EE]/95">
+                        Plaza Sotomayor (24) · Muelle Prat (20) · Buenos Aires (18)
+                    </div>
+                    <div id="posterLine3" class="text-xs sm:text-base font-light tracking-[0.04em] text-[#EAB308]/90 pt-1">
+                        4 Pictogramas de Onda · 5 Círculos Concéntricos de Intensidad
+                    </div>
+                </div>
+
+                <div class="pt-1 space-y-1 text-xs font-light leading-relaxed tracking-[0.04em] text-[#FAF6EE]/75">
+                    <div id="posterCaption1">Haz clic sobre cualquiera de los 3 territorios para abrir sus círculos y aislar cada pictograma.</div>
+                </div>
+            </div>
+
+            <!-- Bloque Inferior Derecho: Selector Directo de Lugar con Amplio Espaciado -->
+            <div class="interactive flex flex-col items-start lg:items-end gap-5 poster-shadow w-full lg:w-auto">
+
+                <nav class="flex flex-wrap items-center gap-7 sm:gap-9 text-xs sm:text-sm tracking-[0.08em]">
+                    <button onclick="returnToOverview()" id="tab-overview" class="nav-tab active text-[#FAF6EE] opacity-80 hover:opacity-100">
+                        Vista General (Totales)
+                    </button>
+                    <button onclick="enterPlaceDetail('sotomayor')" id="tab-sotomayor" class="nav-tab text-[#FAF6EE] opacity-70 hover:opacity-100">
+                        Plaza Sotomayor (24)
+                    </button>
+                    <button onclick="enterPlaceDetail('muelle')" id="tab-muelle" class="nav-tab text-[#FAF6EE] opacity-70 hover:opacity-100">
+                        Muelle Prat (20)
+                    </button>
+                    <button onclick="enterPlaceDetail('buenosaires')" id="tab-buenosaires" class="nav-tab text-[#FAF6EE] opacity-70 hover:opacity-100">
+                        Buenos Aires (18)
+                    </button>
+                </nav>
+
+                <!-- Firma tipográfica estilo Berliner Philharmoniker -->
+                <div class="text-left lg:text-right leading-[1.35] space-y-0.5">
+                    <div class="text-sm sm:text-base font-semibold tracking-[0.06em] uppercase text-[#EAB308]">
+                        Cartografía de Percepción
+                    </div>
+                    <div class="text-xs font-light tracking-[0.1em] text-[#FAF6EE]/75">
+                        Sotomayor · Muelle Prat · Buenos Aires
+                    </div>
+                </div>
+            </div>
+
+        </footer>
+    </div>
+
+    <script>
+        /**
+         * ============================================================================
+         * 1. MODELO DE PICTOGRAMAS Y DATOS FIJOS DETERMINISTAS
+         * ============================================================================
+         * Cada cualidad de onda está asociada a un Pictograma claro:
+         * - envolvente -> Naturaleza (Viento costero, oleaje, entorno orgánico)
+         * - intensa    -> Tráfico y Motores (Flujo vehicular, vibración mecánica)
+         * - abierta    -> Murmullo Humano (Voces, pasos, apertura comunitaria)
+         * - fugaz      -> Puerto y Señales (Bocinas de barcos, gaviotas, alertas breves)
+         */
+
+        const WAVE_TYPES = {
+            envolvente: {
+                key: 'envolvente',
+                pictogramName: 'Naturaleza',
+                waveQuality: 'Onda Envolvente',
+                label: 'Naturaleza · Envolvente',
+                shortLabel: 'Naturaleza (Envolvente)',
+                lobes: 4,         // Figura cuadrilobular armónica como el afiche de Handel
+                kRadial: 2.22,
+                lobeAmp: 0.46,
+                innerRing: 0.24,
+                emblemSides: 4,
+                description: 'Brisa, agua y acústica envolvente de 4 lóbulos armónicos'
+            },
+            intensa: {
+                key: 'intensa',
+                pictogramName: 'Tráfico y Motores',
+                waveQuality: 'Onda Intensa',
+                label: 'Tráfico y Motores · Intensa',
+                shortLabel: 'Tráfico (Intensa)',
+                lobes: 6,         // Estrella nodal de 6 puntas de alta frecuencia
+                kRadial: 3.15,
+                lobeAmp: 0.52,
+                innerRing: 0.16,
+                emblemSides: 6,
+                description: 'Pulso mecánico y vehicular de 6 crestas nodales'
+            },
+            abierta: {
+                key: 'abierta',
+                pictogramName: 'Murmullo Humano',
+                waveQuality: 'Onda Abierta',
+                label: 'Murmullo Humano · Abierta',
+                shortLabel: 'Voces (Abierta)',
+                lobes: 2,         // Onda bipolar abierta de largo alcance
+                kRadial: 1.68,
+                lobeAmp: 0.50,
+                innerRing: 0.20,
+                emblemSides: 3,
+                description: 'Voces y propagación comunitaria abierta en 2 arcos'
+            },
+            fugaz: {
+                key: 'fugaz',
+                pictogramName: 'Puerto y Señales',
+                waveQuality: 'Onda Fugaz',
+                label: 'Puerto y Señales · Fugaz',
+                shortLabel: 'Puerto (Fugaz)',
+                lobes: 8,         // Corona radial de 8 pétalos
+                kRadial: 2.75,
+                lobeAmp: 0.56,
+                innerRing: 0.14,
+                emblemSides: 8,
+                description: 'Señales portuarias, aves y destellos acústicos de 8 lóbulos'
+            }
+        };
+
+        const INTENSITY_RINGS = [
+            { level: 1, name: 'Círculo 1 · Intensidad Muy Baja', short: 'C1', radiusNorm: 0.22, ampFactor: 0.35 },
+            { level: 2, name: 'Círculo 2 · Intensidad Baja',     short: 'C2', radiusNorm: 0.38, ampFactor: 0.52 },
+            { level: 3, name: 'Círculo 3 · Intensidad Media',    short: 'C3', radiusNorm: 0.54, ampFactor: 0.70 },
+            { level: 4, name: 'Círculo 4 · Intensidad Alta',     short: 'C4', radiusNorm: 0.71, ampFactor: 0.86 },
+            { level: 5, name: 'Círculo 5 · Intensidad Máxima',   short: 'C5', radiusNorm: 0.88, ampFactor: 1.00 }
+        ];
+
+        // DATOS FIJOS PRE-LEVANTADOS POR LUGAR (62 REGISTROS EN TOTAL)
+        const PLACES_DATA = {
+            sotomayor: {
+                id: 'sotomayor',
+                name: 'Plaza Sotomayor',
+                subtitle: 'Confluencia Patrimonial y Eco Urbano',
+                people: [
+                    // Círculo 1 (Muy Baja - 2 personas)
+                    { id: 'S-01', ring: 1, wave: 'envolvente', angle: 0.45,  freqMod: 1.00, note: 'Brisa húmeda contenida en el centro del monumento.' },
+                    { id: 'S-02', ring: 1, wave: 'fugaz',      angle: 3.60,  freqMod: 0.95, note: 'Eco lejano de una sirena de buque desde la dársena.' },
+                    // Círculo 2 (Baja - 4 personas)
+                    { id: 'S-03', ring: 2, wave: 'envolvente', angle: 0.95,  freqMod: 1.02, note: 'Aire costero envolvente entre los edificios patrimoniales.' },
+                    { id: 'S-04', ring: 2, wave: 'abierta',    angle: 2.35,  freqMod: 0.98, note: 'Conversaciones tranquilas que se abren hacia el muelle.' },
+                    { id: 'S-05', ring: 2, wave: 'envolvente', angle: 4.10,  freqMod: 1.04, note: 'Sensación envolvente estable y pareja en la explanada.' },
+                    { id: 'S-06', ring: 2, wave: 'fugaz',      angle: 5.50,  freqMod: 0.92, note: 'Señal acústica breve y pasos aislados sobre adoquines.' },
+                    // Círculo 3 (Media - 6 personas)
+                    { id: 'S-07', ring: 3, wave: 'envolvente', angle: 0.30,  freqMod: 1.00, note: 'Viento y atmósfera envolvente que rebota en las cuatro esquinas.' },
+                    { id: 'S-08', ring: 3, wave: 'intensa',    angle: 1.35,  freqMod: 1.06, note: 'Flujo constante de motores y locomoción por calle Serrano.' },
+                    { id: 'S-09', ring: 3, wave: 'envolvente', angle: 2.40,  freqMod: 0.97, note: 'Resonancia natural contenida como un anfiteatro abierto.' },
+                    { id: 'S-10', ring: 3, wave: 'abierta',    angle: 3.45,  freqMod: 1.01, note: 'Murmullo peatonal continuo que cruza hacia el puerto.' },
+                    { id: 'S-11', ring: 3, wave: 'envolvente', angle: 4.55,  freqMod: 1.03, note: 'Corriente de aire marino que abraza el centro de la plaza.' },
+                    { id: 'S-12', ring: 3, wave: 'intensa',    angle: 5.65,  freqMod: 1.08, note: 'Pulso rítmico de buses y tránsito en el eje arterial.' },
+                    // Círculo 4 (Alta - 7 personas)
+                    { id: 'S-13', ring: 4, wave: 'envolvente', angle: 0.15,  freqMod: 1.05, note: 'Envolvimiento total; el sonido abraza desde todas las fachadas.' },
+                    { id: 'S-14', ring: 4, wave: 'intensa',    angle: 1.05,  freqMod: 1.10, note: 'Vibración intensa de tráfico en el cruce hacia Estación Puerto.' },
+                    { id: 'S-15', ring: 4, wave: 'envolvente', angle: 1.95,  freqMod: 0.99, note: 'Reverberación ambiental profunda sobre el pavimento de piedra.' },
+                    { id: 'S-16', ring: 4, wave: 'intensa',    angle: 2.85,  freqMod: 1.07, note: 'Motores acelerando que hacen vibrar el perímetro sur.' },
+                    { id: 'S-17', ring: 4, wave: 'abierta',    angle: 3.75,  freqMod: 0.96, note: 'Voces de grupos y guías proyectadas hacia la costanera.' },
+                    { id: 'S-18', ring: 4, wave: 'envolvente', angle: 4.65,  freqMod: 1.02, note: 'Cúpula sonora envolvente producida por la simetría urbana.' },
+                    { id: 'S-19', ring: 4, wave: 'intensa',    angle: 5.55,  freqMod: 1.11, note: 'Tráfico pesado reflejado directamente contra los muros.' },
+                    // Círculo 5 (Máxima - 5 personas)
+                    { id: 'S-20', ring: 5, wave: 'intensa',    angle: 0.65,  freqMod: 1.14, note: 'Pico de intensidad vehicular en el borde arterial de la plaza.' },
+                    { id: 'S-21', ring: 5, wave: 'envolvente', angle: 1.90,  freqMod: 1.06, note: 'Máxima sensación envolvente en la confluencia central.' },
+                    { id: 'S-22', ring: 5, wave: 'intensa',    angle: 3.15,  freqMod: 1.12, note: 'Saturación de motores y frenos en la acera oriente.' },
+                    { id: 'S-23', ring: 5, wave: 'envolvente', angle: 4.40,  freqMod: 1.04, note: 'Resonancia envolvente perimetral de gran amplitud.' },
+                    { id: 'S-24', ring: 5, wave: 'abierta',    angle: 5.60,  freqMod: 1.00, note: 'Gran apertura de voces y movimiento hacia el mar.' }
+                ]
+            },
+
+            muelle: {
+                id: 'muelle',
+                name: 'Muelle Prat',
+                subtitle: 'Horizonte Marítimo y Voces del Puerto',
+                people: [
+                    // Círculo 1 (Muy Baja - 3 personas)
+                    { id: 'M-01', ring: 1, wave: 'abierta',    angle: 0.80,  freqMod: 0.96, note: 'Voces lejanas frente al agua que se pierden en la bahía.' },
+                    { id: 'M-02', ring: 1, wave: 'envolvente', angle: 2.90,  freqMod: 0.94, note: 'Brisa marina suave y constante al borde del muelle.' },
+                    { id: 'M-03', ring: 1, wave: 'fugaz',      angle: 5.00,  freqMod: 0.98, note: 'Gritos agudos y breves de gaviotas planeando.' },
+                    // Círculo 2 (Baja - 5 personas)
+                    { id: 'M-04', ring: 2, wave: 'abierta',    angle: 0.40,  freqMod: 1.00, note: 'Murmullo abierto de paseantes mirando los barcos.' },
+                    { id: 'M-05', ring: 2, wave: 'envolvente', angle: 1.65,  freqMod: 0.99, note: 'Vaivén rítmico y envolvente del oleaje bajo el muelle.' },
+                    { id: 'M-06', ring: 2, wave: 'abierta',    angle: 2.90,  freqMod: 0.97, note: 'Conversaciones al aire libre que se disipan hacia el océano.' },
+                    { id: 'M-07', ring: 2, wave: 'fugaz',      angle: 4.15,  freqMod: 1.02, note: 'Campana y silbato puntual de una embarcación menor.' },
+                    { id: 'M-08', ring: 2, wave: 'abierta',    angle: 5.40,  freqMod: 0.95, note: 'Propagación limpia de voces humanas sobre el espejo de agua.' },
+                    // Círculo 3 (Media - 5 personas)
+                    { id: 'M-09', ring: 3, wave: 'abierta',    angle: 0.25,  freqMod: 1.01, note: 'Llamados abiertos de lancheros invitando al recorrido.' },
+                    { id: 'M-10', ring: 3, wave: 'envolvente', angle: 1.50,  freqMod: 1.03, note: 'El sonido del mar y el viento salino envuelve todo el paseo.' },
+                    { id: 'M-11', ring: 3, wave: 'abierta',    angle: 2.75,  freqMod: 0.98, note: 'Risas y murmullo colectivo en la explanada abierta.' },
+                    { id: 'M-12', ring: 3, wave: 'fugaz',      angle: 4.00,  freqMod: 1.04, note: 'Bandada de aves marinas y señales metálicas de amarre.' },
+                    { id: 'M-13', ring: 3, wave: 'abierta',    angle: 5.25,  freqMod: 1.00, note: 'Voces abiertas sin eco arquitectónico que las contenga.' },
+                    // Círculo 4 (Alta - 4 personas)
+                    { id: 'M-14', ring: 4, wave: 'abierta',    angle: 0.90,  freqMod: 1.05, note: 'Gran afluencia de público y pregones abiertos hacia la bahía.' },
+                    { id: 'M-15', ring: 4, wave: 'envolvente', angle: 2.45,  freqMod: 1.02, note: 'Oleaje profundo golpeando los pilotes de forma envolvente.' },
+                    { id: 'M-16', ring: 4, wave: 'intensa',    angle: 4.00,  freqMod: 1.08, note: 'Motor diésel de lancha turística encendiendo junto al muelle.' },
+                    { id: 'M-17', ring: 4, wave: 'abierta',    angle: 5.55,  freqMod: 1.03, note: 'Coro abierto de voces y música callejera frente al mar.' },
+                    // Círculo 5 (Máxima - 3 personas)
+                    { id: 'M-18', ring: 5, wave: 'intensa',    angle: 1.20,  freqMod: 1.12, note: 'Maquinaria pesada de grúa portuaria y remolcador cercano.' },
+                    { id: 'M-19', ring: 5, wave: 'abierta',    angle: 3.30,  freqMod: 1.07, note: 'Onda abierta masiva de actividad humana en hora punta.' },
+                    { id: 'M-20', ring: 5, wave: 'envolvente', angle: 5.10,  freqMod: 1.05, note: 'Viento fuerte y mar de fondo envolviendo todo el cabezo.' }
+                ]
+            },
+
+            buenosaires: {
+                id: 'buenosaires',
+                name: 'Buenos Aires',
+                subtitle: 'Trama Metropolitana y Pulso Continuo',
+                people: [
+                    // Círculo 1 (Muy Baja - 2 personas)
+                    { id: 'B-01', ring: 1, wave: 'envolvente', angle: 1.10,  freqMod: 0.98, note: 'Follaje de árboles amortiguando el rumor de la ciudad.' },
+                    { id: 'B-02', ring: 1, wave: 'abierta',    angle: 4.20,  freqMod: 0.96, note: 'Conversación pausada en una apertura de parque urbano.' },
+                    // Círculo 2 (Baja - 3 personas)
+                    { id: 'B-03', ring: 2, wave: 'envolvente', angle: 0.60,  freqMod: 1.01, note: 'Brisa entre las copas de los plátanos orientales.' },
+                    { id: 'B-04', ring: 2, wave: 'fugaz',      angle: 2.70,  freqMod: 1.03, note: 'Timbre breve de bicicleta y señal peatonal en la esquina.' },
+                    { id: 'B-05', ring: 2, wave: 'abierta',    angle: 4.80,  freqMod: 0.99, note: 'Murmullo humano de terrazas abriéndose por la vereda.' },
+                    // Círculo 3 (Media - 4 personas)
+                    { id: 'B-06', ring: 3, wave: 'intensa',    angle: 0.40,  freqMod: 1.05, note: 'Flujo continuo de avenidas y motores a velocidad media.' },
+                    { id: 'B-07', ring: 3, wave: 'envolvente', angle: 1.95,  freqMod: 1.02, note: 'Atmósfera envolvente contenida por la arboleda y fachadas.' },
+                    { id: 'B-08', ring: 3, wave: 'fugaz',      angle: 3.50,  freqMod: 1.06, note: 'Alertas sonoras breves y cruces rápidos en diagonal.' },
+                    { id: 'B-09', ring: 3, wave: 'intensa',    angle: 5.05,  freqMod: 1.08, note: 'Vibración mecánica constante del transporte subterráneo.' },
+                    // Círculo 4 (Alta - 5 personas)
+                    { id: 'B-10', ring: 4, wave: 'intensa',    angle: 0.20,  freqMod: 1.09, note: 'Corredor metropolitano de colectivos y tránsito denso.' },
+                    { id: 'B-11', ring: 4, wave: 'envolvente', angle: 1.45,  freqMod: 1.04, note: 'Cañón urbano que envuelve al peatón desde ambos frentes.' },
+                    { id: 'B-12', ring: 4, wave: 'intensa',    angle: 2.70,  freqMod: 1.11, note: 'Motores intensos resonando en el cruce de avenales.' },
+                    { id: 'B-13', ring: 4, wave: 'fugaz',      angle: 3.95,  freqMod: 1.07, note: 'Bocinas puntuales y sirenas lejanas que cortan el aire.' },
+                    { id: 'B-14', ring: 4, wave: 'envolvente', angle: 5.20,  freqMod: 1.03, note: 'Rumor ambiental denso y envolvente al caer la tarde.' },
+                    // Círculo 5 (Máxima - 4 personas)
+                    { id: 'B-15', ring: 5, wave: 'intensa',    angle: 0.85,  freqMod: 1.14, note: 'Máxima vibración vehicular en nodo central de transporte.' },
+                    { id: 'B-16', ring: 5, wave: 'intensa',    angle: 2.40,  freqMod: 1.12, note: 'Frecuencia mecánica continua de alta amplitud sobre asfalto.' },
+                    { id: 'B-17', ring: 5, wave: 'envolvente', angle: 3.95,  freqMod: 1.06, note: 'Inmersión acústica envolvente total en hora pico.' },
+                    { id: 'B-18', ring: 5, wave: 'intensa',    angle: 5.50,  freqMod: 1.15, note: 'Resonancia máxima de motores registrada en el anillo exterior.' }
+                ]
+            }
+        };
+
+        /**
+         * ============================================================================
+         * 2. MOTOR FÍSICO DE ARENA DE CUARZO CON ASENTAMIENTO ESTÁTICO (CHLADNI)
+         * ============================================================================
+         */
+        const PARTICLE_COUNT = 26000;
+        let canvas, ctx;
+        let width = window.innerWidth;
+        let height = window.innerHeight;
+
+        const px = new Float32Array(PARTICLE_COUNT);
+        const py = new Float32Array(PARTICLE_COUNT);
+        const vx = new Float32Array(PARTICLE_COUNT);
+        const vy = new Float32Array(PARTICLE_COUNT);
+        const pSize = new Float32Array(PARTICLE_COUNT);
+        const pZoneAssign = new Uint8Array(PARTICLE_COUNT);
+
+        // Paleta fotográfica de arena de cuarzo sobre placa negra (#121110)
+        const SAND_COLORS = [
+            'rgba(250, 246, 238, 0.92)',
+            'rgba(232, 226, 213, 0.86)',
+            'rgba(212, 203, 184, 0.80)',
+            'rgba(176, 166, 148, 0.72)',
+            'rgba(255, 253, 248, 0.96)'
+        ];
+
+        let viewLevel = 'overview'; // 'overview' (Etapa 1) | 'detail' (Etapa 2)
+        let activePlaceKey = 'sotomayor';
+        let activeWaveFilter = 'todas';
+        let activeRingFilter = 0;
+        let isolatedPerson = null;
+        let hoveredElement = null;
+        let isCleanView = false;
+
+        let settleEnergy = 1.0;
+        const placeHarmonicSummary = {};
+
+        window.onload = function () {
+            canvas = document.getElementById('sandCanvas');
+            ctx = canvas.getContext('2d');
+
+            precomputeFixedSummaries();
+            handleResize();
+            window.addEventListener('resize', () => {
+                handleResize();
+                distributeParticlesForCurrentView();
+                triggerSandReorganization(0.85);
+            });
+
+            initSandGrains();
+            setupCanvasInteractions();
+
+            // Asentar instantáneamente la arena para que desde el primer instante sea nítida
+            for (let i = 0; i < 42; i++) {
+                stepSandSettlement(0.65 * (1 - i / 42));
+            }
+            settleEnergy = 0.0;
+
+            updateEditorialUI();
+            updateHarmonicEmblem();
+            requestAnimationFrame(renderLoop);
+        };
+
+        function precomputeFixedSummaries() {
+            Object.keys(PLACES_DATA).forEach(key => {
+                const people = PLACES_DATA[key].people;
+                const total = people.length;
+                const waveCounts = { envolvente: 0, intensa: 0, abierta: 0, fugaz: 0 };
+                const ringCounts = { 1: 0, 2: 0, 3: 0, 4: 0, 5: 0 };
+
+                people.forEach(p => {
+                    waveCounts[p.wave]++;
+                    ringCounts[p.ring]++;
+                });
+
+                const weights = {
+                    envolvente: waveCounts.envolvente / total,
+                    intensa: waveCounts.intensa / total,
+                    abierta: waveCounts.abierta / total,
+                    fugaz: waveCounts.fugaz / total
+                };
+
+                let dominantWave = 'envolvente';
+                let maxC = -1;
+                Object.keys(waveCounts).forEach(w => {
+                    if (waveCounts[w] > maxC) {
+                        maxC = waveCounts[w];
+                        dominantWave = w;
+                    }
+                });
+
+                placeHarmonicSummary[key] = {
+                    total,
+                    waveCounts,
+                    ringCounts,
+                    weights,
+                    dominantWave
+                };
+            });
+        }
+
+        function handleResize() {
+            width = window.innerWidth;
+            height = window.innerHeight;
+            const dpr = Math.min(window.devicePixelRatio || 1, 2);
+            canvas.width = width * dpr;
+            canvas.height = height * dpr;
+            ctx.scale(dpr, dpr);
+        }
+
+        function initSandGrains() {
+            for (let i = 0; i < PARTICLE_COUNT; i++) {
+                pSize[i] = (i % 6 === 0) ? 1.65 : 1.2;
+                const mod = i % 100;
+                if (mod < 40) pZoneAssign[i] = 0;
+                else if (mod < 73) pZoneAssign[i] = 1;
+                else pZoneAssign[i] = 2;
+            }
+            distributeParticlesForCurrentView();
+        }
+
+        // Geometría con márgenes amplios para que los círculos nunca choquen con las tipografías
+        function getOverviewZonesGeometry() {
+            const isMobile = width < 820;
+            const baseR = isMobile
+                ? Math.min(width * 0.24, height * 0.13)
+                : Math.min(width * 0.125, height * 0.21);
+
+            if (isMobile) {
+                return [
+                    { key: 'sotomayor',   cx: width * 0.28, cy: height * 0.36, radius: baseR * 1.04 },
+                    { key: 'muelle',      cx: width * 0.72, cy: height * 0.36, radius: baseR * 0.98 },
+                    { key: 'buenosaires', cx: width * 0.50, cy: height * 0.62, radius: baseR * 0.94 }
+                ];
+            }
+
+            return [
+                { key: 'sotomayor',   cx: width * 0.21, cy: height * 0.48, radius: baseR * 1.06 },
+                { key: 'muelle',      cx: width * 0.50, cy: height * 0.48, radius: baseR * 1.00 },
+                { key: 'buenosaires', cx: width * 0.79, cy: height * 0.48, radius: baseR * 0.94 }
+            ];
+        }
+
+        function getDetailPlateGeometry() {
+            const cx = width * 0.5;
+            const cy = height * 0.50;
+            const radius = Math.min(width, height) * (width < 640 ? 0.33 : 0.31);
+            return { cx, cy, radius };
+        }
+
+        function distributeParticlesForCurrentView() {
+            if (viewLevel === 'overview') {
+                const zones = getOverviewZonesGeometry();
+                for (let i = 0; i < PARTICLE_COUNT; i++) {
+                    const z = zones[pZoneAssign[i]];
+                    const a = (i * 1.6180339) % (Math.PI * 2);
+                    const r = Math.sqrt(((i * 7919) % 10000) / 10000) * z.radius * 1.1;
+                    px[i] = z.cx + Math.cos(a) * r;
+                    py[i] = z.cy + Math.sin(a) * r;
+                    vx[i] = 0;
+                    vy[i] = 0;
+                }
+            } else {
+                const plate = getDetailPlateGeometry();
+                for (let i = 0; i < PARTICLE_COUNT; i++) {
+                    const a = (i * 1.6180339) % (Math.PI * 2);
+                    const r = Math.sqrt(((i * 7919) % 10000) / 10000) * plate.radius * 1.12;
+                    px[i] = plate.cx + Math.cos(a) * r;
+                    py[i] = plate.cy + Math.sin(a) * r;
+                    vx[i] = 0;
+                    vy[i] = 0;
+                }
+            }
+        }
+
+        /**
+         * ============================================================================
+         * 3. ECUACIONES MATEMÁTICAS DE LAS ONDAS ESTACIONARIAS (CHLADNI)
+         * ============================================================================
+         */
+        function evaluateWaveMode(waveTypeObj, rNorm, theta, freqMod = 1.0) {
+            const env = Math.min(1.0, Math.max(0.0, (rNorm - waveTypeObj.innerRing) * 1.48));
+            const angular = waveTypeObj.lobeAmp * env * Math.cos(waveTypeObj.lobes * theta);
+            return Math.sin(waveTypeObj.kRadial * freqMod * Math.PI * rNorm + angular * Math.PI);
+        }
+
+        function evaluateZoneTotalWave(placeKey, x, y, cx, cy, radius) {
+            const nx = (x - cx) / radius;
+            const ny = (y - cy) / radius;
+            const r = Math.hypot(nx, ny);
+            const theta = Math.atan2(ny, nx);
+
+            if (r < 0.08) return 1.4;
+            if (r > 1.04) return (r - 1.04) * 3.0;
+
+            const w = placeHarmonicSummary[placeKey].weights;
+            let val = 0;
+            val += w.envolvente * evaluateWaveMode(WAVE_TYPES.envolvente, r, theta);
+            val += w.intensa    * evaluateWaveMode(WAVE_TYPES.intensa, r, theta);
+            val += w.abierta    * evaluateWaveMode(WAVE_TYPES.abierta, r, theta);
+            val += w.fugaz      * evaluateWaveMode(WAVE_TYPES.fugaz, r, theta);
+
+            const outerBoundary = Math.sin(Math.PI * (r / 1.02));
+            return val * 0.85 + outerBoundary * 0.15;
+        }
+
+        function evaluateDetailPlateWave(x, y, cx, cy, radius) {
+            const nx = (x - cx) / radius;
+            const ny = (y - cy) / radius;
+            const r = Math.hypot(nx, ny);
+            const theta = Math.atan2(ny, nx);
+
+            if (r < 0.068) return 1.5;
+            if (r > 1.08) return (r - 1.08) * 3.2;
+
+            if (isolatedPerson) {
+                const wObj = WAVE_TYPES[isolatedPerson.wave];
+                const ringObj = INTENSITY_RINGS[isolatedPerson.ring - 1];
+                const personWave = evaluateWaveMode(wObj, r, theta - isolatedPerson.angle, isolatedPerson.freqMod);
+                const ringPull = Math.sin(((r - ringObj.radiusNorm) / 0.18) * Math.PI);
+                return personWave * 0.65 + ringPull * 0.35;
+            }
+
+            const people = getFilteredPeopleInActivePlace();
+            if (people.length === 0) {
+                return Math.sin(r * Math.PI * 3);
+            }
+
+            const counts = { envolvente: 0, intensa: 0, abierta: 0, fugaz: 0 };
+            people.forEach(p => counts[p.wave]++);
+            const total = people.length;
+
+            let waveSum = 0;
+            if (counts.envolvente > 0) waveSum += (counts.envolvente / total) * evaluateWaveMode(WAVE_TYPES.envolvente, r, theta);
+            if (counts.intensa > 0)    waveSum += (counts.intensa / total)    * evaluateWaveMode(WAVE_TYPES.intensa, r, theta);
+            if (counts.abierta > 0)    waveSum += (counts.abierta / total)    * evaluateWaveMode(WAVE_TYPES.abierta, r, theta);
+            if (counts.fugaz > 0)      waveSum += (counts.fugaz / total)      * evaluateWaveMode(WAVE_TYPES.fugaz, r, theta);
+
+            if (activeRingFilter > 0) {
+                const targetR = INTENSITY_RINGS[activeRingFilter - 1].radiusNorm;
+                const distFromRing = Math.abs(r - targetR);
+                if (distFromRing > 0.11) {
+                    return (distFromRing - 0.05) * 2.4;
+                }
+            }
+
+            return waveSum;
+        }
+
+        function stepSandSettlement(energyFactor) {
+            if (energyFactor <= 0.001) return;
+            const eps = 2.2;
+
+            if (viewLevel === 'overview') {
+                const zones = getOverviewZonesGeometry();
+                for (let i = 0; i < PARTICLE_COUNT; i++) {
+                    const isBackgroundGrain = (i % 14 === 0);
+                    if (isBackgroundGrain && energyFactor < 0.35) continue;
+
+                    const z = zones[pZoneAssign[i]];
+                    let x = px[i];
+                    let y = py[i];
+
+                    const w0 = Math.abs(evaluateZoneTotalWave(z.key, x, y, z.cx, z.cy, z.radius));
+                    const wx = Math.abs(evaluateZoneTotalWave(z.key, x + eps, y, z.cx, z.cy, z.radius)) - w0;
+                    const wy = Math.abs(evaluateZoneTotalWave(z.key, x, y + eps, z.cx, z.cy, z.radius)) - w0;
+
+                    const pull = isBackgroundGrain ? 0.6 : 4.2;
+                    vx[i] -= wx * pull;
+                    vy[i] -= wy * pull;
+
+                    const jitter = (w0 * 3.8 + 0.22) * energyFactor * (isBackgroundGrain ? 1.8 : 0.85);
+                    vx[i] += ((i % 13) - 6) * 0.06 * jitter + (Math.random() - 0.5) * jitter;
+                    vy[i] += ((i % 11) - 5) * 0.06 * jitter + (Math.random() - 0.5) * jitter;
+
+                    vx[i] *= 0.65;
+                    vy[i] *= 0.65;
+                    px[i] += vx[i];
+                    py[i] += vy[i];
+                }
+            } else {
+                const plate = getDetailPlateGeometry();
+                for (let i = 0; i < PARTICLE_COUNT; i++) {
+                    const isBackgroundGrain = (i % 15 === 0);
+                    if (isBackgroundGrain && energyFactor < 0.35) continue;
+
+                    let x = px[i];
+                    let y = py[i];
+
+                    const w0 = Math.abs(evaluateDetailPlateWave(x, y, plate.cx, plate.cy, plate.radius));
+                    const wx = Math.abs(evaluateDetailPlateWave(x + eps, y, plate.cx, plate.cy, plate.radius)) - w0;
+                    const wy = Math.abs(evaluateDetailPlateWave(x, y + eps, plate.cx, plate.cy, plate.radius)) - w0;
+
+                    const pull = isBackgroundGrain ? 0.55 : 4.6;
+                    vx[i] -= wx * pull;
+                    vy[i] -= wy * pull;
+
+                    const jitter = (w0 * 4.0 + 0.24) * energyFactor * (isBackgroundGrain ? 1.9 : 0.85);
+                    vx[i] += (Math.random() - 0.5) * jitter;
+                    vy[i] += (Math.random() - 0.5) * jitter;
+
+                    vx[i] *= 0.64;
+                    vy[i] *= 0.64;
+                    px[i] += vx[i];
+                    py[i] += vy[i];
+                }
+            }
+        }
+
+        function triggerSandReorganization(initialEnergy = 0.85) {
+            settleEnergy = initialEnergy;
+            for (let s = 0; s < 14; s++) {
+                stepSandSettlement(settleEnergy);
+                settleEnergy *= 0.92;
+            }
+        }
+
+        /**
+         * ============================================================================
+         * 4. RENDERIZADO VISUAL Y PICTOGRAMAS EN CANVAS
+         * ============================================================================
+         */
+        function renderLoop() {
+            if (settleEnergy > 0.004) {
+                stepSandSettlement(settleEnergy);
+                settleEnergy *= 0.91;
+                if (settleEnergy <= 0.005) settleEnergy = 0;
+            }
+
+            ctx.fillStyle = '#121110';
+            ctx.fillRect(0, 0, width, height);
+
+            for (let c = 0; c < SAND_COLORS.length; c++) {
+                ctx.fillStyle = SAND_COLORS[c];
+                ctx.beginPath();
+                for (let i = c; i < PARTICLE_COUNT; i += SAND_COLORS.length) {
+                    const s = pSize[i];
+                    ctx.rect(px[i], py[i], s, s);
+                }
+                ctx.fill();
+            }
+
+            if (viewLevel === 'overview') {
+                renderOverviewOverlay();
+            } else {
+                renderDetailOverlay();
+            }
+
+            requestAnimationFrame(renderLoop);
+        }
+
+        // Dibuja un mini pictograma vectorial en el Canvas (para los nodos o zonas)
+        function drawCanvasPictogram(cx, cy, waveKey, scale = 1.0, color = '#EAB308') {
+            ctx.save();
+            ctx.translate(cx, cy);
+            ctx.scale(scale, scale);
+            ctx.strokeStyle = color;
+            ctx.lineWidth = 1.5;
+            ctx.lineCap = 'round';
+            ctx.lineJoin = 'round';
+
+            ctx.beginPath();
+            if (waveKey === 'envolvente') {
+                // Pictograma Naturaleza: Olas suaves
+                ctx.moveTo(-6, 1);
+                ctx.bezierCurveTo(-3, -3, 0, 4, 3, 0);
+                ctx.bezierCurveTo(4.5, -2, 6, 1, 6, 1);
+                ctx.moveTo(-6, 5);
+                ctx.bezierCurveTo(-3, 1, 0, 8, 3, 4);
+            } else if (waveKey === 'intensa') {
+                // Pictograma Tráfico y Motores: Pulso agudo
+                ctx.moveTo(-6, 1);
+                ctx.lineTo(-3, 1);
+                ctx.lineTo(-1, -5);
+                ctx.lineTo(2, 6);
+                ctx.lineTo(4, -2);
+                ctx.lineTo(6, 1);
+            } else if (waveKey === 'abierta') {
+                // Pictograma Murmullo Humano: Arcos de voz abiertos
+                ctx.arc(-2, 0, 2, 0, Math.PI * 2);
+                ctx.moveTo(2, -3);
+                ctx.quadraticCurveTo(5, 0, 2, 3);
+                ctx.moveTo(4.5, -5.5);
+                ctx.quadraticCurveTo(8.5, 0, 4.5, 5.5);
+            } else if (waveKey === 'fugaz') {
+                // Pictograma Puerto y Señales: Destello radial de 8 direcciones
+                ctx.moveTo(0, -6); ctx.lineTo(0, 6);
+                ctx.moveTo(-6, 0); ctx.lineTo(6, 0);
+                ctx.moveTo(-4, -4); ctx.lineTo(4, 4);
+                ctx.moveTo(4, -4); ctx.lineTo(-4, 4);
+            }
+            ctx.stroke();
+            ctx.restore();
+        }
+
+        function renderOverviewOverlay() {
+            const zones = getOverviewZonesGeometry();
+
+            // Línea conectora sutil entre territorios
+            ctx.save();
+            ctx.beginPath();
+            ctx.setLineDash([4, 8]);
+            ctx.strokeStyle = 'rgba(234, 179, 8, 0.2)';
+            ctx.lineWidth = 1;
+            for (let i = 0; i < zones.length - 1; i++) {
+                ctx.moveTo(zones[i].cx, zones[i].cy);
+                ctx.lineTo(zones[i + 1].cx, zones[i + 1].cy);
+            }
+            ctx.stroke();
+            ctx.restore();
+
+            zones.forEach(z => {
+                const place = PLACES_DATA[z.key];
+                const summary = placeHarmonicSummary[z.key];
+                const isHovered = (hoveredElement && hoveredElement.type === 'zone' && hoveredElement.key === z.key);
+
+                ctx.save();
+
+                // Anillo exterior de la placa del lugar
+                ctx.beginPath();
+                ctx.arc(z.cx, z.cy, z.radius * 1.03, 0, Math.PI * 2);
+                ctx.strokeStyle = isHovered ? '#EAB308' : 'rgba(234, 179, 8, 0.34)';
+                ctx.lineWidth = isHovered ? 2.0 : 1.1;
+                ctx.stroke();
+
+                // Los 5 anillos internos en miniatura
+                INTENSITY_RINGS.forEach(ring => {
+                    ctx.beginPath();
+                    ctx.arc(z.cx, z.cy, z.radius * ring.radiusNorm, 0, Math.PI * 2);
+                    ctx.strokeStyle = isHovered ? 'rgba(234, 179, 8, 0.22)' : 'rgba(234, 179, 8, 0.08)';
+                    ctx.lineWidth = 0.7;
+                    ctx.stroke();
+                });
+
+                // Perno metálico central
+                drawHexBolt(z.cx, z.cy, 8.5);
+
+                if (!isCleanView) {
+                    // Títulos con mayor separación vertical respecto al círculo
+                    ctx.textAlign = 'center';
+                    ctx.fillStyle = '#EAB308';
+                    ctx.font = '600 13px Montserrat';
+                    ctx.fillText(place.name.toUpperCase(), z.cx, z.cy - z.radius - 38);
+
+                    ctx.fillStyle = 'rgba(250, 246, 238, 0.85)';
+                    ctx.font = '400 11px Montserrat';
+                    ctx.fillText(`${summary.total} PERSONAS · PREDOMINA: ${WAVE_TYPES[summary.dominantWave].pictogramName.toUpperCase()}`, z.cx, z.cy - z.radius - 19);
+
+                    // Acción inferior bien separada
+                    const pillY = z.cy + z.radius + 32;
+                    ctx.font = isHovered ? '600 10.5px Montserrat' : '500 10px Montserrat';
+                    ctx.fillStyle = isHovered ? '#FACC15' : 'rgba(234, 179, 8, 0.85)';
+                    ctx.fillText(
+                        isHovered ? '[ CLIC PARA INDAGAR CÍRCULOS Y PICTOGRAMAS → ]' : '[ PRESIONAR PARA INDAGAR LUGAR ]',
+                        z.cx,
+                        pillY
+                    );
+                }
+
+                ctx.restore();
+            });
+        }
+
+        function renderDetailOverlay() {
+            const plate = getDetailPlateGeometry();
+            const place = PLACES_DATA[activePlaceKey];
+            const filteredPeople = getFilteredPeopleInActivePlace();
+            const filteredIds = new Set(filteredPeople.map(p => p.id));
+
+            ctx.save();
+
+            // 1. DIBUJAR LOS 5 CÍRCULOS CONCÉNTRICOS DE INTENSIDAD
+            INTENSITY_RINGS.forEach(ring => {
+                const rPx = plate.radius * ring.radiusNorm;
+                const isSelectedRing = (activeRingFilter === ring.level);
+                const isHoveredRing = (hoveredElement && hoveredElement.type === 'ring' && hoveredElement.level === ring.level);
+
+                ctx.beginPath();
+                ctx.arc(plate.cx, plate.cy, rPx, 0, Math.PI * 2);
+
+                if (isSelectedRing || isHoveredRing) {
+                    ctx.strokeStyle = '#EAB308';
+                    ctx.lineWidth = 1.8;
+                    ctx.setLineDash([]);
+                } else {
+                    ctx.strokeStyle = activeRingFilter === 0
+                        ? 'rgba(234, 179, 8, 0.26)'
+                        : 'rgba(234, 179, 8, 0.10)';
+                    ctx.lineWidth = 0.9;
+                    ctx.setLineDash([3, 6]);
+                }
+                ctx.stroke();
+                ctx.setLineDash([]);
+
+                if (!isCleanView) {
+                    const labelY = plate.cy - rPx - 6;
+                    ctx.font = (isSelectedRing || isHoveredRing) ? '600 9.5px Montserrat' : '500 9px Montserrat';
+                    ctx.fillStyle = (isSelectedRing || isHoveredRing)
+                        ? '#FACC15'
+                        : (activeRingFilter === 0 ? 'rgba(234, 179, 8, 0.75)' : 'rgba(234, 179, 8, 0.28)');
+                    ctx.textAlign = 'center';
+                    ctx.fillText(`C${ring.level} · INTENSIDAD ${ring.level}/5`, plate.cx, labelY);
+                }
+            });
+
+            // Ejes cardinales sutiles
+            ctx.beginPath();
+            ctx.strokeStyle = 'rgba(234, 179, 8, 0.11)';
+            ctx.lineWidth = 0.75;
+            ctx.moveTo(plate.cx - plate.radius * 0.95, plate.cy);
+            ctx.lineTo(plate.cx + plate.radius * 0.95, plate.cy);
+            ctx.moveTo(plate.cx, plate.cy - plate.radius * 0.95);
+            ctx.lineTo(plate.cx, plate.cy + plate.radius * 0.95);
+            ctx.stroke();
+
+            // 2. DIBUJAR A CADA PERSONA, SU ONDA ESTACIONARIA Y SU PICTOGRAMA
+            place.people.forEach(person => {
+                const isIncluded = filteredIds.has(person.id) && (!isolatedPerson || isolatedPerson.id === person.id);
+                const isThisPersonHovered = (hoveredElement && hoveredElement.type === 'person' && hoveredElement.person.id === person.id) ||
+                                            (isolatedPerson && isolatedPerson.id === person.id);
+
+                const ringInfo = INTENSITY_RINGS[person.ring - 1];
+                const waveInfo = WAVE_TYPES[person.wave];
+                const baseR = plate.radius * ringInfo.radiusNorm;
+                const pxNode = plate.cx + Math.cos(person.angle) * baseR;
+                const pyNode = plate.cy + Math.sin(person.angle) * baseR;
+
+                if (isIncluded) {
+                    ctx.beginPath();
+                    const arcSpan = isThisPersonHovered ? Math.PI * 2 : 0.56;
+                    const steps = isThisPersonHovered ? 180 : 38;
+                    const waveAmpPx = (6 + person.ring * 3.1) * (isThisPersonHovered ? 1.45 : 0.85);
+
+                    for (let s = 0; s <= steps; s++) {
+                        const a = (person.angle - arcSpan / 2) + (s / steps) * arcSpan;
+                        const envelope = isThisPersonHovered ? 1.0 : Math.sin((s / steps) * Math.PI);
+                        const harmonic = Math.sin((a - person.angle) * waveInfo.lobes * 2.5 * person.freqMod);
+                        const rOsc = baseR + harmonic * waveAmpPx * envelope;
+
+                        const wx = plate.cx + Math.cos(a) * rOsc;
+                        const wy = plate.cy + Math.sin(a) * rOsc;
+                        if (s === 0) ctx.moveTo(wx, wy);
+                        else ctx.lineTo(wx, wy);
+                    }
+
+                    ctx.strokeStyle = isThisPersonHovered
+                        ? 'rgba(250, 204, 21, 0.96)'
+                        : 'rgba(234, 179, 8, 0.50)';
+                    ctx.lineWidth = isThisPersonHovered ? 2.0 : 1.15;
+                    ctx.stroke();
+                }
+
+                // Nodo de la persona
+                const nodeRadius = isThisPersonHovered ? 6.5 : (isIncluded ? 4.0 : 2.0);
+
+                if (isIncluded) {
+                    ctx.beginPath();
+                    ctx.arc(pxNode, pyNode, nodeRadius + 4.0, 0, Math.PI * 2);
+                    ctx.fillStyle = isThisPersonHovered ? 'rgba(250, 204, 21, 0.32)' : 'rgba(234, 179, 8, 0.16)';
+                    ctx.fill();
+                }
+
+                ctx.beginPath();
+                ctx.arc(pxNode, pyNode, nodeRadius, 0, Math.PI * 2);
+                ctx.fillStyle = isThisPersonHovered
+                    ? '#FAF6EE'
+                    : (isIncluded ? '#EAB308' : 'rgba(234, 179, 8, 0.18)');
+                ctx.fill();
+
+                if (isIncluded) {
+                    ctx.lineWidth = 1.0;
+                    ctx.strokeStyle = '#121110';
+                    ctx.stroke();
+                }
+
+                // Si la persona está resaltada o hay pocos nodos filtrados, mostrar código y su mini-pictograma
+                if (!isCleanView && (isThisPersonHovered || (isIncluded && filteredPeople.length <= 7))) {
+                    drawCanvasPictogram(pxNode + 14, pyNode - 8, person.wave, 0.85, '#FACC15');
+                    ctx.font = '600 9.5px Montserrat';
+                    ctx.fillStyle = '#FAF6EE';
+                    ctx.textAlign = 'left';
+                    ctx.fillText(person.id, pxNode + 9, pyNode + 8);
+                }
+            });
+
+            // 3. PERNO METÁLICO CENTRAL DE LA PLACA
+            drawHexBolt(plate.cx, plate.cy, 11);
+
+            ctx.restore();
+        }
+
+        function drawHexBolt(cx, cy, hexRadius) {
+            ctx.save();
+            ctx.translate(cx, cy);
+
+            ctx.beginPath();
+            ctx.arc(1.5, 2.5, hexRadius * 1.35, 0, Math.PI * 2);
+            ctx.fillStyle = 'rgba(0, 0, 0, 0.82)';
+            ctx.fill();
+
+            ctx.beginPath();
+            ctx.arc(0, 0, hexRadius * 1.2, 0, Math.PI * 2);
+            ctx.fillStyle = '#383532';
+            ctx.fill();
+            ctx.lineWidth = 1;
+            ctx.strokeStyle = '#57534E';
+            ctx.stroke();
+
+            ctx.beginPath();
+            for (let s = 0; s < 6; s++) {
+                const ang = (s * Math.PI) / 3 - Math.PI / 6;
+                const hx = Math.cos(ang) * hexRadius;
+                const hy = Math.sin(ang) * hexRadius;
+                if (s === 0) ctx.moveTo(hx, hy);
+                else ctx.lineTo(hx, hy);
+            }
+            ctx.closePath();
+
+            const grad = ctx.createLinearGradient(-hexRadius, -hexRadius, hexRadius, hexRadius);
+            grad.addColorStop(0, '#E7E5E4');
+            grad.addColorStop(0.5, '#A8A29E');
+            grad.addColorStop(1, '#57534E');
+            ctx.fillStyle = grad;
+            ctx.fill();
+            ctx.lineWidth = 0.9;
+            ctx.strokeStyle = '#F5F5F4';
+            ctx.stroke();
+
+            ctx.beginPath();
+            ctx.arc(0, 0, hexRadius * 0.48, 0, Math.PI * 2);
+            ctx.fillStyle = '#D6D3D1';
+            ctx.fill();
+            ctx.lineWidth = 1;
+            ctx.strokeStyle = '#44403C';
+            ctx.stroke();
+
+            ctx.restore();
+        }
+
+        /**
+         * ============================================================================
+         * 5. NAVEGACIÓN ENTRE LAS 3 ETAPAS (INTRO -> TOTALES -> INDAGACIÓN LUGAR)
+         * ============================================================================
+         */
+        function closeIntroAndEnterOverview() {
+            const modal = document.getElementById('introModal');
+            modal.classList.add('hidden-stage');
+            triggerSandReorganization(0.8);
+        }
+
+        function openIntroScreen() {
+            const modal = document.getElementById('introModal');
+            modal.classList.remove('hidden-stage');
+        }
+
+        function toggleCleanView() {
+            isCleanView = !isCleanView;
+            const footer = document.getElementById('editorialFooter');
+            const level2 = document.getElementById('level2Controls');
+            const btn = document.getElementById('cleanViewBtn');
+
+            if (isCleanView) {
+                footer.style.opacity = '0.08';
+                if (viewLevel === 'detail') level2.style.opacity = '0.12';
+                btn.textContent = 'Mostrar Textos';
+                btn.classList.add('border-[#EAB308]', 'text-[#EAB308]');
+            } else {
+                footer.style.opacity = '1';
+                level2.style.opacity = '1';
+                btn.textContent = 'Vista Limpia';
+                btn.classList.remove('border-[#EAB308]', 'text-[#EAB308]');
+            }
+        }
+
+        function getFilteredPeopleInActivePlace() {
+            const all = PLACES_DATA[activePlaceKey].people;
+            return all.filter(p => {
+                const matchWave = (activeWaveFilter === 'todas' || p.wave === activeWaveFilter);
+                const matchRing = (activeRingFilter === 0 || p.ring === activeRingFilter);
+                return matchWave && matchRing;
+            });
+        }
+
+        function enterPlaceDetail(placeKey) {
+            viewLevel = 'detail';
+            activePlaceKey = placeKey;
+            activeWaveFilter = 'todas';
+            activeRingFilter = 0;
+            isolatedPerson = null;
+            hoveredElement = null;
+
+            document.getElementById('hoverCard').classList.add('hidden');
+            document.getElementById('backToOverviewBtn').classList.remove('hidden');
+            document.getElementById('level2Controls').classList.remove('hidden');
+            document.getElementById('level2Controls').classList.add('flex');
+            document.getElementById('personIsolationBanner').classList.add('hidden');
+
+            updateNavigationTabs();
+            updateFilterButtonsState();
+            distributeParticlesForCurrentView();
+            triggerSandReorganization(0.95);
+            updateEditorialUI();
+            updateHarmonicEmblem();
+        }
+
+        function returnToOverview() {
+            viewLevel = 'overview';
+            isolatedPerson = null;
+            hoveredElement = null;
+
+            document.getElementById('hoverCard').classList.add('hidden');
+            document.getElementById('backToOverviewBtn').classList.add('hidden');
+            document.getElementById('level2Controls').classList.add('hidden');
+            document.getElementById('level2Controls').classList.remove('flex');
+
+            updateNavigationTabs();
+            distributeParticlesForCurrentView();
+            triggerSandReorganization(0.95);
+            updateEditorialUI();
+            updateHarmonicEmblem();
+        }
+
+        function setWaveFilter(waveKey) {
+            activeWaveFilter = waveKey;
+            isolatedPerson = null;
+            document.getElementById('personIsolationBanner').classList.add('hidden');
+
+            updateFilterButtonsState();
+            triggerSandReorganization(0.9);
+            updateEditorialUI();
+            updateHarmonicEmblem();
+        }
+
+        function setRingFilter(ringLevel) {
+            activeRingFilter = (activeRingFilter === ringLevel && ringLevel !== 0) ? 0 : ringLevel;
+            isolatedPerson = null;
+            document.getElementById('personIsolationBanner').classList.add('hidden');
+
+            updateFilterButtonsState();
+            triggerSandReorganization(0.9);
+            updateEditorialUI();
+            updateHarmonicEmblem();
+        }
+
+        function isolateSinglePerson(personObj) {
+            isolatedPerson = personObj;
+            const banner = document.getElementById('personIsolationBanner');
+            const label = document.getElementById('isolatedPersonLabel');
+            banner.classList.remove('hidden');
+            banner.classList.add('flex');
+            label.textContent = `Aislando ${personObj.id} · ${WAVE_TYPES[personObj.wave].label} · Círculo ${personObj.ring}`;
+
+            triggerSandReorganization(0.9);
+            updateEditorialUI();
+            updateHarmonicEmblem();
+        }
+
+        function clearIsolatedPerson() {
+            isolatedPerson = null;
+            const banner = document.getElementById('personIsolationBanner');
+            banner.classList.add('hidden');
+            banner.classList.remove('flex');
+
+            triggerSandReorganization(0.85);
+            updateEditorialUI();
+            updateHarmonicEmblem();
+        }
+
+        function updateNavigationTabs() {
+            const tabs = ['overview', 'sotomayor', 'muelle', 'buenosaires'];
+            tabs.forEach(t => {
+                const el = document.getElementById('tab-' + t);
+                if (!el) return;
+                const isActive = (viewLevel === 'overview' && t === 'overview') ||
+                                 (viewLevel === 'detail' && t === activePlaceKey);
+                el.classList.toggle('active', isActive);
+            });
+        }
+
+        function updateFilterButtonsState() {
+            const place = PLACES_DATA[activePlaceKey];
+            const summary = placeHarmonicSummary[activePlaceKey];
+
+            document.getElementById('wfCount-todas').textContent = summary.total;
+            ['envolvente', 'intensa', 'abierta', 'fugaz'].forEach(wKey => {
+                const count = place.people.filter(p =>
+                    p.wave === wKey && (activeRingFilter === 0 || p.ring === activeRingFilter)
+                ).length;
+                document.getElementById('wfCount-' + wKey).textContent = count;
+            });
+
+            for (let r = 1; r <= 5; r++) {
+                const count = place.people.filter(p =>
+                    p.ring === r && (activeWaveFilter === 'todas' || p.wave === activeWaveFilter)
+                ).length;
+                document.getElementById('rfCount-' + r).textContent = count;
+            }
+
+            ['todas', 'envolvente', 'intensa', 'abierta', 'fugaz'].forEach(wKey => {
+                const btn = document.getElementById('wf-' + wKey);
+                if (btn) btn.classList.toggle('active', activeWaveFilter === wKey);
+            });
+
+            for (let r = 0; r <= 5; r++) {
+                const btn = document.getElementById('rf-' + r);
+                if (btn) btn.classList.toggle('active', activeRingFilter === r);
+            }
+        }
+
+        /**
+         * ============================================================================
+         * 6. EMBLEMA POLIGONAL Y TEXTOS EDITORIALES ESPACIOSOS
+         * ============================================================================
+         */
+        function updateHarmonicEmblem() {
+            const svg = document.getElementById('harmonicEmblem');
+            const waveKeys = ['envolvente', 'intensa', 'abierta', 'fugaz'];
+            let weights = { envolvente: 0.35, intensa: 0.30, abierta: 0.22, fugaz: 0.13 };
+
+            if (viewLevel === 'detail') {
+                const filtered = getFilteredPeopleInActivePlace();
+                const total = Math.max(1, filtered.length);
+                weights = { envolvente: 0, intensa: 0, abierta: 0, fugaz: 0 };
+                filtered.forEach(p => weights[p.wave] += 1 / total);
+            }
+
+            let html = '';
+            waveKeys.forEach((k, idx) => {
+                const wInfo = WAVE_TYPES[k];
+                const ratio = weights[k];
+                const radius = 15 + ratio * 28;
+                const sides = wInfo.emblemSides;
+                const rot = (idx * 22 * Math.PI) / 180;
+
+                let pts = [];
+                for (let s = 0; s < sides; s++) {
+                    const a = (s * 2 * Math.PI) / sides + rot - Math.PI / 2;
+                    pts.push(`${(Math.cos(a) * radius).toFixed(1)},${(Math.sin(a) * radius).toFixed(1)}`);
+                }
+
+                const isHighlighted = (activeWaveFilter === 'todas' || activeWaveFilter === k);
+                const opacity = isHighlighted ? Math.max(0.28, 0.3 + ratio * 0.7) : 0.14;
+                const sw = (ratio > 0.35) ? 2.0 : 1.3;
+
+                html += `<polygon points="${pts.join(' ')}" fill="none" stroke="#EAB308" stroke-width="${sw}" opacity="${opacity}" />`;
+            });
+
+            svg.innerHTML = html;
+        }
+
+        function updateEditorialUI() {
+            if (viewLevel === 'overview') {
+                document.getElementById('headerBreadcrumb').textContent = 'ETAPA 01 · VISTA GENERAL DE LUGARES';
+                document.getElementById('headerMainStatus').textContent = 'Representación Total Fija · 62 Personas';
+                document.getElementById('headerSubStatus').textContent = 'Presiona Sotomayor, Muelle Prat o Buenos Aires para separar sus círculos y pictogramas.';
+
+                document.getElementById('posterTitle').textContent = 'Representación Total de Lugares';
+                document.getElementById('posterLine2').textContent = 'Plaza Sotomayor (24) · Muelle Prat (20) · Buenos Aires (18)';
+                document.getElementById('posterLine3').textContent = '4 Pictogramas de Onda · 5 Círculos Concéntricos de Intensidad';
+                document.getElementById('posterCaption1').textContent = 'Haz clic sobre cualquiera de los 3 territorios en la placa para abrir el desglose por pictograma e intensidad.';
+                return;
+            }
+
+            const place = PLACES_DATA[activePlaceKey];
+            const summary = placeHarmonicSummary[activePlaceKey];
+            const filtered = getFilteredPeopleInActivePlace();
+            const pct = Math.round((filtered.length / summary.total) * 100);
+
+            document.getElementById('headerBreadcrumb').textContent = `ETAPA 02 · INDAGACIÓN DE ${place.name.toUpperCase()}`;
+
+            if (isolatedPerson) {
+                const wObj = WAVE_TYPES[isolatedPerson.wave];
+                document.getElementById('headerMainStatus').textContent =
+                    `Persona ${isolatedPerson.id} · ${wObj.label} · Círculo ${isolatedPerson.ring}/5`;
+                document.getElementById('headerSubStatus').textContent =
+                    `"${isolatedPerson.note}"`;
+
+                document.getElementById('posterTitle').textContent = `${place.name} — Registro ${isolatedPerson.id}`;
+                document.getElementById('posterLine2').textContent = `Pictograma: ${wObj.pictogramName} (${wObj.waveQuality} · n=${wObj.lobes})`;
+                document.getElementById('posterLine3').textContent = `Ubicada en el Círculo ${isolatedPerson.ring} de Intensidad (Nivel ${isolatedPerson.ring}/5)`;
+                document.getElementById('posterCaption1').textContent = 'Haz clic nuevamente sobre el nodo o en "[ Restaurar Grupo ]" arriba a la derecha para volver al conjunto.';
+                return;
+            }
+
+            const waveLabel = activeWaveFilter === 'todas'
+                ? 'Todos los Pictogramas'
+                : WAVE_TYPES[activeWaveFilter].label;
+            const ringLabel = activeRingFilter === 0
+                ? 'Círculos 1 al 5'
+                : INTENSITY_RINGS[activeRingFilter - 1].name;
+
+            document.getElementById('headerMainStatus').textContent =
+                `${place.name} · ${filtered.length} de ${summary.total} Personas (${pct}%)`;
+            document.getElementById('headerSubStatus').textContent =
+                `Filtro activo: ${waveLabel} · ${ringLabel}`;
+
+            document.getElementById('posterTitle').textContent = `${place.name} (${summary.total} Personas)`;
+            document.getElementById('posterLine2').textContent =
+                activeWaveFilter === 'todas'
+                    ? `Naturaleza: ${summary.waveCounts.envolvente} · Tráfico: ${summary.waveCounts.intensa} · Voces: ${summary.waveCounts.abierta} · Puerto: ${summary.waveCounts.fugaz}`
+                    : `Aislando Pictograma: ${WAVE_TYPES[activeWaveFilter].label} (${filtered.length} personas)`;
+            document.getElementById('posterLine3').textContent =
+                activeRingFilter === 0
+                    ? `Predomina: ${WAVE_TYPES[summary.dominantWave].label} · 5 Círculos de Intensidad Activos`
+                    : `Aislando únicamente el ${INTENSITY_RINGS[activeRingFilter - 1].name}`;
+
+            document.getElementById('posterCaption1').textContent =
+                'Selecciona arriba un Pictograma de Onda o haz clic sobre un círculo o persona dorada para aislar sus datos.';
+        }
+
+        /**
+         * ============================================================================
+         * 7. INTERACCIÓN CON EL LIENZO
+         * ============================================================================
+         */
+        function setupCanvasInteractions() {
+            const hoverCard = document.getElementById('hoverCard');
+
+            canvas.addEventListener('mousemove', (e) => {
+                const mx = e.clientX;
+                const my = e.clientY;
+
+                if (viewLevel === 'overview') {
+                    const zones = getOverviewZonesGeometry();
+                    let foundZone = null;
+
+                    for (let z of zones) {
+                        const d = Math.hypot(mx - z.cx, my - z.cy);
+                        if (d <= z.radius * 1.08) {
+                            foundZone = z;
+                            break;
+                        }
+                    }
+
+                    if (foundZone) {
+                        canvas.style.cursor = 'pointer';
+                        hoveredElement = { type: 'zone', key: foundZone.key };
+                        const place = PLACES_DATA[foundZone.key];
+                        const sum = placeHarmonicSummary[foundZone.key];
+
+                        hoverCard.classList.remove('hidden');
+                        positionTooltip(mx, my);
+                        document.getElementById('hcHeaderLeft').textContent = place.name.toUpperCase();
+                        document.getElementById('hcHeaderRight').textContent = `TOTAL: ${sum.total} PERSONAS`;
+                        document.getElementById('hcBodyText').textContent =
+                            `Naturaleza (Envolvente): ${sum.waveCounts.envolvente} · Tráfico (Intensa): ${sum.waveCounts.intensa} · Voces (Abierta): ${sum.waveCounts.abierta} · Puerto (Fugaz): ${sum.waveCounts.fugaz}`;
+                        document.getElementById('hcFooterLeft').textContent = `Predomina: ${WAVE_TYPES[sum.dominantWave].pictogramName}`;
+                        document.getElementById('hcFooterRight').textContent = `Clic para indagar →`;
+                    } else {
+                        canvas.style.cursor = 'default';
+                        hoveredElement = null;
+                        hoverCard.classList.add('hidden');
+                    }
+                    return;
+                }
+
+                // ETAPA 2: Hover sobre persona o sobre círculo de intensidad
+                const plate = getDetailPlateGeometry();
+                const place = PLACES_DATA[activePlaceKey];
+                let foundPerson = null;
+                let minPersonDist = 14;
+
+                for (let p of place.people) {
+                    const rPx = plate.radius * INTENSITY_RINGS[p.ring - 1].radiusNorm;
+                    const pxNode = plate.cx + Math.cos(p.angle) * rPx;
+                    const pyNode = plate.cy + Math.sin(p.angle) * rPx;
+                    const d = Math.hypot(mx - pxNode, my - pyNode);
+                    if (d < minPersonDist) {
+                        minPersonDist = d;
+                        foundPerson = p;
+                    }
+                }
+
+                if (foundPerson) {
+                    canvas.style.cursor = 'pointer';
+                    hoveredElement = { type: 'person', person: foundPerson };
+                    const wInfo = WAVE_TYPES[foundPerson.wave];
+
+                    hoverCard.classList.remove('hidden');
+                    positionTooltip(mx, my);
+                    document.getElementById('hcHeaderLeft').textContent = `PERSONA ${foundPerson.id} · ${place.name}`;
+                    document.getElementById('hcHeaderRight').textContent = `CÍRCULO ${foundPerson.ring} DE 5`;
+                    document.getElementById('hcBodyText').textContent = `"${foundPerson.note}"`;
+                    document.getElementById('hcFooterLeft').textContent = `Pictograma: ${wInfo.label}`;
+                    document.getElementById('hcFooterRight').textContent = `Clic para aislar`;
+                    return;
+                }
+
+                const distFromCenter = Math.hypot(mx - plate.cx, my - plate.cy);
+                let foundRing = null;
+                for (let ring of INTENSITY_RINGS) {
+                    const rPx = plate.radius * ring.radiusNorm;
+                    if (Math.abs(distFromCenter - rPx) < 10) {
+                        foundRing = ring;
+                        break;
+                    }
+                }
+
+                if (foundRing) {
+                    canvas.style.cursor = 'pointer';
+                    hoveredElement = { type: 'ring', level: foundRing.level };
+                    const ringCount = place.people.filter(p => p.ring === foundRing.level).length;
+
+                    hoverCard.classList.remove('hidden');
+                    positionTooltip(mx, my);
+                    document.getElementById('hcHeaderLeft').textContent = foundRing.name.toUpperCase();
+                    document.getElementById('hcHeaderRight').textContent = `${ringCount} PERSONAS`;
+                    document.getElementById('hcBodyText').textContent =
+                        `Anillo concéntrico del instrumento (Intensidad ${foundRing.level}/5). Presiona para aislar únicamente a las personas de este círculo.`;
+                    document.getElementById('hcFooterLeft').textContent = `Radio: ${Math.round(foundRing.radiusNorm * 100)}%`;
+                    document.getElementById('hcFooterRight').textContent = `Clic para filtrar anillo`;
+                } else {
+                    canvas.style.cursor = 'default';
+                    hoveredElement = null;
+                    hoverCard.classList.add('hidden');
+                }
+            });
+
+            canvas.addEventListener('click', () => {
+                if (!hoveredElement) return;
+
+                if (viewLevel === 'overview' && hoveredElement.type === 'zone') {
+                    enterPlaceDetail(hoveredElement.key);
+                } else if (viewLevel === 'detail') {
+                    if (hoveredElement.type === 'person') {
+                        if (isolatedPerson && isolatedPerson.id === hoveredElement.person.id) {
+                            clearIsolatedPerson();
+                        } else {
+                            isolateSinglePerson(hoveredElement.person);
+                        }
+                    } else if (hoveredElement.type === 'ring') {
+                        setRingFilter(hoveredElement.level);
+                    }
+                }
+            });
+        }
+
+        function positionTooltip(mx, my) {
+            const hoverCard = document.getElementById('hoverCard');
+            const tx = Math.min(width - 340, Math.max(24, mx + 22));
+            const ty = Math.max(24, my - 96);
+            hoverCard.style.left = `${tx}px`;
+            hoverCard.style.top = `${ty}px`;
+        }
+    </script>
+</body>
+</html>
