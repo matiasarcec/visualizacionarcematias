@@ -90,7 +90,7 @@
             display: inline-flex;
             align-items: center;
             gap: 0.55rem;
-            padding: 0.45rem 0.8rem;
+            padding: 0.45rem 0.85rem;
             border-radius: 9999px;
             border: 1px solid rgba(234, 179, 8, 0.28);
             background: rgba(18, 17, 16, 0.72);
@@ -113,14 +113,14 @@
             font-weight: 600;
         }
 
-        /* Chips de los 5 círculos del instrumento */
+        /* Chips de los 3 círculos de intensidad (Bajo, Medio, Alto) */
         .ring-pill {
-            padding: 0.3rem 0.65rem;
+            padding: 0.34rem 0.78rem;
             border-radius: 9999px;
             border: 1px solid rgba(234, 179, 8, 0.24);
             background: rgba(18, 17, 16, 0.68);
             color: rgba(234, 179, 8, 0.78);
-            font-size: 10px;
+            font-size: 10.5px;
             font-weight: 500;
             letter-spacing: 0.1em;
             transition: all 0.2s ease;
@@ -134,6 +134,15 @@
             background: rgba(234, 179, 8, 0.22);
             color: #FDE047;
             font-weight: 600;
+        }
+
+        /* Indicador de micro-vibración acústica */
+        @keyframes acousticDot {
+            0%, 100% { transform: scale(1); opacity: 0.95; }
+            50% { transform: scale(1.35); opacity: 0.45; }
+        }
+        .vib-dot {
+            animation: acousticDot 1.1s infinite ease-in-out;
         }
 
         /* Pulso sutil del llamado a la acción en la portada */
@@ -154,85 +163,97 @@
 
     <!-- ==========================================================================
          ESQUINA SUPERIOR IZQUIERDA (top: 44px, left: 52px)
-         Emblema geométrico amarillo de polígonos superpuestos (exacto al afiche)
+         Emblema geométrico amarillo de polígonos superpuestos + Estado de Vibración
          ========================================================================== -->
-    <div class="ui-corner top-8 left-8 sm:top-12 sm:left-14 flex items-center gap-6">
+    <div class="ui-corner top-8 left-8 sm:top-12 sm:left-14 flex items-center gap-5">
         <button onclick="handleTopEmblemClick()" class="interactive group text-left focus:outline-none" title="Cambiar etapa / Volver">
             <svg id="harmonicEmblem" width="82" height="82" viewBox="-52 -52 104 104" class="overflow-visible transition-transform duration-500 group-hover:scale-105">
                 <!-- Polígonos amarillos superpuestos generados dinámicamente -->
             </svg>
         </button>
 
-        <!-- Botón minimalista de retorno cuando se está en Etapa 1 o Etapa 2 -->
-        <div id="topNavActions" class="interactive hidden items-center gap-3 poster-text">
-            <button id="backBtn" onclick="stepBack()" class="px-3.5 py-1.5 rounded-full border border-[#EAB308]/40 bg-[#121110]/75 text-[#EAB308] text-[10px] font-medium tracking-[0.16em] uppercase hover:border-[#EAB308] hover:text-[#FAF6EE] transition-all">
-                ← Volver
+        <div class="flex flex-col items-start gap-2 poster-text">
+            <!-- Control de vibración acústica en el lugar -->
+            <button onclick="toggleVibrationMode()" id="vibBadgeBtn" class="interactive inline-flex items-center gap-2 px-3 py-1 rounded-full border border-[#EAB308]/35 bg-[#121110]/70 text-[#EAB308]/90 text-[10px] font-medium tracking-[0.14em] uppercase hover:border-[#EAB308] hover:text-[#FAF6EE] transition-all">
+                <span id="vibIndicatorDot" class="w-1.5 h-1.5 rounded-full bg-[#EAB308] vib-dot"></span>
+                <span id="vibStatusLabel">Vibración en el Lugar · Activa</span>
             </button>
+
+            <!-- Botón minimalista de retorno cuando se está en Etapa 1 o Etapa 2 -->
+            <div id="topNavActions" class="interactive hidden items-center gap-2.5">
+                <button id="backBtn" onclick="stepBack()" class="px-3.5 py-1.5 rounded-full border border-[#EAB308]/45 bg-[#121110]/80 text-[#EAB308] text-[10px] font-medium tracking-[0.16em] uppercase hover:border-[#EAB308] hover:text-[#FAF6EE] transition-all">
+                    ← Volver
+                </button>
+            </div>
         </div>
     </div>
 
     <!-- ==========================================================================
          ESQUINA SUPERIOR DERECHA (top: 44px, right: 52px)
-         Solo visible en Etapa 2 (Desglose de Lugar) para filtrar por Pictograma y Círculo
+         Solo visible en Etapa 2 (Desglose de Lugar) para filtrar por los 4 Pictogramas
+         (Tránsito, Obras, Personas, Naturaleza) y los 3 Niveles (Bajo, Medio, Alto)
          ========================================================================== -->
-    <div id="detailFiltersCorner" class="ui-corner top-8 right-8 sm:top-12 sm:right-14 hidden flex-col items-end gap-3.5 max-w-xl">
-        <!-- Fila 1: Los 4 Pictogramas de Onda + Total -->
+    <div id="detailFiltersCorner" class="ui-corner top-8 right-8 sm:top-12 sm:right-14 hidden flex-col items-end gap-3.5 max-w-2xl">
+        <!-- Fila 1: Los 4 Pictogramas Exactos + Total -->
         <div class="interactive flex flex-wrap justify-end gap-2">
             <button onclick="setWaveFilter('todas')" id="wf-todas" class="picto-btn active">
                 <span>Total</span>
                 <span class="opacity-75" id="wfCount-todas">24</span>
             </button>
 
-            <!-- 1. Naturaleza (Envolvente) -->
-            <button onclick="setWaveFilter('envolvente')" id="wf-envolvente" class="picto-btn">
-                <svg class="w-3.5 h-3.5 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round">
-                    <path d="M2 13c2.5-3 5.5-3 8 0s5.5 3 8 0 3.5-2 4-1"/>
-                    <path d="M12 3c-3.5 2-5 5.5-2 8 3-2.5 1.5-6-2-8z"/>
+            <!-- 1. Tránsito -->
+            <button onclick="setWaveFilter('transito')" id="wf-transito" class="picto-btn">
+                <svg class="w-3.5 h-3.5 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M5 15h14l-1.5-5.5A2 2 0 0 0 15.6 8H8.4a2 2 0 0 0-1.9 1.5L5 15z"/>
+                    <path d="M3 15h18v3a1 1 0 0 1-1 1h-1a1 1 0 0 1-1-1v-1H6v1a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1v-3z"/>
+                    <circle cx="7.5" cy="12.5" r="0.8" fill="currentColor"/>
+                    <circle cx="16.5" cy="12.5" r="0.8" fill="currentColor"/>
+                </svg>
+                <span>Tránsito</span>
+                <span class="opacity-75" id="wfCount-transito">7</span>
+            </button>
+
+            <!-- 2. Obras -->
+            <button onclick="setWaveFilter('obras')" id="wf-obras" class="picto-btn">
+                <svg class="w-3.5 h-3.5 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M14 4l6 6-2.5 2.5-6-6L14 4z"/>
+                    <path d="M4 20l8.5-8.5"/>
+                    <path d="M3 14h4M10 3v4M18 16l3 3"/>
+                </svg>
+                <span>Obras</span>
+                <span class="opacity-75" id="wfCount-obras">3</span>
+            </button>
+
+            <!-- 3. Personas -->
+            <button onclick="setWaveFilter('personas')" id="wf-personas" class="picto-btn">
+                <svg class="w-3.5 h-3.5 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <circle cx="9" cy="7.5" r="3"/>
+                    <path d="M3.5 19c0-3 2.5-5.2 5.5-5.2s5.5 2.2 5.5 5.2"/>
+                    <circle cx="16.5" cy="8.5" r="2.2"/>
+                    <path d="M15 14.2c2.4.3 4.5 2 4.5 4.6"/>
+                </svg>
+                <span>Personas</span>
+                <span class="opacity-75" id="wfCount-personas">4</span>
+            </button>
+
+            <!-- 4. Naturaleza -->
+            <button onclick="setWaveFilter('naturaleza')" id="wf-naturaleza" class="picto-btn">
+                <svg class="w-3.5 h-3.5 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M2 15c2.5-2.8 5.5-2.8 8 0s5.5 2.8 8 0 3.5-2 4-1"/>
+                    <path d="M12 3c-3.5 2.2-5 6-2 8.8 3-2.8 1.5-6.6-2-8.8z"/>
                 </svg>
                 <span>Naturaleza</span>
-                <span class="opacity-75" id="wfCount-envolvente">11</span>
-            </button>
-
-            <!-- 2. Tráfico y Motores (Intensa) -->
-            <button onclick="setWaveFilter('intensa')" id="wf-intensa" class="picto-btn">
-                <svg class="w-3.5 h-3.5 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                    <polyline points="2 12 6 12 9 4 13 20 16 9 19 15 22 12"/>
-                </svg>
-                <span>Tráfico</span>
-                <span class="opacity-75" id="wfCount-intensa">7</span>
-            </button>
-
-            <!-- 3. Murmullo Humano (Abierta) -->
-            <button onclick="setWaveFilter('abierta')" id="wf-abierta" class="picto-btn">
-                <svg class="w-3.5 h-3.5 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round">
-                    <circle cx="9" cy="10" r="3"/>
-                    <path d="M16 6a6 6 0 0 1 0 9"/>
-                    <path d="M19.5 3.5a10 10 0 0 1 0 14"/>
-                </svg>
-                <span>Voces</span>
-                <span class="opacity-75" id="wfCount-abierta">4</span>
-            </button>
-
-            <!-- 4. Puerto y Señales (Fugaz) -->
-            <button onclick="setWaveFilter('fugaz')" id="wf-fugaz" class="picto-btn">
-                <svg class="w-3.5 h-3.5 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round">
-                    <circle cx="12" cy="12" r="2.2"/>
-                    <path d="M12 2v4M12 18v4M2 12h4M18 12h4M5 5l3 3M16 16l3 3M19 5l-3 3M8 16l-3 3"/>
-                </svg>
-                <span>Puerto</span>
-                <span class="opacity-75" id="wfCount-fugaz">2</span>
+                <span class="opacity-75" id="wfCount-naturaleza">10</span>
             </button>
         </div>
 
-        <!-- Fila 2: Los 5 Círculos del Instrumento (C1 a C5) -->
-        <div class="interactive flex flex-wrap justify-end items-center gap-1.5">
-            <span class="text-[9px] font-medium tracking-[0.18em] uppercase text-[#EAB308]/65 mr-1 poster-text">Círculos:</span>
-            <button onclick="setRingFilter(0)" id="rf-0" class="ring-pill active">C1–C5</button>
-            <button onclick="setRingFilter(1)" id="rf-1" class="ring-pill">C1 (<span id="rfCount-1">2</span>)</button>
-            <button onclick="setRingFilter(2)" id="rf-2" class="ring-pill">C2 (<span id="rfCount-2">4</span>)</button>
-            <button onclick="setRingFilter(3)" id="rf-3" class="ring-pill">C3 (<span id="rfCount-3">6</span>)</button>
-            <button onclick="setRingFilter(4)" id="rf-4" class="ring-pill">C4 (<span id="rfCount-4">7</span>)</button>
-            <button onclick="setRingFilter(5)" id="rf-5" class="ring-pill">C5 (<span id="rfCount-5">5</span>)</button>
+        <!-- Fila 2: Únicamente los 3 Círculos de Intensidad (Bajo, Medio, Alto) -->
+        <div class="interactive flex flex-wrap justify-end items-center gap-2">
+            <span class="text-[9.5px] font-medium tracking-[0.18em] uppercase text-[#EAB308]/70 mr-1 poster-text">Intensidad:</span>
+            <button onclick="setRingFilter(0)" id="rf-0" class="ring-pill active">Todos</button>
+            <button onclick="setRingFilter(1)" id="rf-1" class="ring-pill">Bajo (<span id="rfCount-1">5</span>)</button>
+            <button onclick="setRingFilter(2)" id="rf-2" class="ring-pill">Medio (<span id="rfCount-2">10</span>)</button>
+            <button onclick="setRingFilter(3)" id="rf-3" class="ring-pill">Alto (<span id="rfCount-3">9</span>)</button>
         </div>
 
         <!-- Etiqueta cuando se aísla a 1 persona -->
@@ -266,25 +287,25 @@
             </div>
         </div>
 
-        <!-- Leyenda compacta de los 4 Pictogramas + Pie de acción (como el pie pequeño del afiche) -->
+        <!-- Leyenda compacta de los 4 Pictogramas (Tránsito, Obras, Personas, Naturaleza) + Pie de acción -->
         <div class="mt-6 space-y-3">
             <!-- Mini-fila de los 4 pictogramas siempre comprensibles -->
-            <div class="flex flex-wrap items-center gap-x-4 gap-y-1.5 text-[10px] font-normal tracking-[0.06em] text-[#EAB308]/85">
+            <div class="flex flex-wrap items-center gap-x-4 gap-y-1.5 text-[10.5px] font-normal tracking-[0.06em] text-[#EAB308]/90">
                 <span class="inline-flex items-center gap-1.5">
-                    <svg class="w-3 h-3" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M2 13c2.5-3 5.5-3 8 0s5.5 3 8 0"/><path d="M12 3c-3 2-4 5-2 7 2-2 1-5-2-7z"/></svg>
+                    <svg class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M5 15h14l-1.5-5.5A2 2 0 0 0 15.6 8H8.4a2 2 0 0 0-1.9 1.5L5 15z"/><path d="M3 15h18v3H3z"/></svg>
+                    Tránsito
+                </span>
+                <span class="inline-flex items-center gap-1.5">
+                    <svg class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M14 4l6 6-2.5 2.5-6-6L14 4z"/><path d="M4 20l8.5-8.5"/></svg>
+                    Obras
+                </span>
+                <span class="inline-flex items-center gap-1.5">
+                    <svg class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="9" cy="7.5" r="3"/><path d="M3.5 19c0-3 2.5-5.2 5.5-5.2s5.5 2.2 5.5 5.2"/></svg>
+                    Personas
+                </span>
+                <span class="inline-flex items-center gap-1.5">
+                    <svg class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M2 15c2.5-2.8 5.5-2.8 8 0s5.5 2.8 8 0"/><path d="M12 3c-3 2-4 5-2 7 2-2 1-5-2-7z"/></svg>
                     Naturaleza
-                </span>
-                <span class="inline-flex items-center gap-1.5">
-                    <svg class="w-3 h-3" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="2 12 6 12 9 4 14 20 18 10 22 12"/></svg>
-                    Tráfico
-                </span>
-                <span class="inline-flex items-center gap-1.5">
-                    <svg class="w-3 h-3" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="8" cy="10" r="3"/><path d="M15 6a6 6 0 0 1 0 9"/></svg>
-                    Voces
-                </span>
-                <span class="inline-flex items-center gap-1.5">
-                    <svg class="w-3 h-3" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="2"/><path d="M12 2v4M12 18v4M2 12h4M18 12h4"/></svg>
-                    Puerto
                 </span>
             </div>
 
@@ -295,7 +316,7 @@
                         Click en la placa para ingresar al total →
                     </div>
                     <div id="smallCaption2" class="text-[11px] sm:text-xs font-light tracking-[0.02em] text-[#EAB308]/80">
-                        4 pictogramas de onda · 5 círculos de intensidad
+                        4 pictogramas · 3 niveles de intensidad (Bajo · Medio · Alto)
                     </div>
                 </button>
             </div>
@@ -338,93 +359,103 @@
     <script>
         /**
          * ============================================================================
-         * 1. DEFINICIÓN DE LOS 4 PICTOGRAMAS Y DATOS FIJOS DETERMINISTAS (N = 62)
+         * 1. LOS 4 PICTOGRAMAS EXACTOS (TRÁNSITO, OBRAS, PERSONAS, NATURALEZA)
+         *    Y LOS 3 NIVELES DE INTENSIDAD (BAJO, MEDIO, ALTO)
          * ============================================================================
          */
         const WAVE_TYPES = {
-            envolvente: {
-                key: 'envolvente',
+            transito: {
+                key: 'transito',
+                pictogramName: 'Tránsito',
+                waveQuality: 'Onda de Tránsito',
+                lobes: 6,          // Estrella hexagonal de flujo vehicular continuo
+                kRadial: 3.12,
+                lobeAmp: 0.52,
+                innerRing: 0.16,
+                emblemSides: 6,
+                vibFreq: 1.35
+            },
+            obras: {
+                key: 'obras',
+                pictogramName: 'Obras',
+                waveQuality: 'Onda de Obras',
+                lobes: 8,          // Octogonal de pulsos mecánicos y percusión urbana
+                kRadial: 2.85,
+                lobeAmp: 0.56,
+                innerRing: 0.14,
+                emblemSides: 8,
+                vibFreq: 1.65
+            },
+            personas: {
+                key: 'personas',
+                pictogramName: 'Personas',
+                waveQuality: 'Onda de Personas',
+                lobes: 2,          // Bipolar abierta de voces y pasos humanos
+                kRadial: 1.76,
+                lobeAmp: 0.48,
+                innerRing: 0.20,
+                emblemSides: 5,
+                vibFreq: 0.95
+            },
+            naturaleza: {
+                key: 'naturaleza',
                 pictogramName: 'Naturaleza',
-                waveQuality: 'Onda Envolvente',
+                waveQuality: 'Onda de Naturaleza',
                 lobes: 4,          // Cuadrilobular armónica como el afiche de Handel
                 kRadial: 2.22,
                 lobeAmp: 0.46,
                 innerRing: 0.24,
-                emblemSides: 4
-            },
-            intensa: {
-                key: 'intensa',
-                pictogramName: 'Tráfico',
-                waveQuality: 'Onda Intensa',
-                lobes: 6,          // Estrella hexagonal de alta frecuencia
-                kRadial: 3.12,
-                lobeAmp: 0.52,
-                innerRing: 0.16,
-                emblemSides: 6
-            },
-            abierta: {
-                key: 'abierta',
-                pictogramName: 'Voces',
-                waveQuality: 'Onda Abierta',
-                lobes: 2,          // Bipolar abierta hacia el horizonte
-                kRadial: 1.72,
-                lobeAmp: 0.48,
-                innerRing: 0.20,
-                emblemSides: 3
-            },
-            fugaz: {
-                key: 'fugaz',
-                pictogramName: 'Puerto',
-                waveQuality: 'Onda Fugaz',
-                lobes: 8,          // Octogonal de pulsos breves
-                kRadial: 2.75,
-                lobeAmp: 0.55,
-                innerRing: 0.14,
-                emblemSides: 8
+                emblemSides: 4,
+                vibFreq: 0.80
             }
         };
 
+        // ÚNICAMENTE 3 CÍRCULOS DE INTENSIDAD: BAJO, MEDIO Y ALTO
         const INTENSITY_RINGS = [
-            { level: 1, short: 'C1', label: 'Intensidad 1 · Muy Baja', radiusNorm: 0.22 },
-            { level: 2, short: 'C2', label: 'Intensidad 2 · Baja',     radiusNorm: 0.38 },
-            { level: 3, short: 'C3', label: 'Intensidad 3 · Media',    radiusNorm: 0.54 },
-            { level: 4, short: 'C4', label: 'Intensidad 4 · Alta',     radiusNorm: 0.71 },
-            { level: 5, short: 'C5', label: 'Intensidad 5 · Máxima',   radiusNorm: 0.88 }
+            { level: 1, short: 'BAJO',  name: 'Bajo',  label: 'Intensidad Baja',  radiusNorm: 0.31 },
+            { level: 2, short: 'MEDIO', name: 'Medio', label: 'Intensidad Media', radiusNorm: 0.58 },
+            { level: 3, short: 'ALTO',  name: 'Alto',  label: 'Intensidad Alta',  radiusNorm: 0.85 }
         ];
 
         // DATOS FIJOS CERRADOS (Sotomayor = 24, Muelle Prat = 20, Buenos Aires = 18 -> Total = 62)
+        // Cada registro pertenece a uno de los 3 círculos (1: Bajo, 2: Medio, 3: Alto)
+        // y a uno de los 4 pictogramas ('transito', 'obras', 'personas', 'naturaleza').
         const PLACES_DATA = {
             sotomayor: {
                 id: 'sotomayor',
                 name: 'Plaza Sotomayor',
                 subtitle: 'Confluencia urbana y eco patrimonial',
-                // Posición asimétrica en Etapa 1: Mayor tamaño (N=24), arriba-izquierda
                 layoutRatio: { x: 0.28, y: 0.37, sizeScale: 1.18 },
                 people: [
-                    { id: 'S-01', ring: 1, wave: 'envolvente', angle: 0.45, freqMod: 1.00, note: 'Brisa húmeda contenida en el centro.' },
-                    { id: 'S-02', ring: 1, wave: 'fugaz',      angle: 3.60, freqMod: 0.95, note: 'Eco lejano de buque desde la dársena.' },
-                    { id: 'S-03', ring: 2, wave: 'envolvente', angle: 0.95, freqMod: 1.02, note: 'Aire costero envolvente entre fachadas.' },
-                    { id: 'S-04', ring: 2, wave: 'abierta',    angle: 2.35, freqMod: 0.98, note: 'Voces tranquilas hacia el muelle.' },
-                    { id: 'S-05', ring: 2, wave: 'envolvente', angle: 4.10, freqMod: 1.04, note: 'Sensación envolvente en la explanada.' },
-                    { id: 'S-06', ring: 2, wave: 'fugaz',      angle: 5.50, freqMod: 0.92, note: 'Señal breve sobre adoquines.' },
-                    { id: 'S-07', ring: 3, wave: 'envolvente', angle: 0.30, freqMod: 1.00, note: 'Viento que rebota en las cuatro esquinas.' },
-                    { id: 'S-08', ring: 3, wave: 'intensa',    angle: 1.35, freqMod: 1.06, note: 'Flujo constante por calle Serrano.' },
-                    { id: 'S-09', ring: 3, wave: 'envolvente', angle: 2.40, freqMod: 0.97, note: 'Resonancia natural como anfiteatro.' },
-                    { id: 'S-10', ring: 3, wave: 'abierta',    angle: 3.45, freqMod: 1.01, note: 'Murmullo peatonal hacia el puerto.' },
-                    { id: 'S-11', ring: 3, wave: 'envolvente', angle: 4.55, freqMod: 1.03, note: 'Corriente marina que abraza la plaza.' },
-                    { id: 'S-12', ring: 3, wave: 'intensa',    angle: 5.65, freqMod: 1.08, note: 'Pulso de buses en el eje arterial.' },
-                    { id: 'S-13', ring: 4, wave: 'envolvente', angle: 0.15, freqMod: 1.05, note: 'Envolvimiento total desde los muros.' },
-                    { id: 'S-14', ring: 4, wave: 'intensa',    angle: 1.05, freqMod: 1.10, note: 'Vibración intensa de tráfico.' },
-                    { id: 'S-15', ring: 4, wave: 'envolvente', angle: 1.95, freqMod: 0.99, note: 'Reverberación profunda en piedra.' },
-                    { id: 'S-16', ring: 4, wave: 'intensa',    angle: 2.85, freqMod: 1.07, note: 'Motores acelerando en el perímetro sur.' },
-                    { id: 'S-17', ring: 4, wave: 'abierta',    angle: 3.75, freqMod: 0.96, note: 'Voces de grupos hacia la costanera.' },
-                    { id: 'S-18', ring: 4, wave: 'envolvente', angle: 4.65, freqMod: 1.02, note: 'Cúpula sonora por la simetría urbana.' },
-                    { id: 'S-19', ring: 4, wave: 'intensa',    angle: 5.55, freqMod: 1.11, note: 'Tráfico pesado reflejado en fachadas.' },
-                    { id: 'S-20', ring: 5, wave: 'intensa',    angle: 0.65, freqMod: 1.14, note: 'Pico vehicular en el borde arterial.' },
-                    { id: 'S-21', ring: 5, wave: 'envolvente', angle: 1.90, freqMod: 1.06, note: 'Máxima sensación envolvente central.' },
-                    { id: 'S-22', ring: 5, wave: 'intensa',    angle: 3.15, freqMod: 1.12, note: 'Saturación de motores en acera oriente.' },
-                    { id: 'S-23', ring: 5, wave: 'envolvente', angle: 4.40, freqMod: 1.04, note: 'Resonancia envolvente de gran amplitud.' },
-                    { id: 'S-24', ring: 5, wave: 'abierta',    angle: 5.60, freqMod: 1.00, note: 'Gran apertura de voces hacia el mar.' }
+                    // Nivel 1: Bajo (5 personas)
+                    { id: 'S-01', ring: 1, wave: 'naturaleza', angle: 0.45, freqMod: 1.00, note: 'Brisa húmeda contenida en el centro.' },
+                    { id: 'S-02', ring: 1, wave: 'personas',   angle: 1.75, freqMod: 0.97, note: 'Pasos tranquilos sobre la explanada.' },
+                    { id: 'S-03', ring: 1, wave: 'naturaleza', angle: 3.05, freqMod: 1.02, note: 'Aire costero envolvente entre fachadas.' },
+                    { id: 'S-04', ring: 1, wave: 'personas',   angle: 4.35, freqMod: 0.98, note: 'Conversación suave hacia el monumento.' },
+                    { id: 'S-05', ring: 1, wave: 'naturaleza', angle: 5.55, freqMod: 1.03, note: 'Eco lejano de gaviotas y viento.' },
+
+                    // Nivel 2: Medio (10 personas)
+                    { id: 'S-06', ring: 2, wave: 'naturaleza', angle: 0.25, freqMod: 1.00, note: 'Viento que rebota en las cuatro esquinas.' },
+                    { id: 'S-07', ring: 2, wave: 'transito',   angle: 0.88, freqMod: 1.06, note: 'Flujo constante por calle Serrano.' },
+                    { id: 'S-08', ring: 2, wave: 'naturaleza', angle: 1.50, freqMod: 0.97, note: 'Resonancia natural como anfiteatro.' },
+                    { id: 'S-09', ring: 2, wave: 'personas',   angle: 2.12, freqMod: 1.01, note: 'Murmullo peatonal hacia el puerto.' },
+                    { id: 'S-10', ring: 2, wave: 'obras',      angle: 2.75, freqMod: 1.09, note: 'Reparación de adoquines en el borde.' },
+                    { id: 'S-11', ring: 2, wave: 'naturaleza', angle: 3.38, freqMod: 1.03, note: 'Corriente marina que abraza la plaza.' },
+                    { id: 'S-12', ring: 2, wave: 'transito',   angle: 4.00, freqMod: 1.08, note: 'Pulso de buses en el eje arterial.' },
+                    { id: 'S-13', ring: 2, wave: 'naturaleza', angle: 4.62, freqMod: 1.04, note: 'Envolvimiento acústico desde los muros.' },
+                    { id: 'S-14', ring: 2, wave: 'personas',   angle: 5.25, freqMod: 0.96, note: 'Grupos cruzando hacia la estación.' },
+                    { id: 'S-15', ring: 2, wave: 'naturaleza', angle: 5.88, freqMod: 1.02, note: 'Cúpula de viento por simetría urbana.' },
+
+                    // Nivel 3: Alto (9 personas)
+                    { id: 'S-16', ring: 3, wave: 'transito',   angle: 0.35, freqMod: 1.11, note: 'Vibración intensa de tránsito vehicular.' },
+                    { id: 'S-17', ring: 3, wave: 'obras',      angle: 1.05, freqMod: 1.15, note: 'Maquinaria de mantención en fachada.' },
+                    { id: 'S-18', ring: 3, wave: 'transito',   angle: 1.75, freqMod: 1.09, note: 'Motores acelerando en el perímetro sur.' },
+                    { id: 'S-19', ring: 3, wave: 'naturaleza', angle: 2.45, freqMod: 1.05, note: 'Ráfaga costera encajonada con fuerza.' },
+                    { id: 'S-20', ring: 3, wave: 'transito',   angle: 3.15, freqMod: 1.13, note: 'Tránsito pesado reflejado en piedra.' },
+                    { id: 'S-21', ring: 3, wave: 'obras',      angle: 3.85, freqMod: 1.16, note: 'Golpe metálico de obra portuaria.' },
+                    { id: 'S-22', ring: 3, wave: 'transito',   angle: 4.55, freqMod: 1.12, note: 'Saturación de motores en acera oriente.' },
+                    { id: 'S-23', ring: 3, wave: 'naturaleza', angle: 5.25, freqMod: 1.06, note: 'Resonancia envolvente de gran amplitud.' },
+                    { id: 'S-24', ring: 3, wave: 'transito',   angle: 5.95, freqMod: 1.10, note: 'Pico vehicular en el borde arterial.' }
                 ]
             },
 
@@ -432,29 +463,33 @@
                 id: 'muelle',
                 name: 'Muelle Prat',
                 subtitle: 'Horizonte marítimo y voces abiertas',
-                // Posición asimétrica en Etapa 1: Tamaño mediano (N=20), derecha-media/baja
                 layoutRatio: { x: 0.73, y: 0.44, sizeScale: 1.02 },
                 people: [
-                    { id: 'M-01', ring: 1, wave: 'abierta',    angle: 0.80, freqMod: 0.96, note: 'Voces frente al agua hacia la bahía.' },
-                    { id: 'M-02', ring: 1, wave: 'envolvente', angle: 2.90, freqMod: 0.94, note: 'Brisa marina suave al borde del muelle.' },
-                    { id: 'M-03', ring: 1, wave: 'fugaz',      angle: 5.00, freqMod: 0.98, note: 'Gaviotas planeando sobre el agua.' },
-                    { id: 'M-04', ring: 2, wave: 'abierta',    angle: 0.40, freqMod: 1.00, note: 'Murmullo abierto mirando los barcos.' },
-                    { id: 'M-05', ring: 2, wave: 'envolvente', angle: 1.65, freqMod: 0.99, note: 'Vaivén envolvente del oleaje.' },
-                    { id: 'M-06', ring: 2, wave: 'abierta',    angle: 2.90, freqMod: 0.97, note: 'Conversaciones que se abren al océano.' },
-                    { id: 'M-07', ring: 2, wave: 'fugaz',      angle: 4.15, freqMod: 1.02, note: 'Campana puntual de embarcación.' },
-                    { id: 'M-08', ring: 2, wave: 'abierta',    angle: 5.40, freqMod: 0.95, note: 'Propagación limpia de voces humanas.' },
-                    { id: 'M-09', ring: 3, wave: 'abierta',    angle: 0.25, freqMod: 1.01, note: 'Llamados abiertos de lancheros.' },
-                    { id: 'M-10', ring: 3, wave: 'envolvente', angle: 1.50, freqMod: 1.03, note: 'Mar y viento salino envolvente.' },
-                    { id: 'M-11', ring: 3, wave: 'abierta',    angle: 2.75, freqMod: 0.98, note: 'Murmullo colectivo en la explanada.' },
-                    { id: 'M-12', ring: 3, wave: 'fugaz',      angle: 4.00, freqMod: 1.04, note: 'Aves marinas y señales de amarre.' },
-                    { id: 'M-13', ring: 3, wave: 'abierta',    angle: 5.25, freqMod: 1.00, note: 'Voces abiertas sin eco arquitectónico.' },
-                    { id: 'M-14', ring: 4, wave: 'abierta',    angle: 0.90, freqMod: 1.05, note: 'Pregones abiertos hacia la bahía.' },
-                    { id: 'M-15', ring: 4, wave: 'envolvente', angle: 2.45, freqMod: 1.02, note: 'Oleaje profundo bajo los pilotes.' },
-                    { id: 'M-16', ring: 4, wave: 'intensa',    angle: 4.00, freqMod: 1.08, note: 'Motor diésel de lancha turística.' },
-                    { id: 'M-17', ring: 4, wave: 'abierta',    angle: 5.55, freqMod: 1.03, note: 'Coro abierto de voces frente al mar.' },
-                    { id: 'M-18', ring: 5, wave: 'intensa',    angle: 1.20, freqMod: 1.12, note: 'Remolcador cercano en maniobra.' },
-                    { id: 'M-19', ring: 5, wave: 'abierta',    angle: 3.30, freqMod: 1.07, note: 'Onda abierta masiva en hora punta.' },
-                    { id: 'M-20', ring: 5, wave: 'envolvente', angle: 5.10, freqMod: 1.05, note: 'Viento fuerte y mar envolvente.' }
+                    // Nivel 1: Bajo (6 personas)
+                    { id: 'M-01', ring: 1, wave: 'personas',   angle: 0.55, freqMod: 0.96, note: 'Voces tranquilas frente a la bahía.' },
+                    { id: 'M-02', ring: 1, wave: 'naturaleza', angle: 1.60, freqMod: 0.94, note: 'Brisa marina suave al borde del muelle.' },
+                    { id: 'M-03', ring: 1, wave: 'personas',   angle: 2.65, freqMod: 0.99, note: 'Murmullo abierto mirando los barcos.' },
+                    { id: 'M-04', ring: 1, wave: 'naturaleza', angle: 3.70, freqMod: 0.98, note: 'Gaviotas planeando sobre el agua.' },
+                    { id: 'M-05', ring: 1, wave: 'personas',   angle: 4.75, freqMod: 0.97, note: 'Conversaciones que se abren al océano.' },
+                    { id: 'M-06', ring: 1, wave: 'naturaleza', angle: 5.80, freqMod: 0.95, note: 'Vaivén rítmico del oleaje bajo el muelle.' },
+
+                    // Nivel 2: Medio (8 personas)
+                    { id: 'M-07', ring: 2, wave: 'personas',   angle: 0.30, freqMod: 1.01, note: 'Llamados abiertos de lancheros.' },
+                    { id: 'M-08', ring: 2, wave: 'naturaleza', angle: 1.08, freqMod: 1.03, note: 'Mar y viento salino envolvente.' },
+                    { id: 'M-09', ring: 2, wave: 'personas',   angle: 1.86, freqMod: 0.98, note: 'Murmullo colectivo en la explanada.' },
+                    { id: 'M-10', ring: 2, wave: 'obras',      angle: 2.64, freqMod: 1.07, note: 'Maniobra de grúa y cadenas a lo lejos.' },
+                    { id: 'M-11', ring: 2, wave: 'personas',   angle: 3.42, freqMod: 1.00, note: 'Voces abiertas sin eco arquitectónico.' },
+                    { id: 'M-12', ring: 2, wave: 'naturaleza', angle: 4.20, freqMod: 1.02, note: 'Oleaje profundo chocando en pilotes.' },
+                    { id: 'M-13', ring: 2, wave: 'personas',   angle: 4.98, freqMod: 1.04, note: 'Pregones turísticos hacia la bahía.' },
+                    { id: 'M-14', ring: 2, wave: 'personas',   angle: 5.76, freqMod: 1.01, note: 'Coro abierto de visitantes frente al mar.' },
+
+                    // Nivel 3: Alto (6 personas)
+                    { id: 'M-15', ring: 3, wave: 'transito',   angle: 0.70, freqMod: 1.09, note: 'Motor diésel de lancha turística.' },
+                    { id: 'M-16', ring: 3, wave: 'obras',      angle: 1.75, freqMod: 1.14, note: 'Carga pesada y metal en espigón.' },
+                    { id: 'M-17', ring: 3, wave: 'personas',   angle: 2.80, freqMod: 1.07, note: 'Gran concurrencia peatonal en hora punta.' },
+                    { id: 'M-18', ring: 3, wave: 'transito',   angle: 3.85, freqMod: 1.12, note: 'Remolcador cercano en maniobra.' },
+                    { id: 'M-19', ring: 3, wave: 'naturaleza', angle: 4.90, freqMod: 1.06, note: 'Viento costero fuerte y oleaje alto.' },
+                    { id: 'M-20', ring: 3, wave: 'personas',   angle: 5.90, freqMod: 1.05, note: 'Voces amplificadas junto al embarcadero.' }
                 ]
             },
 
@@ -462,34 +497,38 @@
                 id: 'buenosaires',
                 name: 'Buenos Aires',
                 subtitle: 'Trama metropolitana y pulso continuo',
-                // Posición asimétrica en Etapa 1: Tamaño menor (N=18), abajo-centro
                 layoutRatio: { x: 0.49, y: 0.68, sizeScale: 0.90 },
                 people: [
-                    { id: 'B-01', ring: 1, wave: 'envolvente', angle: 1.10, freqMod: 0.98, note: 'Follaje amortiguando la ciudad.' },
-                    { id: 'B-02', ring: 1, wave: 'abierta',    angle: 4.20, freqMod: 0.96, note: 'Conversación en apertura de parque.' },
-                    { id: 'B-03', ring: 2, wave: 'envolvente', angle: 0.60, freqMod: 1.01, note: 'Brisa entre copas de árboles.' },
-                    { id: 'B-04', ring: 2, wave: 'fugaz',      angle: 2.70, freqMod: 1.03, note: 'Timbre breve y señal peatonal.' },
-                    { id: 'B-05', ring: 2, wave: 'abierta',    angle: 4.80, freqMod: 0.99, note: 'Murmullo humano en vereda.' },
-                    { id: 'B-06', ring: 3, wave: 'intensa',    angle: 0.40, freqMod: 1.05, note: 'Flujo continuo de avenidas.' },
-                    { id: 'B-07', ring: 3, wave: 'envolvente', angle: 1.95, freqMod: 1.02, note: 'Atmósfera contenida por fachadas.' },
-                    { id: 'B-08', ring: 3, wave: 'fugaz',      angle: 3.50, freqMod: 1.06, note: 'Alertas breves en cruce diagonal.' },
-                    { id: 'B-09', ring: 3, wave: 'intensa',    angle: 5.05, freqMod: 1.08, note: 'Vibración mecánica del subterráneo.' },
-                    { id: 'B-10', ring: 4, wave: 'intensa',    angle: 0.20, freqMod: 1.09, note: 'Corredor de colectivos y tránsito.' },
-                    { id: 'B-11', ring: 4, wave: 'envolvente', angle: 1.45, freqMod: 1.04, note: 'Cañón urbano envolvente.' },
-                    { id: 'B-12', ring: 4, wave: 'intensa',    angle: 2.70, freqMod: 1.11, note: 'Motores intensos en el cruce.' },
-                    { id: 'B-13', ring: 4, wave: 'fugaz',      angle: 3.95, freqMod: 1.07, note: 'Bocinas puntuales a lo lejos.' },
-                    { id: 'B-14', ring: 4, wave: 'envolvente', angle: 5.20, freqMod: 1.03, note: 'Rumor denso al caer la tarde.' },
-                    { id: 'B-15', ring: 5, wave: 'intensa',    angle: 0.85, freqMod: 1.14, note: 'Máxima vibración vehicular central.' },
-                    { id: 'B-16', ring: 5, wave: 'intensa',    angle: 2.40, freqMod: 1.12, note: 'Frecuencia mecánica sobre asfalto.' },
-                    { id: 'B-17', ring: 5, wave: 'envolvente', angle: 3.95, freqMod: 1.06, note: 'Inmersión acústica en hora pico.' },
-                    { id: 'B-18', ring: 5, wave: 'intensa',    angle: 5.50, freqMod: 1.15, note: 'Resonancia máxima en anillo exterior.' }
+                    // Nivel 1: Bajo (4 personas)
+                    { id: 'B-01', ring: 1, wave: 'naturaleza', angle: 0.85, freqMod: 0.98, note: 'Follaje de plátanos amortiguando la calle.' },
+                    { id: 'B-02', ring: 1, wave: 'personas',   angle: 2.40, freqMod: 0.96, note: 'Conversación en apertura de vereda.' },
+                    { id: 'B-03', ring: 1, wave: 'naturaleza', angle: 3.95, freqMod: 1.01, note: 'Brisa entre copas de árboles urbanos.' },
+                    { id: 'B-04', ring: 1, wave: 'personas',   angle: 5.50, freqMod: 0.99, note: 'Pasos y murmullo humano en galería.' },
+
+                    // Nivel 2: Medio (7 personas)
+                    { id: 'B-05', ring: 2, wave: 'transito',   angle: 0.40, freqMod: 1.06, note: 'Flujo continuo de avenidas.' },
+                    { id: 'B-06', ring: 2, wave: 'obras',      angle: 1.30, freqMod: 1.10, note: 'Andamios y percusión de obra cercana.' },
+                    { id: 'B-07', ring: 2, wave: 'personas',   angle: 2.20, freqMod: 1.02, note: 'Cruce peatonal activo en diagonal.' },
+                    { id: 'B-08', ring: 2, wave: 'transito',   angle: 3.10, freqMod: 1.08, note: 'Vibración mecánica del subterráneo.' },
+                    { id: 'B-09', ring: 2, wave: 'naturaleza', angle: 4.00, freqMod: 1.03, note: 'Viento canalizado entre edificios.' },
+                    { id: 'B-10', ring: 2, wave: 'obras',      angle: 4.90, freqMod: 1.11, note: 'Taladro intermitente a media cuadra.' },
+                    { id: 'B-11', ring: 2, wave: 'transito',   angle: 5.80, freqMod: 1.07, note: 'Corredor de colectivos y taxis.' },
+
+                    // Nivel 3: Alto (7 personas)
+                    { id: 'B-12', ring: 3, wave: 'transito',   angle: 0.30, freqMod: 1.13, note: 'Motores intensos en cruce de avenidas.' },
+                    { id: 'B-13', ring: 3, wave: 'obras',      angle: 1.20, freqMod: 1.16, note: 'Martillo neumático sobre calzada.' },
+                    { id: 'B-14', ring: 3, wave: 'transito',   angle: 2.10, freqMod: 1.14, note: 'Máxima vibración vehicular central.' },
+                    { id: 'B-15', ring: 3, wave: 'obras',      angle: 3.00, freqMod: 1.15, note: 'Excavación y maquinaria en esquina.' },
+                    { id: 'B-16', ring: 3, wave: 'transito',   angle: 3.90, freqMod: 1.12, note: 'Frecuencia mecánica sobre asfalto.' },
+                    { id: 'B-17', ring: 3, wave: 'personas',   angle: 4.80, freqMod: 1.06, note: 'Flujo denso de personas en hora pico.' },
+                    { id: 'B-18', ring: 3, wave: 'transito',   angle: 5.70, freqMod: 1.15, note: 'Resonancia máxima en anillo exterior.' }
                 ]
             }
         };
 
         /**
          * ============================================================================
-         * 2. MOTOR DE ARENA DE CUARZO FIJA Y DETERMINISTA (28,000 GRANOS)
+         * 2. MOTOR DE ARENA DE CUARZO CON VIBRACIÓN ACÚSTICA EN EL LUGAR (28,000 GRANOS)
          * ============================================================================
          */
         const PARTICLE_COUNT = 28000;
@@ -502,6 +541,7 @@
         const vx = new Float32Array(PARTICLE_COUNT);
         const vy = new Float32Array(PARTICLE_COUNT);
         const pSize = new Float32Array(PARTICLE_COUNT);
+        const pPhase = new Float32Array(PARTICLE_COUNT);
         const pZoneAssign = new Uint8Array(PARTICLE_COUNT); // 0: Sotomayor, 1: Muelle, 2: BsAs
 
         const SAND_COLORS = [
@@ -512,14 +552,18 @@
             'rgba(255, 254, 250, 0.97)'
         ];
 
-        // Etapas: 'intro' (Portada exacto al afiche) -> 'overview' (3 lugares en diversas alturas y tamaños en torno al total) -> 'detail' (Lugar individual)
+        // Etapas: 'intro' -> 'overview' -> 'detail'
         let currentStage = 'intro';
         let activePlaceKey = 'sotomayor';
         let activeWaveFilter = 'todas';
-        let activeRingFilter = 0;
+        let activeRingFilter = 0; // 0: Todos, 1: Bajo, 2: Medio, 3: Alto
         let isolatedPerson = null;
         let hoveredItem = null;
         let settleEnergy = 1.0;
+
+        // Estado de la vibración acústica continua en el lugar
+        let vibrationActive = true;
+        let simTime = 0;
 
         const placeHarmonicSummary = {};
 
@@ -549,17 +593,17 @@
             Object.keys(PLACES_DATA).forEach(key => {
                 const people = PLACES_DATA[key].people;
                 const total = people.length;
-                const waveCounts = { envolvente: 0, intensa: 0, abierta: 0, fugaz: 0 };
+                const waveCounts = { transito: 0, obras: 0, personas: 0, naturaleza: 0 };
                 people.forEach(p => waveCounts[p.wave]++);
 
                 const weights = {
-                    envolvente: waveCounts.envolvente / total,
-                    intensa: waveCounts.intensa / total,
-                    abierta: waveCounts.abierta / total,
-                    fugaz: waveCounts.fugaz / total
+                    transito:   waveCounts.transito / total,
+                    obras:      waveCounts.obras / total,
+                    personas:   waveCounts.personas / total,
+                    naturaleza: waveCounts.naturaleza / total
                 };
 
-                let dominantWave = 'envolvente';
+                let dominantWave = 'naturaleza';
                 let maxC = -1;
                 Object.keys(waveCounts).forEach(w => {
                     if (waveCounts[w] > maxC) {
@@ -583,8 +627,8 @@
 
         function initSandGrains() {
             for (let i = 0; i < PARTICLE_COUNT; i++) {
-                pSize[i] = (i % 5 === 0) ? 1.65 : 1.22;
-                // Proporción exacta a N (24 / 62 = 39%, 20 / 62 = 32%, 18 / 62 = 29%)
+                pSize[i] = (i % 5 === 0) ? 1.68 : 1.24;
+                pPhase[i] = (i * 0.6180339887) % (Math.PI * 2);
                 const mod = i % 62;
                 if (mod < 24) pZoneAssign[i] = 0;
                 else if (mod < 44) pZoneAssign[i] = 1;
@@ -593,18 +637,29 @@
             distributeParticlesForCurrentStage();
         }
 
+        function toggleVibrationMode() {
+            vibrationActive = !vibrationActive;
+            const dot = document.getElementById('vibIndicatorDot');
+            const label = document.getElementById('vibStatusLabel');
+            if (vibrationActive) {
+                dot.classList.add('vib-dot');
+                dot.style.opacity = '1';
+                label.textContent = 'Vibración en el Lugar · Activa';
+            } else {
+                dot.classList.remove('vib-dot');
+                dot.style.opacity = '0.35';
+                label.textContent = 'Vibración en el Lugar · Pausada';
+            }
+        }
+
         /**
-         * GEOMETRÍA DE LAS 3 ETAPAS:
-         * - Etapa 'intro': Gran placa a pantalla completa como el afiche de Handel.
-         * - Etapa 'overview': Los 3 lugares en diversas alturas y tamaños proporcionales a su N (24, 20, 18) orbitando en torno a un núcleo central del Total (N=62).
-         * - Etapa 'detail': Placa individual del lugar con sus 5 círculos concéntricos.
+         * GEOMETRÍA DE LAS 3 ETAPAS
          */
         function getOverviewConstellationGeometry() {
             const isMobile = width < 768;
             const minDim = Math.min(width, height);
             const baseR = isMobile ? minDim * 0.165 : minDim * 0.145;
 
-            // Centro de gravedad del Total (N = 62)
             const hubX = width * 0.49;
             const hubY = height * 0.47;
 
@@ -612,11 +667,8 @@
                 return {
                     hub: { cx: width * 0.50, cy: height * 0.46, radius: baseR * 0.36 },
                     zones: [
-                        // Sotomayor (N=24, el más grande, arriba-izquierda)
                         { key: 'sotomayor',   cx: width * 0.30, cy: height * 0.29, radius: baseR * 1.16 },
-                        // Muelle Prat (N=20, mediano, derecha-medio)
                         { key: 'muelle',      cx: width * 0.72, cy: height * 0.43, radius: baseR * 1.00 },
-                        // Buenos Aires (N=18, menor, abajo-izquierda/centro)
                         { key: 'buenosaires', cx: width * 0.43, cy: height * 0.65, radius: baseR * 0.88 }
                     ]
                 };
@@ -671,17 +723,18 @@
 
         /**
          * ============================================================================
-         * 3. ECUACIONES DE ONDA ESTACIONARIA (CHLADNI)
+         * 3. ECUACIONES DE ONDA ESTACIONARIA (CHLADNI) CON PULSO DE VIBRACIÓN VIVA
          * ============================================================================
          */
-        function evaluateWaveMode(waveTypeObj, rNorm, theta, freqMod = 1.0) {
+        function evaluateWaveMode(waveTypeObj, rNorm, theta, freqMod = 1.0, breath = 0.0) {
             const env = Math.min(1.0, Math.max(0.0, (rNorm - waveTypeObj.innerRing) * 1.48));
-            const angular = waveTypeObj.lobeAmp * env * Math.cos(waveTypeObj.lobes * theta);
-            return Math.sin(waveTypeObj.kRadial * freqMod * Math.PI * rNorm + angular * Math.PI);
+            const lobeAmpLive = waveTypeObj.lobeAmp * (1.0 + breath * 0.045);
+            const angular = lobeAmpLive * env * Math.cos(waveTypeObj.lobes * theta);
+            return Math.sin((waveTypeObj.kRadial * freqMod + breath * 0.03) * Math.PI * rNorm + angular * Math.PI);
         }
 
         // Ecuación de la Portada (Etapa 0): Figura cuadrilobular + anillo interior idéntica al póster Handel
-        function evaluateIntroPosterWave(x, y, cx, cy, radius) {
+        function evaluateIntroPosterWave(x, y, cx, cy, radius, breath = 0.0) {
             const nx = (x - cx) / radius;
             const ny = (y - cy) / radius;
             const r = Math.hypot(nx, ny);
@@ -689,13 +742,12 @@
 
             if (r < 0.055) return 1.5;
 
-            // Anillo circular interior limpio + Diamante redondeado de 4 lóbulos + Arcos en las esquinas
             const env = Math.min(1.0, Math.max(0.0, (r - 0.25) * 1.42));
-            const angular = 0.45 * env * Math.cos(4 * theta);
-            return Math.sin(2.22 * Math.PI * r + angular * Math.PI);
+            const angular = (0.45 + breath * 0.018) * env * Math.cos(4 * theta);
+            return Math.sin((2.22 + breath * 0.02) * Math.PI * r + angular * Math.PI);
         }
 
-        function evaluateZoneTotalWave(placeKey, x, y, cx, cy, radius) {
+        function evaluateZoneTotalWave(placeKey, x, y, cx, cy, radius, breath = 0.0) {
             const nx = (x - cx) / radius;
             const ny = (y - cy) / radius;
             const r = Math.hypot(nx, ny);
@@ -706,16 +758,16 @@
 
             const w = placeHarmonicSummary[placeKey].weights;
             let val = 0;
-            val += w.envolvente * evaluateWaveMode(WAVE_TYPES.envolvente, r, theta);
-            val += w.intensa    * evaluateWaveMode(WAVE_TYPES.intensa, r, theta);
-            val += w.abierta    * evaluateWaveMode(WAVE_TYPES.abierta, r, theta);
-            val += w.fugaz      * evaluateWaveMode(WAVE_TYPES.fugaz, r, theta);
+            val += w.transito   * evaluateWaveMode(WAVE_TYPES.transito, r, theta, 1.0, breath);
+            val += w.obras      * evaluateWaveMode(WAVE_TYPES.obras, r, theta, 1.0, breath);
+            val += w.personas   * evaluateWaveMode(WAVE_TYPES.personas, r, theta, 1.0, breath);
+            val += w.naturaleza * evaluateWaveMode(WAVE_TYPES.naturaleza, r, theta, 1.0, breath);
 
             const outerBoundary = Math.sin(Math.PI * (r / 1.02));
             return val * 0.85 + outerBoundary * 0.15;
         }
 
-        function evaluateDetailPlateWave(x, y, cx, cy, radius) {
+        function evaluateDetailPlateWave(x, y, cx, cy, radius, breath = 0.0) {
             const nx = (x - cx) / radius;
             const ny = (y - cy) / radius;
             const r = Math.hypot(nx, ny);
@@ -727,35 +779,41 @@
             if (isolatedPerson) {
                 const wObj = WAVE_TYPES[isolatedPerson.wave];
                 const ringObj = INTENSITY_RINGS[isolatedPerson.ring - 1];
-                const personWave = evaluateWaveMode(wObj, r, theta - isolatedPerson.angle, isolatedPerson.freqMod);
-                const ringPull = Math.sin(((r - ringObj.radiusNorm) / 0.18) * Math.PI);
+                const personWave = evaluateWaveMode(wObj, r, theta - isolatedPerson.angle, isolatedPerson.freqMod, breath);
+                const ringPull = Math.sin(((r - ringObj.radiusNorm) / 0.22) * Math.PI);
                 return personWave * 0.65 + ringPull * 0.35;
             }
 
             const people = getFilteredPeopleInActivePlace();
             if (people.length === 0) return Math.sin(r * Math.PI * 3);
 
-            const counts = { envolvente: 0, intensa: 0, abierta: 0, fugaz: 0 };
+            const counts = { transito: 0, obras: 0, personas: 0, naturaleza: 0 };
             people.forEach(p => counts[p.wave]++);
             const total = people.length;
 
             let waveSum = 0;
-            if (counts.envolvente > 0) waveSum += (counts.envolvente / total) * evaluateWaveMode(WAVE_TYPES.envolvente, r, theta);
-            if (counts.intensa > 0)    waveSum += (counts.intensa / total)    * evaluateWaveMode(WAVE_TYPES.intensa, r, theta);
-            if (counts.abierta > 0)    waveSum += (counts.abierta / total)    * evaluateWaveMode(WAVE_TYPES.abierta, r, theta);
-            if (counts.fugaz > 0)      waveSum += (counts.fugaz / total)      * evaluateWaveMode(WAVE_TYPES.fugaz, r, theta);
+            if (counts.transito > 0)   waveSum += (counts.transito / total)   * evaluateWaveMode(WAVE_TYPES.transito, r, theta, 1.0, breath);
+            if (counts.obras > 0)      waveSum += (counts.obras / total)      * evaluateWaveMode(WAVE_TYPES.obras, r, theta, 1.0, breath);
+            if (counts.personas > 0)   waveSum += (counts.personas / total)   * evaluateWaveMode(WAVE_TYPES.personas, r, theta, 1.0, breath);
+            if (counts.naturaleza > 0) waveSum += (counts.naturaleza / total) * evaluateWaveMode(WAVE_TYPES.naturaleza, r, theta, 1.0, breath);
 
+            // Si se filtra por uno de los 3 niveles (Bajo, Medio, Alto), concentrar la arena en torno a ese anillo
             if (activeRingFilter > 0) {
                 const targetR = INTENSITY_RINGS[activeRingFilter - 1].radiusNorm;
                 const distFromRing = Math.abs(r - targetR);
-                if (distFromRing > 0.11) {
-                    return (distFromRing - 0.05) * 2.4;
+                if (distFromRing > 0.14) {
+                    return (distFromRing - 0.06) * 2.3;
                 }
             }
             return waveSum;
         }
 
-        function stepSandSettlement(energyFactor) {
+        /**
+         * PASO DE FÍSICA Y MICRO-VIBRACIÓN ACÚSTICA EN EL LUGAR:
+         * Nunca congela los granos a cero si `vibrationActive` está encendido.
+         * Mantiene la figura Chladni perfectamente definida mientras cada grano vibra en su lugar.
+         */
+        function stepSandSettlement(energyFactor, breath = 0.0) {
             if (energyFactor <= 0.001) return;
             const eps = 2.2;
 
@@ -763,23 +821,26 @@
                 const plate = getSinglePlateGeometry(true);
                 for (let i = 0; i < PARTICLE_COUNT; i++) {
                     const isDust = (i % 9 === 0);
-                    if (isDust && energyFactor < 0.38) continue;
-
                     let x = px[i], y = py[i];
-                    const w0 = Math.abs(evaluateIntroPosterWave(x, y, plate.cx, plate.cy, plate.radius));
-                    const wx = Math.abs(evaluateIntroPosterWave(x + eps, y, plate.cx, plate.cy, plate.radius)) - w0;
-                    const wy = Math.abs(evaluateIntroPosterWave(x, y + eps, plate.cx, plate.cy, plate.radius)) - w0;
 
-                    const pull = isDust ? 0.5 : 4.8;
+                    const w0 = Math.abs(evaluateIntroPosterWave(x, y, plate.cx, plate.cy, plate.radius, breath));
+                    const wx = Math.abs(evaluateIntroPosterWave(x + eps, y, plate.cx, plate.cy, plate.radius, breath)) - w0;
+                    const wy = Math.abs(evaluateIntroPosterWave(x, y + eps, plate.cx, plate.cy, plate.radius, breath)) - w0;
+
+                    const pull = isDust ? 0.55 : 4.8;
                     vx[i] -= wx * pull;
                     vy[i] -= wy * pull;
 
-                    const jitter = (w0 * 3.8 + 0.25) * energyFactor * (isDust ? 2.1 : 0.85);
-                    vx[i] += (Math.random() - 0.5) * jitter;
-                    vy[i] += (Math.random() - 0.5) * jitter;
+                    // Vibración acústica en el lugar: los granos en la cresta nodal tiemblan sutilmente,
+                    // y los granos en zonas oscuras (w0 alto) rebotan más vivo sobre el metal.
+                    const harmonicTremor = Math.sin(simTime * 16.0 + pPhase[i]) * 0.42 * energyFactor;
+                    const antinodeBounce = (w0 * 3.6 + 0.34) * energyFactor * (isDust ? 1.85 : 0.92);
 
-                    vx[i] *= 0.64;
-                    vy[i] *= 0.64;
+                    vx[i] += (Math.random() - 0.5) * antinodeBounce + Math.cos(pPhase[i] + simTime * 9.0) * harmonicTremor;
+                    vy[i] += (Math.random() - 0.5) * antinodeBounce + Math.sin(pPhase[i] + simTime * 9.0) * harmonicTremor;
+
+                    vx[i] *= 0.62;
+                    vy[i] *= 0.62;
                     px[i] += vx[i];
                     py[i] += vy[i];
                 }
@@ -787,25 +848,25 @@
                 const { zones } = getOverviewConstellationGeometry();
                 for (let i = 0; i < PARTICLE_COUNT; i++) {
                     const isDust = (i % 13 === 0);
-                    if (isDust && energyFactor < 0.35) continue;
-
                     const z = zones[pZoneAssign[i]];
                     let x = px[i], y = py[i];
 
-                    const w0 = Math.abs(evaluateZoneTotalWave(z.key, x, y, z.cx, z.cy, z.radius));
-                    const wx = Math.abs(evaluateZoneTotalWave(z.key, x + eps, y, z.cx, z.cy, z.radius)) - w0;
-                    const wy = Math.abs(evaluateZoneTotalWave(z.key, x, y + eps, z.cx, z.cy, z.radius)) - w0;
+                    const w0 = Math.abs(evaluateZoneTotalWave(z.key, x, y, z.cx, z.cy, z.radius, breath));
+                    const wx = Math.abs(evaluateZoneTotalWave(z.key, x + eps, y, z.cx, z.cy, z.radius, breath)) - w0;
+                    const wy = Math.abs(evaluateZoneTotalWave(z.key, x, y + eps, z.cx, z.cy, z.radius, breath)) - w0;
 
-                    const pull = isDust ? 0.55 : 4.4;
+                    const pull = isDust ? 0.58 : 4.5;
                     vx[i] -= wx * pull;
                     vy[i] -= wy * pull;
 
-                    const jitter = (w0 * 3.6 + 0.22) * energyFactor * (isDust ? 1.8 : 0.85);
-                    vx[i] += (Math.random() - 0.5) * jitter;
-                    vy[i] += (Math.random() - 0.5) * jitter;
+                    const harmonicTremor = Math.sin(simTime * 15.0 + pPhase[i]) * 0.38 * energyFactor;
+                    const antinodeBounce = (w0 * 3.4 + 0.30) * energyFactor * (isDust ? 1.65 : 0.88);
 
-                    vx[i] *= 0.65;
-                    vy[i] *= 0.65;
+                    vx[i] += (Math.random() - 0.5) * antinodeBounce + Math.cos(pPhase[i] + simTime * 8.5) * harmonicTremor;
+                    vy[i] += (Math.random() - 0.5) * antinodeBounce + Math.sin(pPhase[i] + simTime * 8.5) * harmonicTremor;
+
+                    vx[i] *= 0.63;
+                    vy[i] *= 0.63;
                     px[i] += vx[i];
                     py[i] += vy[i];
                 }
@@ -813,23 +874,24 @@
                 const plate = getSinglePlateGeometry(false);
                 for (let i = 0; i < PARTICLE_COUNT; i++) {
                     const isDust = (i % 14 === 0);
-                    if (isDust && energyFactor < 0.35) continue;
-
                     let x = px[i], y = py[i];
-                    const w0 = Math.abs(evaluateDetailPlateWave(x, y, plate.cx, plate.cy, plate.radius));
-                    const wx = Math.abs(evaluateDetailPlateWave(x + eps, y, plate.cx, plate.cy, plate.radius)) - w0;
-                    const wy = Math.abs(evaluateDetailPlateWave(x, y + eps, plate.cx, plate.cy, plate.radius)) - w0;
 
-                    const pull = isDust ? 0.55 : 4.6;
+                    const w0 = Math.abs(evaluateDetailPlateWave(x, y, plate.cx, plate.cy, plate.radius, breath));
+                    const wx = Math.abs(evaluateDetailPlateWave(x + eps, y, plate.cx, plate.cy, plate.radius, breath)) - w0;
+                    const wy = Math.abs(evaluateDetailPlateWave(x, y + eps, plate.cx, plate.cy, plate.radius, breath)) - w0;
+
+                    const pull = isDust ? 0.58 : 4.7;
                     vx[i] -= wx * pull;
                     vy[i] -= wy * pull;
 
-                    const jitter = (w0 * 4.0 + 0.24) * energyFactor * (isDust ? 1.9 : 0.85);
-                    vx[i] += (Math.random() - 0.5) * jitter;
-                    vy[i] += (Math.random() - 0.5) * jitter;
+                    const harmonicTremor = Math.sin(simTime * 17.0 + pPhase[i]) * 0.44 * energyFactor;
+                    const antinodeBounce = (w0 * 3.8 + 0.32) * energyFactor * (isDust ? 1.75 : 0.90);
 
-                    vx[i] *= 0.64;
-                    vy[i] *= 0.64;
+                    vx[i] += (Math.random() - 0.5) * antinodeBounce + Math.cos(pPhase[i] + simTime * 10.0) * harmonicTremor;
+                    vy[i] += (Math.random() - 0.5) * antinodeBounce + Math.sin(pPhase[i] + simTime * 10.0) * harmonicTremor;
+
+                    vx[i] *= 0.62;
+                    vy[i] *= 0.62;
                     px[i] += vx[i];
                     py[i] += vy[i];
                 }
@@ -837,30 +899,40 @@
         }
 
         function settleImmediately() {
-            for (let i = 0; i < 40; i++) {
-                stepSandSettlement(0.72 * (1 - i / 40));
+            for (let i = 0; i < 38; i++) {
+                stepSandSettlement(0.75 * (1 - i / 42), 0.0);
             }
-            settleEnergy = 0.0;
+            // Se mantiene en un nivel base de vibración estacionaria en lugar de caer a 0
+            settleEnergy = 0.24;
         }
 
         function triggerGentleReorganization() {
-            settleEnergy = 0.88;
-            for (let s = 0; s < 16; s++) {
-                stepSandSettlement(settleEnergy);
+            settleEnergy = 0.95;
+            for (let s = 0; s < 14; s++) {
+                stepSandSettlement(settleEnergy, 0.0);
                 settleEnergy *= 0.91;
             }
         }
 
         /**
          * ============================================================================
-         * 4. RENDERIZADO VISUAL EN CANVAS
+         * 4. RENDERIZADO VISUAL EN CANVAS CON VIBRACIÓN EN TIEMPO REAL
          * ============================================================================
          */
         function renderLoop() {
-            if (settleEnergy > 0.004) {
-                stepSandSettlement(settleEnergy);
-                settleEnergy *= 0.90;
-                if (settleEnergy <= 0.005) settleEnergy = 0;
+            simTime += 0.035;
+
+            // Energía mínima continua de vibración acústica en el lugar (0.22 cuando está activa)
+            const steadyFloor = vibrationActive ? 0.22 : 0.0;
+            if (settleEnergy > steadyFloor) {
+                settleEnergy = Math.max(steadyFloor, settleEnergy * 0.92);
+            } else {
+                settleEnergy = steadyFloor;
+            }
+
+            const breath = vibrationActive ? Math.sin(simTime * 1.8) : 0.0;
+            if (settleEnergy > 0.001) {
+                stepSandSettlement(settleEnergy, breath);
             }
 
             ctx.fillStyle = '#121110';
@@ -877,20 +949,24 @@
                 ctx.fill();
             }
 
+            // Micro-vibración visual del perno central cuando la placa está excitada
+            const boltJitterX = vibrationActive ? Math.cos(simTime * 24) * 0.35 : 0;
+            const boltJitterY = vibrationActive ? Math.sin(simTime * 28) * 0.35 : 0;
+
             if (currentStage === 'intro') {
                 const plate = getSinglePlateGeometry(true);
-                drawHexBolt(plate.cx, plate.cy, 11.5);
+                drawHexBolt(plate.cx + boltJitterX, plate.cy + boltJitterY, 11.5);
             } else if (currentStage === 'overview') {
-                renderOverviewConstellation();
+                renderOverviewConstellation(boltJitterX, boltJitterY);
             } else {
-                renderDetailOverlay();
+                renderDetailOverlay(boltJitterX, boltJitterY);
             }
 
             requestAnimationFrame(renderLoop);
         }
 
         // Etapa 1: Los 3 lugares en diversas alturas y tamaños orbitando en torno al Total (N=62)
-        function renderOverviewConstellation() {
+        function renderOverviewConstellation(boltJitterX, boltJitterY) {
             const { hub, zones } = getOverviewConstellationGeometry();
 
             ctx.save();
@@ -900,7 +976,7 @@
                 const isHovered = hoveredItem && hoveredItem.type === 'zone' && hoveredItem.key === z.key;
                 ctx.beginPath();
                 ctx.setLineDash([3, 7]);
-                ctx.strokeStyle = isHovered ? 'rgba(234, 179, 8, 0.7)' : 'rgba(234, 179, 8, 0.24)';
+                ctx.strokeStyle = isHovered ? 'rgba(234, 179, 8, 0.75)' : 'rgba(234, 179, 8, 0.24)';
                 ctx.lineWidth = isHovered ? 1.4 : 0.9;
                 ctx.moveTo(hub.cx, hub.cy);
                 ctx.lineTo(z.cx, z.cy);
@@ -908,9 +984,10 @@
             });
             ctx.setLineDash([]);
 
-            // 2. Núcleo articulador del Total (N = 62) en el centro de la constelación
+            // 2. Núcleo articulador del Total (N = 62)
+            const hubPulse = vibrationActive ? Math.sin(simTime * 3.2) * 1.2 : 0;
             ctx.beginPath();
-            ctx.arc(hub.cx, hub.cy, 28, 0, Math.PI * 2);
+            ctx.arc(hub.cx, hub.cy, 28 + hubPulse, 0, Math.PI * 2);
             ctx.fillStyle = 'rgba(18, 17, 16, 0.88)';
             ctx.fill();
             ctx.strokeStyle = 'rgba(234, 179, 8, 0.55)';
@@ -926,36 +1003,125 @@
             ctx.fillText('N = 62', hub.cx, hub.cy + 11);
 
             // 3. Dibujar cada una de las 3 placas en su altura y tamaño proporcional
-            zones.forEach(z => {
+            zones.forEach((z, idx) => {
                 const place = PLACES_DATA[z.key];
                 const summary = placeHarmonicSummary[z.key];
                 const isHovered = hoveredItem && hoveredItem.type === 'zone' && hoveredItem.key === z.key;
+                const ringVib = vibrationActive ? Math.sin(simTime * 4.5 + idx * 1.7) * 0.9 : 0;
 
-                // Borde sutil de la placa
                 ctx.beginPath();
-                ctx.arc(z.cx, z.cy, z.radius * 1.02, 0, Math.PI * 2);
+                ctx.arc(z.cx, z.cy, z.radius * 1.02 + ringVib, 0, Math.PI * 2);
                 ctx.strokeStyle = isHovered ? '#EAB308' : 'rgba(234, 179, 8, 0.30)';
                 ctx.lineWidth = isHovered ? 1.9 : 1.0;
                 ctx.stroke();
 
-                // Perno metálico proporcional al tamaño de la placa
-                drawHexBolt(z.cx, z.cy, 8.5 * (z.radius / 115));
+                drawHexBolt(z.cx + boltJitterX, z.cy + boltJitterY, 8.5 * (z.radius / 115));
 
-                // Etiqueta limpia y aireada junto a cada círculo
                 const labelY = z.cy - z.radius - 18;
                 ctx.textAlign = 'center';
                 ctx.fillStyle = '#EAB308';
                 ctx.font = isHovered ? '600 13px Montserrat' : '500 12px Montserrat';
                 ctx.fillText(`${place.name} (${summary.total})`, z.cx, labelY);
 
-                ctx.fillStyle = isHovered ? '#FAF6EE' : 'rgba(234, 179, 8, 0.72)';
+                ctx.fillStyle = isHovered ? '#FAF6EE' : 'rgba(234, 179, 8, 0.75)';
                 ctx.font = '300 10.5px Montserrat';
                 ctx.fillText(
-                    isHovered ? 'Click para abrir círculos →' : WAVE_TYPES[summary.dominantWave].pictogramName,
+                    isHovered ? 'Click para abrir Bajo · Medio · Alto →' : `Predomina: ${WAVE_TYPES[summary.dominantWave].pictogramName}`,
                     z.cx,
                     z.cy + z.radius + 20
                 );
             });
+
+            ctx.restore();
+        }
+
+        // Etapa 2: Placa del lugar con sus 3 círculos de intensidad (Bajo, Medio, Alto) y las ondas vivas
+        function renderDetailOverlay(boltJitterX, boltJitterY) {
+            const plate = getSinglePlateGeometry(false);
+            const place = PLACES_DATA[activePlaceKey];
+            const filteredPeople = getFilteredPeopleInActivePlace();
+            const filteredIds = new Set(filteredPeople.map(p => p.id));
+
+            ctx.save();
+
+            // 1. Los 3 Círculos concéntricos del instrumento (BAJO, MEDIO, ALTO)
+            INTENSITY_RINGS.forEach(ring => {
+                const rPx = plate.radius * ring.radiusNorm;
+                const isSelected = (activeRingFilter === ring.level);
+                const isHovered = (hoveredItem && hoveredItem.type === 'ring' && hoveredItem.level === ring.level);
+
+                ctx.beginPath();
+                ctx.arc(plate.cx, plate.cy, rPx, 0, Math.PI * 2);
+
+                if (isSelected || isHovered) {
+                    ctx.strokeStyle = '#EAB308';
+                    ctx.lineWidth = 1.7;
+                    ctx.setLineDash([]);
+                } else {
+                    ctx.strokeStyle = activeRingFilter === 0 ? 'rgba(234, 179, 8, 0.28)' : 'rgba(234, 179, 8, 0.10)';
+                    ctx.lineWidth = 0.95;
+                    ctx.setLineDash([4, 7]);
+                }
+                ctx.stroke();
+                ctx.setLineDash([]);
+
+                // Etiqueta clara BAJO / MEDIO / ALTO en el eje superior de cada círculo
+                ctx.textAlign = 'center';
+                ctx.font = (isSelected || isHovered) ? '600 10px Montserrat' : '500 9.5px Montserrat';
+                ctx.fillStyle = (isSelected || isHovered) ? '#FDE047' : 'rgba(234, 179, 8, 0.65)';
+                ctx.fillText(ring.short, plate.cx, plate.cy - rPx - 6);
+            });
+
+            // 2. Nodos de personas y su onda estacionaria individual vibrando en tiempo real
+            place.people.forEach(person => {
+                const isIncluded = filteredIds.has(person.id) && (!isolatedPerson || isolatedPerson.id === person.id);
+                const isHighlighted = (hoveredItem && hoveredItem.type === 'person' && hoveredItem.person.id === person.id) ||
+                                      (isolatedPerson && isolatedPerson.id === person.id);
+
+                const ringInfo = INTENSITY_RINGS[person.ring - 1];
+                const waveInfo = WAVE_TYPES[person.wave];
+                const baseR = plate.radius * ringInfo.radiusNorm;
+
+                // Fase de vibración viva para la onda de cada persona
+                const livePhase = vibrationActive ? simTime * 5.2 * waveInfo.vibFreq : 0;
+                const nodeRadialTremor = vibrationActive
+                    ? Math.sin(livePhase + person.angle * 3.0) * (1.2 + person.ring * 0.55)
+                    : 0;
+
+                const pxNode = plate.cx + Math.cos(person.angle) * (baseR + nodeRadialTremor);
+                const pyNode = plate.cy + Math.sin(person.angle) * (baseR + nodeRadialTremor);
+
+                if (isIncluded) {
+                    ctx.beginPath();
+                    const arcSpan = isHighlighted ? Math.PI * 2 : 0.56;
+                    const steps = isHighlighted ? 160 : 38;
+                    const waveAmpPx = (6 + person.ring * 3.8) * (isHighlighted ? 1.45 : 0.85);
+
+                    for (let s = 0; s <= steps; s++) {
+                        const a = (person.angle - arcSpan / 2) + (s / steps) * arcSpan;
+                        const env = isHighlighted ? 1.0 : Math.sin((s / steps) * Math.PI);
+                        const osc = Math.sin((a - person.angle) * waveInfo.lobes * 2.4 * person.freqMod + livePhase);
+                        const rOsc = baseR + osc * waveAmpPx * env;
+                        const wx = plate.cx + Math.cos(a) * rOsc;
+                        const wy = plate.cy + Math.sin(a) * rOsc;
+                        if (s === 0) ctx.moveTo(wx, wy);
+                        else ctx.lineTo(wx, wy);
+                    }
+                    ctx.strokeStyle = isHighlighted ? '#FDE047' : 'rgba(234, 179, 8, 0.52)';
+                    ctx.lineWidth = isHighlighted ? 1.95 : 1.15;
+                    ctx.stroke();
+                }
+
+                // Punto dorado de la persona
+                const rDot = isHighlighted ? 6.2 : (isIncluded ? 4.0 : 1.8);
+                ctx.beginPath();
+                ctx.arc(pxNode, pyNode, rDot, 0, Math.PI * 2);
+                ctx.fillStyle = isHighlighted ? '#FAF6EE' : (isIncluded ? '#EAB308' : 'rgba(234, 179, 8, 0.18)');
+                ctx.fill();
+            });
+
+            // 3. Perno metálico central con micro-vibración
+            drawHexBolt(plate.cx + boltJitterX, plate.cy + boltJitterY, 10.5);
 
             ctx.restore();
         }
@@ -1222,26 +1388,26 @@
             const summary = placeHarmonicSummary[activePlaceKey];
 
             document.getElementById('wfCount-todas').textContent = summary.total;
-            ['envolvente', 'intensa', 'abierta', 'fugaz'].forEach(wKey => {
+            ['transito', 'obras', 'personas', 'naturaleza'].forEach(wKey => {
                 const count = place.people.filter(p =>
                     p.wave === wKey && (activeRingFilter === 0 || p.ring === activeRingFilter)
                 ).length;
                 document.getElementById('wfCount-' + wKey).textContent = count;
             });
 
-            for (let r = 1; r <= 5; r++) {
+            for (let r = 1; r <= 3; r++) {
                 const count = place.people.filter(p =>
                     p.ring === r && (activeWaveFilter === 'todas' || p.wave === activeWaveFilter)
                 ).length;
                 document.getElementById('rfCount-' + r).textContent = count;
             }
 
-            ['todas', 'envolvente', 'intensa', 'abierta', 'fugaz'].forEach(wKey => {
+            ['todas', 'transito', 'obras', 'personas', 'naturaleza'].forEach(wKey => {
                 const btn = document.getElementById('wf-' + wKey);
                 if (btn) btn.classList.toggle('active', activeWaveFilter === wKey);
             });
 
-            for (let r = 0; r <= 5; r++) {
+            for (let r = 0; r <= 3; r++) {
                 const btn = document.getElementById('rf-' + r);
                 if (btn) btn.classList.toggle('active', activeRingFilter === r);
             }
@@ -1261,7 +1427,7 @@
             const c1 = document.getElementById('smallCaption1');
             const c2 = document.getElementById('smallCaption2');
 
-            // Si el usuario está pasando el cursor sobre un elemento, mostrar su síntesis sin abrir cajas invasivas
+            // Si el usuario está pasando el cursor sobre un elemento
             if (hoveredItem) {
                 if (hoveredItem.type === 'zone') {
                     const p = PLACES_DATA[hoveredItem.key];
@@ -1269,22 +1435,36 @@
                     l1.textContent = p.name;
                     l2.textContent = `${s.total} personas registradas`;
                     l3.textContent = `Predomina: ${WAVE_TYPES[s.dominantWave].pictogramName}`;
-                    l4.textContent = `Naturaleza ${s.waveCounts.envolvente} · Tráfico ${s.waveCounts.intensa}`;
-                    l5.textContent = `Voces ${s.waveCounts.abierta} · Puerto ${s.waveCounts.fugaz}`;
+                    l4.textContent = `Tránsito ${s.waveCounts.transito} · Obras ${s.waveCounts.obras}`;
+                    l5.textContent = `Personas ${s.waveCounts.personas} · Naturaleza ${s.waveCounts.naturaleza}`;
                     c1.textContent = 'Click en este círculo para desglosar →';
-                    c2.textContent = 'Se abrirán sus 5 anillos y 4 pictogramas';
+                    c2.textContent = '3 niveles (Bajo · Medio · Alto) y 4 pictogramas';
                     return;
                 }
                 if (hoveredItem.type === 'person') {
                     const per = hoveredItem.person;
                     const w = WAVE_TYPES[per.wave];
+                    const ringObj = INTENSITY_RINGS[per.ring - 1];
                     l1.textContent = `Registro ${per.id}`;
                     l2.textContent = `Pictograma: ${w.pictogramName}`;
                     l3.textContent = `${w.waveQuality} (n=${w.lobes})`;
-                    l4.textContent = `Círculo ${per.ring} de 5`;
+                    l4.textContent = `Nivel de Intensidad: ${ringObj.name}`;
                     l5.textContent = per.note;
                     c1.textContent = 'Click para aislar esta onda individual →';
                     c2.textContent = PLACES_DATA[activePlaceKey].name;
+                    return;
+                }
+                if (hoveredItem.type === 'ring') {
+                    const ringObj = INTENSITY_RINGS[hoveredItem.level - 1];
+                    const place = PLACES_DATA[activePlaceKey];
+                    const countInRing = place.people.filter(p => p.ring === hoveredItem.level).length;
+                    l1.textContent = `${place.name} · Nivel ${ringObj.name}`;
+                    l2.textContent = `${countInRing} registros en este círculo`;
+                    l3.textContent = ringObj.label;
+                    l4.textContent = 'Círculo concéntrico del instrumento';
+                    l5.textContent = place.subtitle;
+                    c1.textContent = `Click para aislar el nivel ${ringObj.name} →`;
+                    c2.textContent = '3 niveles: Bajo · Medio · Alto';
                     return;
                 }
             }
@@ -1296,7 +1476,7 @@
                 l4.textContent = 'Sotomayor, Muelle Prat,';
                 l5.textContent = 'Buenos Aires';
                 c1.textContent = 'Click en la placa para ingresar al total →';
-                c2.textContent = '4 pictogramas de onda · 5 círculos de intensidad';
+                c2.textContent = '4 pictogramas · 3 niveles de intensidad (Bajo · Medio · Alto)';
                 return;
             }
 
@@ -1318,9 +1498,10 @@
 
             if (isolatedPerson) {
                 const w = WAVE_TYPES[isolatedPerson.wave];
+                const ringObj = INTENSITY_RINGS[isolatedPerson.ring - 1];
                 l1.textContent = `${place.name} · ${isolatedPerson.id}`;
                 l2.textContent = `Pictograma: ${w.pictogramName}`;
-                l3.textContent = `${w.waveQuality} · Círculo ${isolatedPerson.ring}/5`;
+                l3.textContent = `${w.waveQuality} · Nivel ${ringObj.name}`;
                 l4.textContent = isolatedPerson.note;
                 l5.textContent = 'Onda individual aislada';
                 c1.textContent = 'Click para volver al total del lugar →';
@@ -1334,22 +1515,22 @@
                 ? `Predomina: ${WAVE_TYPES[summary.dominantWave].pictogramName}`
                 : `Pictograma: ${WAVE_TYPES[activeWaveFilter].pictogramName}`;
             l4.textContent = activeRingFilter === 0
-                ? '5 círculos de intensidad (C1–C5)'
-                : `${INTENSITY_RINGS[activeRingFilter - 1].label}`;
+                ? '3 niveles de intensidad (Bajo · Medio · Alto)'
+                : `Círculo activo: ${INTENSITY_RINGS[activeRingFilter - 1].label}`;
             l5.textContent = place.subtitle;
-            c1.textContent = 'Filtra arriba por pictograma o toca un nodo →';
+            c1.textContent = 'Filtra arriba por pictograma o nivel de intensidad →';
             c2.textContent = 'Click aquí para volver a los 3 territorios';
         }
 
         function updateHarmonicEmblem() {
             const svg = document.getElementById('harmonicEmblem');
-            const waveKeys = ['envolvente', 'intensa', 'abierta', 'fugaz'];
-            let weights = { envolvente: 0.36, intensa: 0.28, abierta: 0.22, fugaz: 0.14 };
+            const waveKeys = ['naturaleza', 'transito', 'personas', 'obras'];
+            let weights = { naturaleza: 0.34, transito: 0.28, personas: 0.24, obras: 0.14 };
 
             if (currentStage === 'detail') {
                 const filtered = getFilteredPeopleInActivePlace();
                 const total = Math.max(1, filtered.length);
-                weights = { envolvente: 0, intensa: 0, abierta: 0, fugaz: 0 };
+                weights = { naturaleza: 0, transito: 0, personas: 0, obras: 0 };
                 filtered.forEach(p => weights[p.wave] += 1 / total);
             }
 
