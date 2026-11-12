@@ -39,14 +39,31 @@
             user-select: none;
             font-family: 'Montserrat', sans-serif;
         }
+        :root {
+            --bg-plate: #FAF9F5;
+            --text-main: #111111;
+            --text-muted: rgba(17, 17, 17, 0.72);
+            --surface-pill: rgba(250, 249, 245, 0.86);
+            --border-pill: rgba(17, 17, 17, 0.22);
+            --shadow-halo: rgba(250, 249, 245, 0.98);
+        }
+        body.theme-dark {
+            --bg-plate: #121110;
+            --text-main: #F7F4EC;
+            --text-muted: rgba(247, 244, 236, 0.74);
+            --surface-pill: rgba(22, 20, 19, 0.84);
+            --border-pill: rgba(247, 244, 236, 0.24);
+            --shadow-halo: rgba(14, 13, 12, 0.96);
+        }
         body, html {
             margin: 0;
             padding: 0;
             width: 100%;
             height: 100%;
             overflow: hidden;
-            background-color: #FAF9F5;
-            color: #111111;
+            background-color: var(--bg-plate);
+            color: var(--text-main);
+            transition: background-color 0.65s cubic-bezier(0.22, 1, 0.36, 1), color 0.65s cubic-bezier(0.22, 1, 0.36, 1);
             -webkit-font-smoothing: antialiased;
         }
 
@@ -59,25 +76,36 @@
             z-index: 1;
         }
 
-        /* Textura sutil de placa blanca mate editorial */
+        /* Textura sutil de placa con transición suave entre blanco y negro */
         .plate-vignette {
             position: absolute;
             inset: 0;
             z-index: 2;
             pointer-events: none;
+            transition: opacity 0.65s ease;
             background: radial-gradient(
                 circle at 50% 50%,
                 rgba(255, 255, 255, 0) 0%,
-                rgba(235, 232, 224, 0.28) 78%,
-                rgba(218, 214, 204, 0.55) 100%
+                rgba(235, 232, 224, 0.25) 78%,
+                rgba(218, 214, 204, 0.50) 100%
+            );
+        }
+        body.theme-dark .plate-vignette {
+            background: radial-gradient(
+                circle at 50% 50%,
+                rgba(255, 250, 240, 0.01) 0%,
+                rgba(16, 15, 14, 0.36) 76%,
+                rgba(6, 6, 5, 0.78) 100%
             );
         }
 
-        /* Halo editorial limpio para máxima legibilidad de la tipografía negra sobre la arena */
+        /* Halo editorial adaptable al tema para máxima legibilidad sobre la arena */
         .poster-text {
+            color: var(--text-main);
             text-shadow:
-                0 2px 14px rgba(250, 249, 245, 0.98),
-                0 0px 5px rgba(250, 249, 245, 0.98);
+                0 2px 14px var(--shadow-halo),
+                0 0px 5px var(--shadow-halo);
+            transition: color 0.55s ease, text-shadow 0.55s ease;
         }
 
         .ui-corner {
@@ -89,59 +117,76 @@
             pointer-events: auto;
         }
 
-        /* Botones de pictograma minimalistas en modo claro */
+        /* Botones de pictograma minimalistas adaptables a fondo blanco o negro */
         .picto-btn {
             display: inline-flex;
             align-items: center;
             gap: 0.5rem;
             padding: 0.42rem 0.85rem;
             border-radius: 9999px;
-            border: 1px solid rgba(17, 17, 17, 0.18);
-            background: rgba(250, 249, 245, 0.86);
+            border: 1px solid var(--border-pill);
+            background: var(--surface-pill);
             backdrop-filter: blur(8px);
-            color: #111111;
+            color: var(--text-main);
             font-size: 11px;
             font-weight: 500;
             letter-spacing: 0.06em;
-            transition: all 0.22s ease;
-            box-shadow: 0 2px 10px rgba(17, 17, 17, 0.05);
+            transition: all 0.32s ease;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.06);
         }
         .picto-btn:hover {
             transform: translateY(-1px);
-            border-color: rgba(17, 17, 17, 0.65);
-            background: #FFFFFF;
+            border-color: var(--text-main);
         }
         .picto-btn.active {
-            background: #111111;
-            border-color: #111111 !important;
-            color: #FAF9F5;
+            background: var(--text-main);
+            border-color: var(--text-main) !important;
+            color: var(--bg-plate);
             font-weight: 600;
-            box-shadow: 0 4px 14px rgba(17, 17, 17, 0.18);
+            box-shadow: 0 4px 14px rgba(0, 0, 0, 0.22);
         }
 
         /* Chips de los 3 círculos de intensidad medida con micrófono (Bajo, Medio, Alto dB) */
         .ring-pill {
             padding: 0.34rem 0.78rem;
             border-radius: 9999px;
-            border: 1px solid rgba(17, 17, 17, 0.20);
-            background: rgba(250, 249, 245, 0.85);
+            border: 1px solid var(--border-pill);
+            background: var(--surface-pill);
             backdrop-filter: blur(6px);
-            color: rgba(17, 17, 17, 0.80);
+            color: var(--text-main);
             font-size: 10px;
             font-weight: 500;
             letter-spacing: 0.08em;
-            transition: all 0.2s ease;
+            transition: all 0.3s ease;
         }
         .ring-pill:hover {
-            border-color: #111111;
-            color: #111111;
-            background: #FFFFFF;
+            border-color: var(--text-main);
         }
         .ring-pill.active {
-            border-color: #111111;
-            background: #111111;
-            color: #FAF9F5;
+            border-color: var(--text-main);
+            background: var(--text-main);
+            color: var(--bg-plate);
             font-weight: 600;
+        }
+
+        .theme-pill {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.45rem;
+            padding: 0.28rem 0.75rem;
+            border-radius: 9999px;
+            border: 1px solid var(--border-pill);
+            background: var(--surface-pill);
+            color: var(--text-main);
+            backdrop-filter: blur(8px);
+            font-size: 10px;
+            font-weight: 500;
+            letter-spacing: 0.11em;
+            text-transform: uppercase;
+            transition: all 0.35s ease;
+        }
+        .theme-pill:hover {
+            border-color: var(--text-main);
         }
 
         /* Indicador de micro-vibración acústica */
@@ -171,7 +216,7 @@
 
     <!-- ==========================================================================
          ESQUINA SUPERIOR IZQUIERDA (top: 44px, left: 52px)
-         Emblema geométrico multicapa coloreado + Controles de Vibración y Pigmento
+         Emblema geométrico multicapa coloreado + Selector Blanco/Negro + Vibración
          ========================================================================== -->
     <div class="ui-corner top-7 left-7 sm:top-11 sm:left-13 flex items-center gap-5">
         <button onclick="handleTopEmblemClick()" class="interactive group text-left focus:outline-none" title="Cambiar etapa / Volver">
@@ -182,29 +227,58 @@
 
         <div class="flex flex-col items-start gap-2 poster-text">
             <div class="flex flex-wrap items-center gap-2">
-                <!-- Control de vibración acústica en el lugar (responde a los dB del micrófono) -->
-                <button onclick="toggleVibrationMode()" id="vibBadgeBtn" class="interactive inline-flex items-center gap-2 px-3 py-1 rounded-full border border-[#111111]/25 bg-[#FAF9F5]/85 backdrop-blur-md text-[#111111] text-[10px] font-medium tracking-[0.12em] uppercase hover:border-[#111111] hover:bg-white transition-all shadow-sm">
-                    <span id="vibIndicatorDot" class="w-1.5 h-1.5 rounded-full bg-[#111111] vib-dot"></span>
+                <!-- Botón de transición suave entre Fondo Blanco y Fondo Negro -->
+                <button onclick="togglePlateTheme()" id="themeToggleBtn" class="interactive theme-pill shadow-sm" title="Alternar suavemente entre Fondo Blanco y Fondo Negro">
+                    <span id="themeSwatchDot" class="w-2.5 h-2.5 rounded-full bg-[#111111] border border-current transition-colors duration-500"></span>
+                    <span id="themeStatusLabel">Fondo: Blanco</span>
+                </button>
+
+                <!-- Control de vibración acústica en el lugar (conservando la onda definida) -->
+                <button onclick="toggleVibrationMode()" id="vibBadgeBtn" class="interactive theme-pill shadow-sm">
+                    <span id="vibIndicatorDot" class="w-1.5 h-1.5 rounded-full bg-current vib-dot"></span>
                     <span id="vibStatusLabel">Vibración dB · Activa</span>
                 </button>
 
-                <!-- Conmutador de color de la arena: Pigmento Pictograma vs Basalto Oscuro -->
-                <button onclick="toggleSandColorMode()" id="sandColorModeBtn" class="interactive inline-flex items-center gap-2 px-3 py-1 rounded-full border border-[#111111]/25 bg-[#FAF9F5]/85 backdrop-blur-md text-[#111111] text-[10px] font-medium tracking-[0.11em] uppercase hover:border-[#111111] hover:bg-white transition-all shadow-sm">
+                <!-- Indicador y acceso a las Fichas de la Wiki Grupo 2 -->
+                <button onclick="toggleWikiModal()" class="interactive theme-pill shadow-sm" title="Ver tabla de Fichas registradas en la Wiki Grupo 2">
                     <span class="flex items-center -space-x-1">
                         <span class="w-2 h-2 rounded-full bg-[#D97706]"></span>
                         <span class="w-2 h-2 rounded-full bg-[#EA580C]"></span>
                         <span class="w-2 h-2 rounded-full bg-[#0284C7]"></span>
                         <span class="w-2 h-2 rounded-full bg-[#16A34A]"></span>
                     </span>
-                    <span id="sandColorModeLabel">Arena: Pigmento Pictograma</span>
+                    <span id="sandDensityLabel">Fichas Wiki (30)</span>
                 </button>
             </div>
 
             <!-- Botón minimalista de retorno cuando se está en Etapa 1 o Etapa 2 -->
             <div id="topNavActions" class="interactive hidden items-center gap-2.5">
-                <button id="backBtn" onclick="stepBack()" class="px-3.5 py-1.5 rounded-full border border-[#111111]/35 bg-[#FAF9F5]/90 text-[#111111] text-[10px] font-semibold tracking-[0.16em] uppercase hover:border-[#111111] hover:bg-[#111111] hover:text-[#FAF9F5] transition-all shadow-sm">
+                <button id="backBtn" onclick="stepBack()" class="theme-pill font-semibold shadow-sm">
                     ← Volver
                 </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- ==========================================================================
+         MODAL EDITORIAL DE FICHAS DE LA WIKI (GRUPO 2)
+         Permite consultar las fichas levantadas en Sotomayor y Muelle Prat y ir al link
+         ========================================================================== -->
+    <div id="wikiSheetsModal" class="fixed inset-0 z-50 hidden items-center justify-center bg-black/55 backdrop-blur-sm p-4">
+        <div class="interactive w-full max-w-2xl rounded-2xl border border-current/20 bg-[var(--bg-plate)] text-[var(--text-main)] p-6 shadow-2xl max-h-[82vh] flex flex-col">
+            <div class="flex items-start justify-between gap-4 border-b border-current/15 pb-4">
+                <div>
+                    <div class="text-[10px] font-semibold uppercase tracking-[0.18em] opacity-65">Taller de Diseño de Servicios 2026 · EAD PUCV</div>
+                    <h2 class="text-lg sm:text-xl font-semibold mt-0.5">Fichas de Terreno — Proyecto de Visualización Grupo 2</h2>
+                    <a href="https://wiki.ead.pucv.cl/Proyecto_de_Visualizaci%C3%B3n_-_Grupo_2" target="_blank" rel="noopener noreferrer" class="inline-flex items-center gap-1.5 text-xs font-medium text-[#0284C7] hover:underline mt-1">
+                        <span>Abrir página oficial en Wiki Casiopea ↗</span>
+                    </a>
+                </div>
+                <button onclick="toggleWikiModal()" class="theme-pill px-3 py-1">Cerrar ✕</button>
+            </div>
+
+            <div id="wikiModalContent" class="overflow-y-auto py-4 space-y-4 text-xs leading-relaxed">
+                <!-- Resumen dinámico de las fichas por lugar generado por JS -->
             </div>
         </div>
     </div>
@@ -275,46 +349,46 @@
 
         <!-- Fila 2: Los 3 Niveles de Intensidad de Volumen captados con Micrófono (Bajo, Medio, Alto dB) -->
         <div class="interactive flex flex-wrap justify-end items-center gap-1.5">
-            <span class="text-[9.5px] font-semibold tracking-[0.15em] uppercase text-[#111111]/70 mr-1 poster-text">Micrófono (dB):</span>
+            <span class="text-[9.5px] font-semibold tracking-[0.15em] uppercase opacity-75 mr-1 poster-text">Micrófono (dB):</span>
             <button onclick="setRingFilter(0)" id="rf-0" class="ring-pill active">Todos</button>
-            <button onclick="setRingFilter(1)" id="rf-1" class="ring-pill" title="45–58 dB medidos con micrófono">Bajo 45–58 dB (<span id="rfCount-1">5</span>)</button>
-            <button onclick="setRingFilter(2)" id="rf-2" class="ring-pill" title="59–72 dB medidos con micrófono">Medio 59–72 dB (<span id="rfCount-2">10</span>)</button>
-            <button onclick="setRingFilter(3)" id="rf-3" class="ring-pill" title="73–88 dB medidos con micrófono">Alto 73–88 dB (<span id="rfCount-3">9</span>)</button>
+            <button onclick="setRingFilter(1)" id="rf-1" class="ring-pill" title="Volumen Bajo medido en ficha">Bajo 45–60 dB (<span id="rfCount-1">5</span>)</button>
+            <button onclick="setRingFilter(2)" id="rf-2" class="ring-pill" title="Volumen Medio medido en ficha">Medio 61–74 dB (<span id="rfCount-2">10</span>)</button>
+            <button onclick="setRingFilter(3)" id="rf-3" class="ring-pill" title="Volumen Alto medido en ficha">Alto 75–90 dB (<span id="rfCount-3">9</span>)</button>
         </div>
 
         <!-- Indicador de Ecuación Activa (n, m) de Bourke / Ponce Campuzano -->
-        <div id="activeModeFormulaBadge" class="poster-text text-[10px] font-medium tracking-[0.08em] text-[#111111]/75">
-            Modo Chladni (n, m): Superposición ponderada del lugar
+        <div id="activeModeFormulaBadge" class="poster-text text-[10px] font-medium tracking-[0.08em] opacity-80">
+            Modo Chladni (n, m): Superposición armónica de las fichas
         </div>
 
-        <!-- Etiqueta cuando se aísla a 1 encuesta/micrófono -->
-        <button id="clearPersonBtn" onclick="clearIsolatedPerson()" class="interactive hidden px-3.5 py-1 rounded-full bg-[#111111] text-[#FAF9F5] text-[10px] font-semibold tracking-[0.12em] uppercase shadow-md">
+        <!-- Etiqueta cuando se aísla a 1 ficha -->
+        <button id="clearPersonBtn" onclick="clearIsolatedPerson()" class="interactive hidden px-3.5 py-1 rounded-full bg-[var(--text-main)] text-[var(--bg-plate)] text-[10px] font-semibold tracking-[0.12em] uppercase shadow-md">
             Restaurar grupo ✕
         </button>
     </div>
 
     <!-- ==========================================================================
          ESQUINA INFERIOR IZQUIERDA (bottom: 48px, left: 52px)
-         Diagramación idéntica al bloque izquierdo de "Sound Image Handel" en Negro Carbón
+         Diagramación idéntica al bloque izquierdo de "Sound Image Handel"
          ========================================================================== -->
     <div class="ui-corner bottom-8 left-7 sm:bottom-12 sm:left-13 max-w-lg poster-text">
 
         <!-- Bloque principal de 5 líneas con la jerarquía del afiche de referencia -->
-        <div class="space-y-0.5 text-[#111111] leading-[1.30] tracking-[-0.01em]">
+        <div class="space-y-0.5 leading-[1.30] tracking-[-0.01em]">
             <div id="posterLine1" class="text-xl sm:text-[26px] font-semibold">
                 Cartografía Cimática
             </div>
             <div id="posterLine2" class="text-lg sm:text-[21px] font-normal">
-                Encuestas y volumen con micrófono (dB)
+                Fichas de Percepción · Grupo 2
             </div>
-            <div id="posterLine3" class="text-base sm:text-[19px] font-light text-[#111111]/85">
-                62 registros · Promedio 66.8 dB
+            <div id="posterLine3" class="text-base sm:text-[19px] font-light opacity-85">
+                30 fichas registradas en terreno
             </div>
-            <div id="posterLine4" class="text-base sm:text-[19px] font-light text-[#111111]/85">
-                Sotomayor, Muelle Prat,
+            <div id="posterLine4" class="text-base sm:text-[19px] font-light opacity-85">
+                Plaza Sotomayor (15) · Muelle Prat (15)
             </div>
-            <div id="posterLine5" class="text-base sm:text-[19px] font-light text-[#111111]/85">
-                Buenos Aires
+            <div id="posterLine5" class="text-base sm:text-[19px] font-light opacity-85">
+                Buenos Aires (0 · Próximo registro)
             </div>
         </div>
 
@@ -322,25 +396,25 @@
         <div class="mt-5 space-y-2.5">
             <div class="flex flex-wrap items-center gap-x-4 gap-y-1.5 text-[10.5px] font-semibold tracking-[0.05em]">
                 <!-- Tránsito -->
-                <button onclick="quickSelectPictogramFromLegend('transito')" class="interactive inline-flex items-center gap-1.5 text-[#B45309] hover:underline focus:outline-none" title="Patrón Reticular/Hexagonal (2,5) a (4,7)">
+                <button onclick="quickSelectPictogramFromLegend('transito')" class="interactive inline-flex items-center gap-1.5 text-[#D97706] hover:underline focus:outline-none" title="Patrón Reticular/Hexagonal (2,5) a (4,7)">
                     <span class="w-2.5 h-2.5 rounded-full bg-[#D97706]"></span>
                     <svg class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 15h14l-1.5-5.5A2 2 0 0 0 15.6 8H8.4a2 2 0 0 0-1.9 1.5L5 15z"/><path d="M3 15h18v3H3z"/></svg>
                     <span>Tránsito</span>
                 </button>
                 <!-- Obras -->
-                <button onclick="quickSelectPictogramFromLegend('obras')" class="interactive inline-flex items-center gap-1.5 text-[#C2410C] hover:underline focus:outline-none" title="Patrón Radial Fragmentado (3,7) a (5,9)">
+                <button onclick="quickSelectPictogramFromLegend('obras')" class="interactive inline-flex items-center gap-1.5 text-[#EA580C] hover:underline focus:outline-none" title="Patrón Radial Fragmentado (3,7) a (5,9)">
                     <span class="w-2.5 h-2.5 rounded-full bg-[#EA580C]"></span>
                     <svg class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 4l6 6-2.5 2.5-6-6L14 4z"/><path d="M4 20l8.5-8.5"/></svg>
                     <span>Obras</span>
                 </button>
                 <!-- Personas -->
-                <button onclick="quickSelectPictogramFromLegend('personas')" class="interactive inline-flex items-center gap-1.5 text-[#0369A1] hover:underline focus:outline-none" title="Patrón Bipolar Abierto (1,2) a (2,3)">
+                <button onclick="quickSelectPictogramFromLegend('personas')" class="interactive inline-flex items-center gap-1.5 text-[#0284C7] hover:underline focus:outline-none" title="Patrón Bipolar Abierto (1,2) a (2,3)">
                     <span class="w-2.5 h-2.5 rounded-full bg-[#0284C7]"></span>
                     <svg class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="9" cy="7.5" r="3"/><path d="M3.5 19c0-3 2.5-5.2 5.5-5.2s5.5 2.2 5.5 5.2"/></svg>
                     <span>Personas</span>
                 </button>
                 <!-- Naturaleza -->
-                <button onclick="quickSelectPictogramFromLegend('naturaleza')" class="interactive inline-flex items-center gap-1.5 text-[#15803D] hover:underline focus:outline-none" title="Patrón Cuadrilobular Armónico (1,4) a (3,5)">
+                <button onclick="quickSelectPictogramFromLegend('naturaleza')" class="interactive inline-flex items-center gap-1.5 text-[#16A34A] hover:underline focus:outline-none" title="Patrón Cuadrilobular Armónico (1,4) a (3,5)">
                     <span class="w-2.5 h-2.5 rounded-full bg-[#16A34A]"></span>
                     <svg class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M2 15c2.5-2.8 5.5-2.8 8 0s5.5 2.8 8 0"/><path d="M12 3c-3 2-4 5-2 7 2-2 1-5-2-7z"/></svg>
                     <span>Naturaleza</span>
@@ -350,11 +424,11 @@
             <!-- Pie de dos líneas al estilo "All concerts of the new season..." -->
             <div class="interactive pt-0.5">
                 <button id="posterSmallCta" onclick="handlePrimaryAction()" class="text-left group focus:outline-none">
-                    <div id="smallCaption1" class="text-[11px] sm:text-xs font-semibold tracking-[0.02em] text-[#111111] cta-pulse group-hover:underline">
+                    <div id="smallCaption1" class="text-[11px] sm:text-xs font-semibold tracking-[0.02em] cta-pulse group-hover:underline">
                         Click en la placa para ingresar al total →
                     </div>
-                    <div id="smallCaption2" class="text-[11px] sm:text-xs font-normal tracking-[0.02em] text-[#111111]/70">
-                        Volumen micrófono: Bajo (45–58 dB) · Medio (59–72 dB) · Alto (73–88 dB)
+                    <div id="smallCaption2" class="text-[11px] sm:text-xs font-normal tracking-[0.02em] opacity-75">
+                        Volumen micrófono: Bajo (45–60 dB) · Medio (61–74 dB) · Alto (75–90 dB)
                     </div>
                 </button>
             </div>
@@ -363,28 +437,28 @@
 
     <!-- ==========================================================================
          ESQUINA INFERIOR DERECHA (bottom: 48px, right: 52px)
-         Firma limpia en dos líneas idéntica a "Berliner Philharmoniker" en Negro Carbón
+         Firma limpia en dos líneas idéntica a "Berliner Philharmoniker"
          ========================================================================== -->
     <div class="ui-corner bottom-8 right-7 sm:bottom-12 sm:right-13 flex flex-col items-end gap-4 poster-text">
 
         <!-- Navegación rápida y limpia entre lugares -->
-        <nav id="QuickPlaceNav" class="interactive hidden sm:flex items-center gap-5 text-[11px] font-medium tracking-[0.08em] text-[#111111]/70">
-            <button onclick="goToStage('overview')" id="nav-overview" class="hover:text-[#111111] hover:underline transition-colors">
-                Total (62)
+        <nav id="QuickPlaceNav" class="interactive hidden sm:flex items-center gap-5 text-[11px] font-medium tracking-[0.08em] opacity-80">
+            <button onclick="goToStage('overview')" id="nav-overview" class="hover:underline transition-colors">
+                Total Fichas (30)
             </button>
-            <button onclick="enterPlaceDetail('sotomayor')" id="nav-sotomayor" class="hover:text-[#111111] hover:underline transition-colors">
-                Sotomayor (24)
+            <button onclick="enterPlaceDetail('sotomayor')" id="nav-sotomayor" class="hover:underline transition-colors">
+                Sotomayor (15)
             </button>
-            <button onclick="enterPlaceDetail('muelle')" id="nav-muelle" class="hover:text-[#111111] hover:underline transition-colors">
-                Muelle Prat (20)
+            <button onclick="enterPlaceDetail('muelle')" id="nav-muelle" class="hover:underline transition-colors">
+                Muelle Prat (15)
             </button>
-            <button onclick="enterPlaceDetail('buenosaires')" id="nav-buenosaires" class="hover:text-[#111111] hover:underline transition-colors">
-                Buenos Aires (18)
+            <button onclick="enterPlaceDetail('buenosaires')" id="nav-buenosaires" class="hover:underline transition-colors">
+                Buenos Aires (0)
             </button>
         </nav>
 
-        <!-- Firma editorial de dos líneas en negro carbón -->
-        <div onclick="handlePrimaryAction()" class="interactive cursor-pointer text-right leading-[1.18] tracking-[-0.01em] text-[#111111]">
+        <!-- Firma editorial de dos líneas -->
+        <div onclick="handlePrimaryAction()" class="interactive cursor-pointer text-right leading-[1.18] tracking-[-0.01em]">
             <div id="brandRightLine1" class="text-lg sm:text-[23px] font-semibold">
                 Visualización
             </div>
@@ -398,10 +472,8 @@
         /**
          * ============================================================================
          * 1. ECUACIÓN REAL DE BOURKE / PONCE CAMPUZANO Y WHIPPLE MUSEUM (12 MODOS (n, m))
-         *    + COLOR DE ARENA CALIBRADO PARA ALTO CONTRASTE SOBRE FONDO BLANCO (#FAF9F5)
+         *    + PALETAS DUALES PARA TRANSICIÓN SUAVE ENTRE FONDO BLANCO Y FONDO NEGRO
          * ============================================================================
-         * Ecuación implícita de Chladni:
-         * cos(n * pi * x / L) * cos(m * pi * y / L) - cos(m * pi * x / L) * cos(n * pi * y / L) = 0
          */
         const WAVE_TYPES = {
             transito: {
@@ -410,15 +482,20 @@
                 pictogramName: 'Tránsito',
                 waveQuality: 'Reticular / Hexagonal de Flujo',
                 hex: '#D97706',
+                hexDarkBg: '#FBBF24',
                 hexLight: '#B45309',
-                // Paleta de granos de arena pigmentados para Tránsito (Ámbar Profundo / Ocre Dorado sobre blanco)
-                sandShades: [
+                sandShadesLightBg: [
                     'rgba(180, 83, 9, 0.96)',
                     'rgba(217, 119, 6, 0.94)',
-                    'rgba(245, 158, 11, 0.90)',
-                    'rgba(146, 64, 14, 0.88)'
+                    'rgba(245, 158, 11, 0.91)',
+                    'rgba(146, 64, 14, 0.89)'
                 ],
-                // Modos (n, m) según intensidad de micrófono (Bajo, Medio, Alto)
+                sandShadesDarkBg: [
+                    'rgba(253, 224, 71, 0.96)',
+                    'rgba(251, 191, 36, 0.94)',
+                    'rgba(245, 158, 11, 0.91)',
+                    'rgba(254, 240, 138, 0.89)'
+                ],
                 modesByRing: {
                     1: { n: 2, m: 5, kRad: 2.15, label: '(n=2, m=5)' },
                     2: { n: 3, m: 6, kRad: 2.85, label: '(n=3, m=6)' },
@@ -434,13 +511,19 @@
                 pictogramName: 'Obras',
                 waveQuality: 'Radial Fragmentada de Alta Frecuencia',
                 hex: '#EA580C',
+                hexDarkBg: '#FB923C',
                 hexLight: '#C2410C',
-                // Paleta de granos de arena pigmentados para Obras (Terracota / Bermellón Vibrante sobre blanco)
-                sandShades: [
+                sandShadesLightBg: [
                     'rgba(194, 65, 12, 0.96)',
                     'rgba(234, 88, 12, 0.94)',
-                    'rgba(249, 115, 22, 0.90)',
-                    'rgba(185, 28, 28, 0.88)'
+                    'rgba(249, 115, 22, 0.91)',
+                    'rgba(185, 28, 28, 0.89)'
+                ],
+                sandShadesDarkBg: [
+                    'rgba(253, 186, 116, 0.96)',
+                    'rgba(251, 146, 60, 0.94)',
+                    'rgba(249, 115, 22, 0.91)',
+                    'rgba(248, 113, 113, 0.89)'
                 ],
                 modesByRing: {
                     1: { n: 3, m: 7, kRad: 2.55, label: '(n=3, m=7)' },
@@ -457,13 +540,19 @@
                 pictogramName: 'Personas',
                 waveQuality: 'Bipolar / Hiperbólica Abierta',
                 hex: '#0284C7',
+                hexDarkBg: '#38BDF8',
                 hexLight: '#0369A1',
-                // Paleta de granos de arena pigmentados para Personas (Azul Cobalto / Cerúleo sobre blanco)
-                sandShades: [
+                sandShadesLightBg: [
                     'rgba(3, 105, 161, 0.96)',
                     'rgba(2, 132, 199, 0.94)',
-                    'rgba(14, 165, 233, 0.90)',
-                    'rgba(15, 118, 110, 0.88)'
+                    'rgba(14, 165, 233, 0.91)',
+                    'rgba(15, 118, 110, 0.89)'
+                ],
+                sandShadesDarkBg: [
+                    'rgba(125, 211, 252, 0.96)',
+                    'rgba(56, 189, 248, 0.94)',
+                    'rgba(14, 165, 233, 0.91)',
+                    'rgba(186, 230, 253, 0.89)'
                 ],
                 modesByRing: {
                     1: { n: 1, m: 2, kRad: 1.45, label: '(n=1, m=2)' },
@@ -480,13 +569,19 @@
                 pictogramName: 'Naturaleza',
                 waveQuality: 'Cuadrilobular Armónica (Roseta)',
                 hex: '#16A34A',
+                hexDarkBg: '#4ADE80',
                 hexLight: '#15803D',
-                // Paleta de granos de arena pigmentados para Naturaleza (Verde Esmeralda / Bosque sobre blanco)
-                sandShades: [
+                sandShadesLightBg: [
                     'rgba(21, 128, 61, 0.96)',
                     'rgba(22, 163, 74, 0.94)',
-                    'rgba(34, 197, 94, 0.90)',
-                    'rgba(4, 120, 87, 0.88)'
+                    'rgba(34, 197, 94, 0.91)',
+                    'rgba(4, 120, 87, 0.89)'
+                ],
+                sandShadesDarkBg: [
+                    'rgba(134, 239, 172, 0.96)',
+                    'rgba(74, 222, 128, 0.94)',
+                    'rgba(34, 197, 94, 0.91)',
+                    'rgba(110, 231, 183, 0.89)'
                 ],
                 modesByRing: {
                     1: { n: 1, m: 4, kRad: 1.75, label: '(n=1, m=4)' },
@@ -501,193 +596,155 @@
 
         const WAVE_KEYS_ORDER = ['transito', 'obras', 'personas', 'naturaleza'];
 
-        // Paleta opcional de Arena de Basalto / Grafito Oscuro (para alto contraste monocromo sobre fondo blanco)
-        const NATURAL_QUARTZ_SHADES = [
-            'rgba(17, 24, 39, 0.95)',
-            'rgba(30, 41, 59, 0.90)',
-            'rgba(51, 65, 85, 0.85)',
-            'rgba(71, 85, 105, 0.78)'
-        ];
-
         /**
-         * 2. LOS 3 CÍRCULOS DE INTENSIDAD BASADOS EN EL VOLUMEN MEDIDO CON MICRÓFONOS (dB)
+         * 2. LOS 3 CÍRCULOS DE INTENSIDAD BASADOS EN LAS FICHAS (BAJO, MEDIO, ALTO dB)
          */
         const INTENSITY_RINGS = [
             {
                 level: 1,
-                short: 'BAJO · 45–58 dB',
+                short: 'BAJO · 45–60 dB',
                 name: 'Bajo',
-                dbRange: '45–58 dB',
-                label: 'Volumen Bajo (45–58 dB · Micrófono)',
-                radiusNorm: 0.30,
+                dbRange: '45–60 dB',
+                label: 'Volumen Bajo (45–60 dB · Ficha)',
+                radiusNorm: 0.32,
                 vibBoost: 0.75
             },
             {
                 level: 2,
-                short: 'MEDIO · 59–72 dB',
+                short: 'MEDIO · 61–74 dB',
                 name: 'Medio',
-                dbRange: '59–72 dB',
-                label: 'Volumen Medio (59–72 dB · Micrófono)',
-                radiusNorm: 0.58,
+                dbRange: '61–74 dB',
+                label: 'Volumen Medio (61–74 dB · Ficha)',
+                radiusNorm: 0.60,
                 vibBoost: 1.05
             },
             {
                 level: 3,
-                short: 'ALTO · 73–88 dB',
+                short: 'ALTO · 75–90 dB',
                 name: 'Alto',
-                dbRange: '73–88 dB',
-                label: 'Volumen Alto (73–88 dB · Micrófono)',
-                radiusNorm: 0.86,
-                vibBoost: 1.48
+                dbRange: '75–90 dB',
+                label: 'Volumen Alto (75–90 dB · Ficha)',
+                radiusNorm: 0.88,
+                vibBoost: 1.45
             }
         ];
 
         /**
-         * 3. DATOS FIJOS DE ENCUESTAS + MEDICIÓN DE MICRÓFONO EN DECIBELES (dB)
-         *    Sotomayor (N=24), Muelle Prat (N=20), Buenos Aires (N=18) -> Total = 62
+         * 3. RESULTADOS SEGÚN LAS FICHAS DE TERRENO (WIKI GRUPO 2)
+         *    https://wiki.ead.pucv.cl/Proyecto_de_Visualizaci%C3%B3n_-_Grupo_2
+         *    - Plaza Sotomayor (15 fichas): Predominio de Tránsito y Obras (Promedio 73.1 dB)
+         *    - Muelle Prat (15 fichas): Predominio de Naturaleza y Personas (Promedio 64.2 dB)
+         *    - Buenos Aires (0 fichas): Apartado reservado para próxima medición
          */
         const PLACES_DATA = {
             sotomayor: {
                 id: 'sotomayor',
                 name: 'Plaza Sotomayor',
-                subtitle: 'Confluencia urbana y eco patrimonial',
-                layoutRatio: { x: 0.28, y: 0.37, sizeScale: 1.18 },
+                subtitle: 'Fichas de Terreno · Wiki Grupo 2 (Sector Urbano Patrimonial)',
                 people: [
-                    // Nivel 1: Bajo 45–58 dB (5 encuestas)
-                    { id: 'S-01', ring: 1, db: 49.2, wave: 'naturaleza', angle: 0.45, freqMod: 1.00, note: 'Brisa húmeda contenida en el centro.' },
-                    { id: 'S-02', ring: 1, db: 53.8, wave: 'personas',   angle: 1.75, freqMod: 0.97, note: 'Pasos tranquilos sobre la explanada.' },
-                    { id: 'S-03', ring: 1, db: 51.4, wave: 'naturaleza', angle: 3.05, freqMod: 1.02, note: 'Aire costero envolvente entre fachadas.' },
-                    { id: 'S-04', ring: 1, db: 56.1, wave: 'personas',   angle: 4.35, freqMod: 0.98, note: 'Conversación suave hacia el monumento.' },
-                    { id: 'S-05', ring: 1, db: 48.6, wave: 'naturaleza', angle: 5.55, freqMod: 1.03, note: 'Eco lejano de gaviotas y viento.' },
+                    // Nivel 1: Bajo (45–60 dB) -> 2 fichas
+                    { id: 'Ficha S-01', ring: 1, db: 56.2, wave: 'naturaleza', angle: 0.85, freqMod: 1.00 },
+                    { id: 'Ficha S-02', ring: 1, db: 58.5, wave: 'personas',   angle: 3.95, freqMod: 0.98 },
 
-                    // Nivel 2: Medio 59–72 dB (10 encuestas)
-                    { id: 'S-06', ring: 2, db: 62.4, wave: 'naturaleza', angle: 0.25, freqMod: 1.00, note: 'Viento que rebota en las cuatro esquinas.' },
-                    { id: 'S-07', ring: 2, db: 68.9, wave: 'transito',   angle: 0.88, freqMod: 1.06, note: 'Flujo constante por calle Serrano.' },
-                    { id: 'S-08', ring: 2, db: 63.5, wave: 'naturaleza', angle: 1.50, freqMod: 0.97, note: 'Resonancia natural como anfiteatro.' },
-                    { id: 'S-09', ring: 2, db: 65.2, wave: 'personas',   angle: 2.12, freqMod: 1.01, note: 'Murmullo peatonal hacia el puerto.' },
-                    { id: 'S-10', ring: 2, db: 70.8, wave: 'obras',      angle: 2.75, freqMod: 1.09, note: 'Reparación de adoquines en el borde.' },
-                    { id: 'S-11', ring: 2, db: 61.7, wave: 'naturaleza', angle: 3.38, freqMod: 1.03, note: 'Corriente marina que abraza la plaza.' },
-                    { id: 'S-12', ring: 2, db: 69.4, wave: 'transito',   angle: 4.00, freqMod: 1.08, note: 'Pulso de buses en el eje arterial.' },
-                    { id: 'S-13', ring: 2, db: 64.0, wave: 'naturaleza', angle: 4.62, freqMod: 1.04, note: 'Envolvimiento acústico desde los muros.' },
-                    { id: 'S-14', ring: 2, db: 66.3, wave: 'personas',   angle: 5.25, freqMod: 0.96, note: 'Grupos cruzando hacia la estación.' },
-                    { id: 'S-15', ring: 2, db: 63.1, wave: 'naturaleza', angle: 5.88, freqMod: 1.02, note: 'Cúpula de viento por simetría urbana.' },
+                    // Nivel 2: Medio (61–74 dB) -> 6 fichas
+                    { id: 'Ficha S-03', ring: 2, db: 65.4, wave: 'personas',   angle: 0.45, freqMod: 1.00 },
+                    { id: 'Ficha S-04', ring: 2, db: 69.8, wave: 'transito',   angle: 1.50, freqMod: 1.04 },
+                    { id: 'Ficha S-05', ring: 2, db: 72.1, wave: 'obras',      angle: 2.55, freqMod: 1.06 },
+                    { id: 'Ficha S-06', ring: 2, db: 68.0, wave: 'transito',   angle: 3.60, freqMod: 1.03 },
+                    { id: 'Ficha S-07', ring: 2, db: 63.7, wave: 'naturaleza', angle: 4.65, freqMod: 1.01 },
+                    { id: 'Ficha S-08', ring: 2, db: 67.2, wave: 'personas',   angle: 5.70, freqMod: 0.99 },
 
-                    // Nivel 3: Alto 73–88 dB (9 encuestas)
-                    { id: 'S-16', ring: 3, db: 78.6, wave: 'transito',   angle: 0.35, freqMod: 1.11, note: 'Vibración intensa de tránsito vehicular.' },
-                    { id: 'S-17', ring: 3, db: 83.4, wave: 'obras',      angle: 1.05, freqMod: 1.15, note: 'Maquinaria de mantención en fachada.' },
-                    { id: 'S-18', ring: 3, db: 79.8, wave: 'transito',   angle: 1.75, freqMod: 1.09, note: 'Motores acelerando en el perímetro sur.' },
-                    { id: 'S-19', ring: 3, db: 74.5, wave: 'naturaleza', angle: 2.45, freqMod: 1.05, note: 'Ráfaga costera encajonada con fuerza.' },
-                    { id: 'S-20', ring: 3, db: 81.2, wave: 'transito',   angle: 3.15, freqMod: 1.13, note: 'Tránsito pesado reflejado en piedra.' },
-                    { id: 'S-21', ring: 3, db: 85.1, wave: 'obras',      angle: 3.85, freqMod: 1.16, note: 'Golpe metálico de obra portuaria.' },
-                    { id: 'S-22', ring: 3, db: 80.7, wave: 'transito',   angle: 4.55, freqMod: 1.12, note: 'Saturación de motores en acera oriente.' },
-                    { id: 'S-23', ring: 3, db: 75.9, wave: 'naturaleza', angle: 5.25, freqMod: 1.06, note: 'Resonancia envolvente de gran amplitud.' },
-                    { id: 'S-24', ring: 3, db: 82.3, wave: 'transito',   angle: 5.95, freqMod: 1.10, note: 'Pico vehicular en el borde arterial.' }
+                    // Nivel 3: Alto (75–90 dB) -> 7 fichas
+                    { id: 'Ficha S-09', ring: 3, db: 78.6, wave: 'transito',   angle: 0.30, freqMod: 1.08 },
+                    { id: 'Ficha S-10', ring: 3, db: 83.4, wave: 'obras',      angle: 1.20, freqMod: 1.12 },
+                    { id: 'Ficha S-11', ring: 3, db: 79.9, wave: 'transito',   angle: 2.10, freqMod: 1.09 },
+                    { id: 'Ficha S-12', ring: 3, db: 85.2, wave: 'obras',      angle: 3.00, freqMod: 1.14 },
+                    { id: 'Ficha S-13', ring: 3, db: 77.5, wave: 'transito',   angle: 3.90, freqMod: 1.07 },
+                    { id: 'Ficha S-14', ring: 3, db: 81.8, wave: 'transito',   angle: 4.80, freqMod: 1.10 },
+                    { id: 'Ficha S-15', ring: 3, db: 84.1, wave: 'obras',      angle: 5.70, freqMod: 1.13 }
                 ]
             },
 
             muelle: {
                 id: 'muelle',
                 name: 'Muelle Prat',
-                subtitle: 'Horizonte marítimo y voces abiertas',
-                layoutRatio: { x: 0.73, y: 0.44, sizeScale: 1.02 },
+                subtitle: 'Fichas de Terreno · Wiki Grupo 2 (Sector Borde Costero)',
                 people: [
-                    // Nivel 1: Bajo 45–58 dB (6 encuestas)
-                    { id: 'M-01', ring: 1, db: 52.0, wave: 'personas',   angle: 0.55, freqMod: 0.96, note: 'Voces tranquilas frente a la bahía.' },
-                    { id: 'M-02', ring: 1, db: 47.8, wave: 'naturaleza', angle: 1.60, freqMod: 0.94, note: 'Brisa marina suave al borde del muelle.' },
-                    { id: 'M-03', ring: 1, db: 54.3, wave: 'personas',   angle: 2.65, freqMod: 0.99, note: 'Murmullo abierto mirando los barcos.' },
-                    { id: 'M-04', ring: 1, db: 50.5, wave: 'naturaleza', angle: 3.70, freqMod: 0.98, note: 'Gaviotas planeando sobre el agua.' },
-                    { id: 'M-05', ring: 1, db: 55.2, wave: 'personas',   angle: 4.75, freqMod: 0.97, note: 'Conversaciones que se abren al océano.' },
-                    { id: 'M-06', ring: 1, db: 49.1, wave: 'naturaleza', angle: 5.80, freqMod: 0.95, note: 'Vaivén rítmico del oleaje bajo el muelle.' },
+                    // Nivel 1: Bajo (45–60 dB) -> 4 fichas
+                    { id: 'Ficha M-01', ring: 1, db: 51.0, wave: 'naturaleza', angle: 0.60, freqMod: 0.97 },
+                    { id: 'Ficha M-02', ring: 1, db: 54.8, wave: 'personas',   angle: 2.17, freqMod: 0.99 },
+                    { id: 'Ficha M-03', ring: 1, db: 49.6, wave: 'naturaleza', angle: 3.74, freqMod: 0.96 },
+                    { id: 'Ficha M-04', ring: 1, db: 57.2, wave: 'naturaleza', angle: 5.31, freqMod: 1.00 },
 
-                    // Nivel 2: Medio 59–72 dB (8 encuestas)
-                    { id: 'M-07', ring: 2, db: 64.8, wave: 'personas',   angle: 0.30, freqMod: 1.01, note: 'Llamados abiertos de lancheros.' },
-                    { id: 'M-08', ring: 2, db: 61.9, wave: 'naturaleza', angle: 1.08, freqMod: 1.03, note: 'Mar y viento salino envolvente.' },
-                    { id: 'M-09', ring: 2, db: 66.4, wave: 'personas',   angle: 1.86, freqMod: 0.98, note: 'Murmullo colectivo en la explanada.' },
-                    { id: 'M-10', ring: 2, db: 71.2, wave: 'obras',      angle: 2.64, freqMod: 1.07, note: 'Maniobra de grúa y cadenas a lo lejos.' },
-                    { id: 'M-11', ring: 2, db: 63.7, wave: 'personas',   angle: 3.42, freqMod: 1.00, note: 'Voces abiertas sin eco arquitectónico.' },
-                    { id: 'M-12', ring: 2, db: 62.5, wave: 'naturaleza', angle: 4.20, freqMod: 1.02, note: 'Oleaje profundo chocando en pilotes.' },
-                    { id: 'M-13', ring: 2, db: 67.9, wave: 'personas',   angle: 4.98, freqMod: 1.04, note: 'Pregones turísticos hacia la bahía.' },
-                    { id: 'M-14', ring: 2, db: 65.6, wave: 'personas',   angle: 5.76, freqMod: 1.01, note: 'Coro abierto de visitantes frente al mar.' },
+                    // Nivel 2: Medio (61–74 dB) -> 7 fichas
+                    { id: 'Ficha M-05', ring: 2, db: 63.5, wave: 'personas',   angle: 0.35, freqMod: 1.01 },
+                    { id: 'Ficha M-06', ring: 2, db: 62.1, wave: 'naturaleza', angle: 1.25, freqMod: 1.02 },
+                    { id: 'Ficha M-07', ring: 2, db: 66.8, wave: 'personas',   angle: 2.15, freqMod: 1.00 },
+                    { id: 'Ficha M-08', ring: 2, db: 71.0, wave: 'obras',      angle: 3.05, freqMod: 1.06 },
+                    { id: 'Ficha M-09', ring: 2, db: 64.0, wave: 'naturaleza', angle: 3.95, freqMod: 1.02 },
+                    { id: 'Ficha M-10', ring: 2, db: 65.7, wave: 'personas',   angle: 4.85, freqMod: 1.01 },
+                    { id: 'Ficha M-11', ring: 2, db: 61.9, wave: 'naturaleza', angle: 5.75, freqMod: 1.00 },
 
-                    // Nivel 3: Alto 73–88 dB (6 encuestas)
-                    { id: 'M-15', ring: 3, db: 77.4, wave: 'transito',   angle: 0.70, freqMod: 1.09, note: 'Motor diésel de lancha turística.' },
-                    { id: 'M-16', ring: 3, db: 84.0, wave: 'obras',      angle: 1.75, freqMod: 1.14, note: 'Carga pesada y metal en espigón.' },
-                    { id: 'M-17', ring: 3, db: 75.8, wave: 'personas',   angle: 2.80, freqMod: 1.07, note: 'Gran concurrencia peatonal en hora punta.' },
-                    { id: 'M-18', ring: 3, db: 80.5, wave: 'transito',   angle: 3.85, freqMod: 1.12, note: 'Remolcador cercano en maniobra.' },
-                    { id: 'M-19', ring: 3, db: 74.2, wave: 'naturaleza', angle: 4.90, freqMod: 1.06, note: 'Viento costero fuerte y oleaje alto.' },
-                    { id: 'M-20', ring: 3, db: 76.9, wave: 'personas',   angle: 5.90, freqMod: 1.05, note: 'Voces amplificadas junto al embarcadero.' }
+                    // Nivel 3: Alto (75–90 dB) -> 4 fichas
+                    { id: 'Ficha M-12', ring: 3, db: 76.4, wave: 'transito',   angle: 0.80, freqMod: 1.08 },
+                    { id: 'Ficha M-13', ring: 3, db: 80.9, wave: 'obras',      angle: 2.37, freqMod: 1.11 },
+                    { id: 'Ficha M-14', ring: 3, db: 75.2, wave: 'personas',   angle: 3.94, freqMod: 1.05 },
+                    { id: 'Ficha M-15', ring: 3, db: 76.0, wave: 'naturaleza', angle: 5.51, freqMod: 1.04 }
                 ]
             },
 
             buenosaires: {
                 id: 'buenosaires',
                 name: 'Buenos Aires',
-                subtitle: 'Trama metropolitana y pulso continuo',
-                layoutRatio: { x: 0.49, y: 0.68, sizeScale: 0.90 },
-                people: [
-                    // Nivel 1: Bajo 45–58 dB (4 encuestas)
-                    { id: 'B-01', ring: 1, db: 51.2, wave: 'naturaleza', angle: 0.85, freqMod: 0.98, note: 'Follaje de plátanos amortiguando la calle.' },
-                    { id: 'B-02', ring: 1, db: 55.6, wave: 'personas',   angle: 2.40, freqMod: 0.96, note: 'Conversación en apertura de vereda.' },
-                    { id: 'B-03', ring: 1, db: 50.4, wave: 'naturaleza', angle: 3.95, freqMod: 1.01, note: 'Brisa entre copas de árboles urbanos.' },
-                    { id: 'B-04', ring: 1, db: 56.8, wave: 'personas',   angle: 5.50, freqMod: 0.99, note: 'Pasos y murmullo humano en galería.' },
-
-                    // Nivel 2: Medio 59–72 dB (7 encuestas)
-                    { id: 'B-05', ring: 2, db: 68.2, wave: 'transito',   angle: 0.40, freqMod: 1.06, note: 'Flujo continuo de avenidas.' },
-                    { id: 'B-06', ring: 2, db: 71.5, wave: 'obras',      angle: 1.30, freqMod: 1.10, note: 'Andamios y percusión de obra cercana.' },
-                    { id: 'B-07', ring: 2, db: 64.9, wave: 'personas',   angle: 2.20, freqMod: 1.02, note: 'Cruce peatonal activo en diagonal.' },
-                    { id: 'B-08', ring: 2, db: 69.7, wave: 'transito',   angle: 3.10, freqMod: 1.08, note: 'Vibración mecánica del subterráneo.' },
-                    { id: 'B-09', ring: 2, db: 62.1, wave: 'naturaleza', angle: 4.00, freqMod: 1.03, note: 'Viento canalizado entre edificios.' },
-                    { id: 'B-10', ring: 2, db: 71.8, wave: 'obras',      angle: 4.90, freqMod: 1.11, note: 'Taladro intermitente a media cuadra.' },
-                    { id: 'B-11', ring: 2, db: 68.8, wave: 'transito',   angle: 5.80, freqMod: 1.07, note: 'Corredor de colectivos y taxis.' },
-
-                    // Nivel 3: Alto 73–88 dB (7 encuestas)
-                    { id: 'B-12', ring: 3, db: 81.4, wave: 'transito',   angle: 0.30, freqMod: 1.13, note: 'Motores intensos en cruce de avenidas.' },
-                    { id: 'B-13', ring: 3, db: 86.2, wave: 'obras',      angle: 1.20, freqMod: 1.16, note: 'Martillo neumático sobre calzada.' },
-                    { id: 'B-14', ring: 3, db: 82.9, wave: 'transito',   angle: 2.10, freqMod: 1.14, note: 'Máxima vibración vehicular central.' },
-                    { id: 'B-15', ring: 3, db: 84.7, wave: 'obras',      angle: 3.00, freqMod: 1.15, note: 'Excavación y maquinaria en esquina.' },
-                    { id: 'B-16', ring: 3, db: 79.5, wave: 'transito',   angle: 3.90, freqMod: 1.12, note: 'Frecuencia mecánica sobre asfalto.' },
-                    { id: 'B-17', ring: 3, db: 76.3, wave: 'personas',   angle: 4.80, freqMod: 1.06, note: 'Flujo denso de personas en hora pico.' },
-                    { id: 'B-18', ring: 3, db: 83.8, wave: 'transito',   angle: 5.70, freqMod: 1.15, note: 'Resonancia máxima en anillo exterior.' }
-                ]
+                subtitle: 'Apartado en espera de levantamiento de fichas',
+                people: []
             }
         };
 
         /**
          * ============================================================================
-         * 2. MOTOR DE ARENA PIGMENTADA CON ECUACIÓN IMPLÍCITA DE CHLADNI (28,000 GRANOS)
+         * 4. MOTOR DE ARENA PIGMENTADA CON TRANSICIÓN SUAVE BLANCO/NEGRO Y
+         *    CONSERVACIÓN ESTRICTA DE LA FORMA DE LA ONDA EN TODAS LAS VISTAS
          * ============================================================================
          */
-        const PARTICLE_COUNT = 28000;
+        const GRAINS_PER_SURVEY = 1150;
+        const MAX_PARTICLES = 36000;
+        let activeParticleCount = 30 * GRAINS_PER_SURVEY;
+
         let canvas, ctx;
         let width = window.innerWidth;
         let height = window.innerHeight;
 
-        const px = new Float32Array(PARTICLE_COUNT);
-        const py = new Float32Array(PARTICLE_COUNT);
-        const vx = new Float32Array(PARTICLE_COUNT);
-        const vy = new Float32Array(PARTICLE_COUNT);
-        const pSize = new Float32Array(PARTICLE_COUNT);
-        const pPhase = new Float32Array(PARTICLE_COUNT);
-        const pZoneAssign = new Uint8Array(PARTICLE_COUNT); // 0: Sotomayor, 1: Muelle, 2: BsAs
-        const pWaveColor = new Uint8Array(PARTICLE_COUNT);  // 0: transito, 1: obras, 2: personas, 3: naturaleza
-        const pShadeVariant = new Uint8Array(PARTICLE_COUNT); // 0..3 variación de brillo del grano
+        const px = new Float32Array(MAX_PARTICLES);
+        const py = new Float32Array(MAX_PARTICLES);
+        const vx = new Float32Array(MAX_PARTICLES);
+        const vy = new Float32Array(MAX_PARTICLES);
+        const pSize = new Float32Array(MAX_PARTICLES);
+        const pPhase = new Float32Array(MAX_PARTICLES);
+        const pShadeVariant = new Uint8Array(MAX_PARTICLES);
+        const pZoneAssign = new Uint8Array(MAX_PARTICLES); // 0: Sotomayor, 1: Muelle, 2: BsAs
+        const pWaveColor = new Uint8Array(MAX_PARTICLES);  // 0: transito, 1: obras, 2: personas, 3: naturaleza
+        const pRingAssign = new Uint8Array(MAX_PARTICLES); // 1: Bajo, 2: Medio, 3: Alto
 
         // Etapas: 'intro' -> 'overview' -> 'detail'
         let currentStage = 'intro';
         let activePlaceKey = 'sotomayor';
         let activeWaveFilter = 'todas';
-        let activeRingFilter = 0; // 0: Todos, 1: Bajo (45-58 dB), 2: Medio (59-72 dB), 3: Alto (73-88 dB)
+        let activeRingFilter = 0;
         let isolatedPerson = null;
         let hoveredItem = null;
         let settleEnergy = 1.0;
 
-        // Estado de vibración acústica (dB) y modo de color de arena
+        // Estado de tema Blanco (0) <-> Negro (1) con interpolación suave
+        let isDarkTheme = false;
+        let themeBlend = 0.0; // 0.0 = Blanco (#FAF9F5), 1.0 = Negro (#121110)
+
         let vibrationActive = true;
-        let pigmentModeActive = true; // true: Arena coloreada según Pictograma | false: Cuarzo Natural
         let simTime = 0;
 
         const placeHarmonicSummary = {};
-        let globalAverageDb = 66.8;
+        let globalTotalSurveys = 30;
+        let globalAverageDb = 68.6;
 
         window.onload = function () {
             canvas = document.getElementById('sandCanvas');
@@ -711,6 +768,84 @@
             requestAnimationFrame(renderLoop);
         };
 
+        function togglePlateTheme() {
+            isDarkTheme = !isDarkTheme;
+            document.body.classList.toggle('theme-dark', isDarkTheme);
+
+            const dot = document.getElementById('themeSwatchDot');
+            const label = document.getElementById('themeStatusLabel');
+            if (isDarkTheme) {
+                dot.style.backgroundColor = '#FAF9F5';
+                label.textContent = 'Fondo: Negro';
+            } else {
+                dot.style.backgroundColor = '#111111';
+                label.textContent = 'Fondo: Blanco';
+            }
+            updateHarmonicEmblem();
+        }
+
+        function toggleWikiModal() {
+            const modal = document.getElementById('wikiSheetsModal');
+            const isHidden = modal.classList.contains('hidden');
+            if (isHidden) {
+                renderWikiModalContent();
+                modal.classList.remove('hidden');
+                modal.classList.add('flex');
+            } else {
+                modal.classList.add('hidden');
+                modal.classList.remove('flex');
+            }
+        }
+
+        function renderWikiModalContent() {
+            const container = document.getElementById('wikiModalContent');
+            let html = '';
+            ['sotomayor', 'muelle'].forEach(key => {
+                const place = PLACES_DATA[key];
+                const s = placeHarmonicSummary[key];
+                html += `
+                    <div class="rounded-xl border border-current/15 p-4 space-y-2.5">
+                        <div class="flex flex-wrap items-center justify-between gap-2">
+                            <span class="font-semibold text-sm">${place.name} (${s.total} fichas)</span>
+                            <span class="font-semibold text-xs px-2.5 py-0.5 rounded-full border border-current/20">Promedio: ${s.avgDb} dB · Rango ${s.minDb}–${s.maxDb} dB</span>
+                        </div>
+                        <div class="grid grid-cols-2 sm:grid-cols-4 gap-2 text-[11px] pt-1">
+                            <div class="p-2 rounded-lg bg-[#D97706]/10 border border-[#D97706]/30"><strong>Tránsito:</strong> ${s.waveCounts.transito} fichas</div>
+                            <div class="p-2 rounded-lg bg-[#EA580C]/10 border border-[#EA580C]/30"><strong>Obras:</strong> ${s.waveCounts.obras} fichas</div>
+                            <div class="p-2 rounded-lg bg-[#0284C7]/10 border border-[#0284C7]/30"><strong>Personas:</strong> ${s.waveCounts.personas} fichas</div>
+                            <div class="p-2 rounded-lg bg-[#16A34A]/10 border border-[#16A34A]/30"><strong>Naturaleza:</strong> ${s.waveCounts.naturaleza} fichas</div>
+                        </div>
+                        <div class="grid grid-cols-3 sm:grid-cols-5 gap-1.5 pt-2 text-[10px] opacity-85">
+                            ${place.people.map(p => `
+                                <div class="px-2 py-1 rounded border border-current/15 flex items-center justify-between">
+                                    <span>${p.id.replace('Ficha ', '')}</span>
+                                    <span class="font-semibold">${p.db} dB</span>
+                                </div>
+                            `).join('')}
+                        </div>
+                    </div>
+                `;
+            });
+            container.innerHTML = html;
+        }
+
+        function toggleVibrationMode() {
+            vibrationActive = !vibrationActive;
+            const dot = document.getElementById('vibIndicatorDot');
+            const label = document.getElementById('vibStatusLabel');
+            if (vibrationActive) {
+                dot.classList.add('vib-dot');
+                dot.style.opacity = '1';
+                label.textContent = 'Vibración dB · Activa';
+                settleEnergy = 0.25;
+            } else {
+                dot.classList.remove('vib-dot');
+                dot.style.opacity = '0.35';
+                label.textContent = 'Vibración dB · Pausada';
+                settleEnergy = 0.0;
+            }
+        }
+
         function precomputeFixedSummaries() {
             let allDbSum = 0;
             let allCount = 0;
@@ -732,13 +867,13 @@
                     allCount++;
                 });
 
-                const avgDb = +(dbSum / total).toFixed(1);
-                const weights = {
+                const avgDb = total > 0 ? +(dbSum / total).toFixed(1) : 0;
+                const weights = total > 0 ? {
                     transito:   waveCounts.transito / total,
                     obras:      waveCounts.obras / total,
                     personas:   waveCounts.personas / total,
                     naturaleza: waveCounts.naturaleza / total
-                };
+                } : { transito: 0.25, obras: 0.25, personas: 0.25, naturaleza: 0.25 };
 
                 let dominantWave = 'naturaleza';
                 let maxC = -1;
@@ -749,10 +884,19 @@
                     }
                 });
 
-                placeHarmonicSummary[key] = { total, waveCounts, weights, dominantWave, avgDb, minDb, maxDb };
+                placeHarmonicSummary[key] = {
+                    total,
+                    waveCounts,
+                    weights,
+                    dominantWave,
+                    avgDb,
+                    minDb: total > 0 ? minDb : 0,
+                    maxDb: total > 0 ? maxDb : 0
+                };
             });
 
-            globalAverageDb = +(allDbSum / allCount).toFixed(1);
+            globalTotalSurveys = allCount;
+            globalAverageDb = allCount > 0 ? +(allDbSum / allCount).toFixed(1) : 0;
         }
 
         function handleResize() {
@@ -765,128 +909,278 @@
         }
 
         function initSandGrains() {
-            const placeKeys = ['sotomayor', 'muelle', 'buenosaires'];
-
-            for (let i = 0; i < PARTICLE_COUNT; i++) {
-                pSize[i] = (i % 5 === 0) ? 1.72 : 1.28;
+            for (let i = 0; i < MAX_PARTICLES; i++) {
+                pSize[i] = (i % 5 === 0) ? 1.78 : 1.32;
                 pPhase[i] = (i * 0.6180339887) % (Math.PI * 2);
                 pShadeVariant[i] = i % 4;
-
-                const mod = i % 62;
-                let zIdx = 0;
-                if (mod < 24) zIdx = 0;
-                else if (mod < 44) zIdx = 1;
-                else zIdx = 2;
-                pZoneAssign[i] = zIdx;
-
-                // Asignar el color de pictograma de cada grano proporcionalmente a los datos reales de esa zona
-                const pKey = placeKeys[zIdx];
-                const people = PLACES_DATA[pKey].people;
-                const personSample = people[i % people.length];
-                pWaveColor[i] = WAVE_TYPES[personSample.wave].colorIndex;
             }
             reassignGrainColorsForStage();
             distributeParticlesForCurrentStage();
         }
 
         /**
-         * Asigna la proporción exacta de colores de arena según la etapa o el filtro activo
+         * CORRELACIÓN DIRECTA DENSIDAD DE ARENA <-> CANTIDAD DE ENCUESTAS (N):
+         * - En Vista General: Sotomayor (18 encuestas) recibe 19,800 granos,
+         *   Muelle Prat (14 encuestas) recibe 15,400 granos, y Buenos Aires (0 encuestas) 0 granos.
+         * - En Vista Detalle: La cantidad de granos en la placa es exactamente N_activo * 1,100
+         *   (ajustada también al filtrar por un pictograma o anillo de dB).
          */
         function reassignGrainColorsForStage() {
+            const densityLabel = document.getElementById('sandDensityLabel');
+
             if (currentStage === 'intro') {
-                // En la portada se distribuyen proporcionalmente a las 62 encuestas globales
                 const allPeople = [
                     ...PLACES_DATA.sotomayor.people,
                     ...PLACES_DATA.muelle.people,
                     ...PLACES_DATA.buenosaires.people
                 ];
-                for (let i = 0; i < PARTICLE_COUNT; i++) {
+                activeParticleCount = Math.min(MAX_PARTICLES, allPeople.length * GRAINS_PER_SURVEY);
+                for (let i = 0; i < activeParticleCount; i++) {
                     const p = allPeople[i % allPeople.length];
                     pWaveColor[i] = WAVE_TYPES[p.wave].colorIndex;
+                    pRingAssign[i] = p.ring;
+                }
+                if (densityLabel) {
+                    densityLabel.textContent = `Fichas Wiki (${allPeople.length}) · ${activeParticleCount.toLocaleString('es-CL')} granos`;
                 }
                 return;
             }
 
             if (currentStage === 'overview') {
-                const placeKeys = ['sotomayor', 'muelle', 'buenosaires'];
-                for (let i = 0; i < PARTICLE_COUNT; i++) {
-                    const pKey = placeKeys[pZoneAssign[i]];
-                    const people = PLACES_DATA[pKey].people;
-                    const p = people[i % people.length];
-                    pWaveColor[i] = WAVE_TYPES[p.wave].colorIndex;
+                const sotoPeople = PLACES_DATA.sotomayor.people;
+                const muellePeople = PLACES_DATA.muelle.people;
+                const bsasPeople = PLACES_DATA.buenosaires.people;
+
+                const sotoGrains = sotoPeople.length * GRAINS_PER_SURVEY;
+                const muelleGrains = muellePeople.length * GRAINS_PER_SURVEY;
+                const bsasGrains = bsasPeople.length * GRAINS_PER_SURVEY;
+
+                activeParticleCount = Math.min(MAX_PARTICLES, sotoGrains + muelleGrains + bsasGrains);
+
+                for (let i = 0; i < activeParticleCount; i++) {
+                    if (i < sotoGrains) {
+                        pZoneAssign[i] = 0;
+                        const p = sotoPeople[i % sotoPeople.length];
+                        pWaveColor[i] = WAVE_TYPES[p.wave].colorIndex;
+                        pRingAssign[i] = p.ring;
+                    } else if (i < sotoGrains + muelleGrains) {
+                        pZoneAssign[i] = 1;
+                        const p = muellePeople[(i - sotoGrains) % muellePeople.length];
+                        pWaveColor[i] = WAVE_TYPES[p.wave].colorIndex;
+                        pRingAssign[i] = p.ring;
+                    } else {
+                        pZoneAssign[i] = 2;
+                        const p = bsasPeople[(i - sotoGrains - muelleGrains) % Math.max(1, bsasPeople.length)];
+                        pWaveColor[i] = p ? WAVE_TYPES[p.wave].colorIndex : 0;
+                        pRingAssign[i] = p ? p.ring : 2;
+                    }
+                }
+                if (densityLabel) {
+                    densityLabel.textContent = `Fichas Wiki (${globalTotalSurveys}) · Densidad ∝ N`;
                 }
                 return;
             }
 
-            // Etapa 'detail': si hay una persona aislada o un pictograma filtrado, la arena adopta ese pigmento
+            // Etapa 'detail': Densidad correlacionada al lugar y al filtro activo
+            const placePeople = PLACES_DATA[activePlaceKey].people;
+            if (placePeople.length === 0) {
+                activeParticleCount = 0;
+                if (densityLabel) {
+                    densityLabel.textContent = 'Densidad: 0 granos (Sin fichas aún)';
+                }
+                return;
+            }
+
             if (isolatedPerson) {
+                activeParticleCount = 3400;
                 const cIdx = WAVE_TYPES[isolatedPerson.wave].colorIndex;
-                for (let i = 0; i < PARTICLE_COUNT; i++) {
+                for (let i = 0; i < activeParticleCount; i++) {
                     pWaveColor[i] = cIdx;
+                    pRingAssign[i] = isolatedPerson.ring;
+                }
+                if (densityLabel) {
+                    densityLabel.textContent = `${isolatedPerson.id} aislada (${isolatedPerson.db} dB)`;
                 }
                 return;
             }
 
             const filtered = getFilteredPeopleInActivePlace();
-            const sourceList = filtered.length > 0 ? filtered : PLACES_DATA[activePlaceKey].people;
-            for (let i = 0; i < PARTICLE_COUNT; i++) {
-                const p = sourceList[i % sourceList.length];
+            activeParticleCount = Math.min(MAX_PARTICLES, filtered.length * 1450);
+
+            for (let i = 0; i < activeParticleCount; i++) {
+                const p = filtered[i % filtered.length];
                 pWaveColor[i] = WAVE_TYPES[p.wave].colorIndex;
+                pRingAssign[i] = p.ring;
             }
-        }
-
-        function toggleVibrationMode() {
-            vibrationActive = !vibrationActive;
-            const dot = document.getElementById('vibIndicatorDot');
-            const label = document.getElementById('vibStatusLabel');
-            if (vibrationActive) {
-                dot.classList.add('vib-dot');
-                dot.style.opacity = '1';
-                label.textContent = 'Vibración dB · Activa';
-            } else {
-                dot.classList.remove('vib-dot');
-                dot.style.opacity = '0.35';
-                label.textContent = 'Vibración dB · Pausada';
+            if (densityLabel) {
+                densityLabel.textContent = `Fichas activas: ${filtered.length} (${activeParticleCount.toLocaleString('es-CL')} granos)`;
             }
-        }
-
-        function toggleSandColorMode() {
-            pigmentModeActive = !pigmentModeActive;
-            const label = document.getElementById('sandColorModeLabel');
-            label.textContent = pigmentModeActive
-                ? 'Arena: Pigmento Pictograma'
-                : 'Arena: Basalto Negro';
-            updateHarmonicEmblem();
         }
 
         /**
-         * GEOMETRÍA DE LAS PLACAS Y DISTRIBUCIÓN DE PARTÍCULAS POR ETAPA
+         * ECUACIONES IMPLÍCITAS DE CHLADNI (BOURKE / PONCE CAMPUZANO / WHIPPLE MUSEUM)
+         */
+        function evaluateBourkeChladniMode(waveTypeObj, ringLevel, nx, ny, r, theta, freqMod = 1.0, phaseShift = 0.0) {
+            const mode = waveTypeObj.modesByRing[ringLevel] || waveTypeObj.modesByRing[2];
+            const n = mode.n;
+            const m = mode.m;
+
+            const sx = nx * 0.78;
+            const sy = ny * 0.78;
+            const bourkeCartesian =
+                Math.cos(n * Math.PI * sx) * Math.cos(m * Math.PI * sy) -
+                Math.cos(m * Math.PI * sx) * Math.cos(n * Math.PI * sy);
+
+            const radialOrder = mode.kRad * freqMod;
+            const angularOrder = waveTypeObj.lobes;
+            const env = Math.min(1.0, Math.max(0.0, (r - 0.14) * 1.45));
+            const polarStanding = Math.sin(
+                radialOrder * Math.PI * r +
+                0.46 * env * Math.cos(angularOrder * theta) * Math.PI +
+                phaseShift
+            );
+
+            return bourkeCartesian * 0.56 + polarStanding * 0.44;
+        }
+
+        function evaluateIntroPosterWave(x, y, cx, cy, radius, breath = 0.0) {
+            const nx = (x - cx) / radius;
+            const ny = (y - cy) / radius;
+            const r = Math.hypot(nx, ny);
+            const theta = Math.atan2(ny, nx);
+
+            if (r < 0.058) return 1.5;
+
+            return evaluateBourkeChladniMode(
+                WAVE_TYPES.naturaleza,
+                2,
+                nx, ny, r, theta,
+                1.0,
+                breath * 0.04
+            );
+        }
+
+        function evaluateZoneTotalWave(placeKey, waveColorIdx, x, y, cx, cy, radius, breath = 0.0) {
+            const nx = (x - cx) / radius;
+            const ny = (y - cy) / radius;
+            const r = Math.hypot(nx, ny);
+            const theta = Math.atan2(ny, nx);
+
+            if (r < 0.085) return 1.4;
+            if (r > 1.02) return (r - 1.02) * 3.2;
+
+            const summary = placeHarmonicSummary[placeKey];
+            const domWaveObj = WAVE_TYPES[summary.dominantWave];
+            const grainWaveObj = WAVE_TYPES[WAVE_KEYS_ORDER[waveColorIdx]];
+
+            const domVal = evaluateBourkeChladniMode(domWaveObj, 2, nx, ny, r, theta, 1.0, breath * 0.03);
+            const grainVal = evaluateBourkeChladniMode(grainWaveObj, 2, nx, ny, r, theta, 1.0, breath * 0.03);
+
+            return domVal * 0.58 + grainVal * 0.42;
+        }
+
+        function evaluateDetailPlateWave(x, y, cx, cy, radius, breath = 0.0) {
+            const nx = (x - cx) / radius;
+            const ny = (y - cy) / radius;
+            const r = Math.hypot(nx, ny);
+            const theta = Math.atan2(ny, nx);
+
+            if (r < 0.072) return 1.5;
+            if (r > 1.04) return (r - 1.04) * 3.2;
+
+            if (isolatedPerson) {
+                const wObj = WAVE_TYPES[isolatedPerson.wave];
+                const ringObj = INTENSITY_RINGS[isolatedPerson.ring - 1];
+                const personWave = evaluateBourkeChladniMode(
+                    wObj,
+                    isolatedPerson.ring,
+                    nx, ny, r,
+                    theta - isolatedPerson.angle,
+                    isolatedPerson.freqMod,
+                    breath * 0.05
+                );
+                const ringPull = Math.sin(((r - ringObj.radiusNorm) / 0.22) * Math.PI);
+                return personWave * 0.76 + ringPull * 0.24;
+            }
+
+            const people = getFilteredPeopleInActivePlace();
+            if (people.length === 0) return Math.sin(r * Math.PI * 3);
+
+            const targetRingLevel = activeRingFilter > 0 ? activeRingFilter : 2;
+
+            if (activeWaveFilter !== 'todas') {
+                const wObj = WAVE_TYPES[activeWaveFilter];
+                const pureVal = evaluateBourkeChladniMode(
+                    wObj,
+                    targetRingLevel,
+                    nx, ny, r, theta,
+                    1.0,
+                    breath * 0.04
+                );
+                if (activeRingFilter > 0) {
+                    const targetR = INTENSITY_RINGS[activeRingFilter - 1].radiusNorm;
+                    const ringEnvelope = Math.sin(((r - targetR) / 0.28) * Math.PI);
+                    return pureVal * 0.78 + ringEnvelope * 0.22;
+                }
+                return pureVal;
+            }
+
+            const counts = { transito: 0, obras: 0, personas: 0, naturaleza: 0 };
+            people.forEach(p => counts[p.wave]++);
+            const total = people.length;
+
+            let waveSum = 0;
+            WAVE_KEYS_ORDER.forEach(k => {
+                if (counts[k] > 0) {
+                    const weight = counts[k] / total;
+                    waveSum += weight * evaluateBourkeChladniMode(
+                        WAVE_TYPES[k],
+                        targetRingLevel,
+                        nx, ny, r, theta,
+                        1.0,
+                        breath * 0.03
+                    );
+                }
+            });
+
+            return waveSum;
+        }
+
+        /**
+         * GEOMETRÍA MEJORADA DE LA CONSTELACIÓN (ETAPA 1):
+         * - Círculo central del TOTAL y PROMEDIO mucho más amplio, limpio y jerárquico (radio 64px),
+         *   ubicado estratégicamente con aire libre para que jamás choque con los círculos ni sus textos.
+         * - Tamaños de los círculos correlacionados con la cantidad de encuestas reales de la Wiki.
          */
         function getOverviewConstellationGeometry() {
             const isMobile = width < 768;
             const minDim = Math.min(width, height);
-            const baseR = isMobile ? minDim * 0.165 : minDim * 0.145;
-
-            const hubX = width * 0.49;
-            const hubY = height * 0.47;
+            const baseR = isMobile ? minDim * 0.15 : minDim * 0.145;
 
             if (isMobile) {
                 return {
-                    hub: { cx: width * 0.50, cy: height * 0.46, radius: baseR * 0.36 },
+                    hub: { cx: width * 0.50, cy: height * 0.48, radius: 52 },
                     zones: [
-                        { key: 'sotomayor',   cx: width * 0.30, cy: height * 0.29, radius: baseR * 1.16 },
-                        { key: 'muelle',      cx: width * 0.72, cy: height * 0.43, radius: baseR * 1.00 },
-                        { key: 'buenosaires', cx: width * 0.43, cy: height * 0.65, radius: baseR * 0.88 }
+                        // Sotomayor (18 encuestas -> Mayor radio y mayor densidad de arena)
+                        { key: 'sotomayor',   cx: width * 0.27, cy: height * 0.25, radius: baseR * 1.15 },
+                        // Muelle Prat (14 encuestas -> Radio proporcional menor y menor densidad)
+                        { key: 'muelle',      cx: width * 0.74, cy: height * 0.30, radius: baseR * 0.98 },
+                        // Buenos Aires (0 encuestas -> Placa latente sin arena)
+                        { key: 'buenosaires', cx: width * 0.52, cy: height * 0.73, radius: baseR * 0.76 }
                     ]
                 };
             }
 
             return {
-                hub: { cx: hubX, cy: hubY, radius: baseR * 0.38 },
+                // Círculo central grande y despejado en el corazón del lienzo
+                hub: { cx: width * 0.48, cy: height * 0.46, radius: 64 },
                 zones: [
-                    { key: 'sotomayor',   cx: width * 0.29, cy: height * 0.34, radius: baseR * 1.22 },
-                    { key: 'muelle',      cx: width * 0.71, cy: height * 0.41, radius: baseR * 1.04 },
-                    { key: 'buenosaires', cx: width * 0.48, cy: height * 0.71, radius: baseR * 0.92 }
+                    // Plaza Sotomayor (N=18): Izquierda superior, gran separación del centro
+                    { key: 'sotomayor',   cx: width * 0.22, cy: height * 0.35, radius: baseR * 1.18 },
+                    // Muelle Prat (N=14): Derecha media-alta, radio proporcional a √(14/18)
+                    { key: 'muelle',      cx: width * 0.76, cy: height * 0.36, radius: baseR * 1.02 },
+                    // Buenos Aires (N=0): Parte inferior derecha/central, aro punteado en espera
+                    { key: 'buenosaires', cx: width * 0.54, cy: height * 0.76, radius: baseR * 0.76 }
                 ]
             };
         }
@@ -894,7 +1188,7 @@
         function getSinglePlateGeometry(isIntro = false) {
             const cx = width * 0.50;
             const cy = height * 0.49;
-            const scale = isIntro ? 0.44 : (width < 640 ? 0.35 : 0.34);
+            const scale = isIntro ? 0.43 : (width < 640 ? 0.34 : 0.34);
             const radius = Math.min(width, height) * scale;
             return { cx, cy, radius };
         }
@@ -902,10 +1196,10 @@
         function distributeParticlesForCurrentStage() {
             if (currentStage === 'overview') {
                 const { zones } = getOverviewConstellationGeometry();
-                for (let i = 0; i < PARTICLE_COUNT; i++) {
+                for (let i = 0; i < activeParticleCount; i++) {
                     const z = zones[pZoneAssign[i]];
                     const a = (i * 1.6180339) % (Math.PI * 2);
-                    const r = Math.sqrt(((i * 7919) % 10000) / 10000) * z.radius * 1.14;
+                    const r = Math.sqrt(((i * 7919) % 10000) / 10000) * z.radius * 0.98;
                     px[i] = z.cx + Math.cos(a) * r;
                     py[i] = z.cy + Math.sin(a) * r;
                     vx[i] = 0;
@@ -913,8 +1207,8 @@
                 }
             } else {
                 const plate = getSinglePlateGeometry(currentStage === 'intro');
-                const spread = currentStage === 'intro' ? 1.42 : 1.12;
-                for (let i = 0; i < PARTICLE_COUNT; i++) {
+                const spread = currentStage === 'intro' ? 1.38 : 1.02;
+                for (let i = 0; i < activeParticleCount; i++) {
                     const a = (i * 1.6180339) % (Math.PI * 2);
                     const r = Math.sqrt(((i * 7919) % 10000) / 10000) * plate.radius * spread;
                     px[i] = plate.cx + Math.cos(a) * r;
@@ -926,201 +1220,126 @@
         }
 
         /**
-         * ECUACIONES IMPLÍCITAS DE CHLADNI (BOURKE / PONCE CAMPUZANO / WHIPPLE MUSEUM)
-         * cos(n * pi * x / L) * cos(m * pi * y / L) - cos(m * pi * x / L) * cos(n * pi * y / L) = 0
+         * PASO FÍSICO CON VIBRACIÓN TANGENCIAL A LA ONDA:
+         * Los granos nunca destruyen la cresta nodal al quedarse en la pantalla:
+         * - El gradiente normal (-wx, -wy) mantiene el grano atrapado en la línea nodal (w0 -> 0).
+         * - La micro-vibración actúa a lo largo de la tangente (-wy, wx) de la onda,
+         *   haciendo que la arena "vibre en el lugar" sin desarmar jamás la figura de Chladni.
          */
-        function evaluateBourkeChladniMode(waveTypeObj, ringLevel, nx, ny, rNorm, theta, freqMod = 1.0, phaseShift = 0.0) {
-            const lvl = Math.min(3, Math.max(1, ringLevel || 2));
-            const mode = waveTypeObj.modesByRing[lvl];
-            const n = mode.n * freqMod;
-            const m = mode.m * freqMod;
-
-            // Término implícito cartesiano de Bourke
-            const chladniRect =
-                Math.cos(n * Math.PI * nx * 0.72) * Math.cos(m * Math.PI * ny * 0.72) -
-                Math.cos(m * Math.PI * nx * 0.72) * Math.cos(n * Math.PI * ny * 0.72);
-
-            // Término armónico polar para placas circulares (Whipple Museum)
-            const env = Math.min(1.0, Math.max(0.0, (rNorm - 0.16) * 1.45));
-            const polarWave = Math.sin(
-                mode.kRad * Math.PI * rNorm +
-                0.45 * env * Math.cos(waveTypeObj.lobes * theta) * Math.PI +
-                phaseShift
-            );
-
-            return chladniRect * 0.54 + polarWave * 0.46;
-        }
-
-        function evaluateIntroPosterWave(x, y, cx, cy, radius, breath = 0.0) {
-            const nx = (x - cx) / radius;
-            const ny = (y - cy) / radius;
-            const r = Math.hypot(nx, ny);
-            const theta = Math.atan2(ny, nx);
-
-            if (r < 0.055) return 1.5;
-
-            const env = Math.min(1.0, Math.max(0.0, (r - 0.25) * 1.42));
-            const angular = 0.45 * env * Math.cos(4 * theta);
-            return Math.sin(2.22 * Math.PI * r + angular * Math.PI + breath * 0.05);
-        }
-
-        function evaluateZoneTotalWave(placeKey, x, y, cx, cy, radius, breath = 0.0) {
-            const nx = (x - cx) / radius;
-            const ny = (y - cy) / radius;
-            const r = Math.hypot(nx, ny);
-            const theta = Math.atan2(ny, nx);
-
-            if (r < 0.08) return 1.4;
-            if (r > 1.04) return (r - 1.04) * 3.0;
-
-            const w = placeHarmonicSummary[placeKey].weights;
-            let val = 0;
-            val += w.transito   * evaluateBourkeChladniMode(WAVE_TYPES.transito,   2, nx, ny, r, theta, 1.0, breath * 0.05);
-            val += w.obras      * evaluateBourkeChladniMode(WAVE_TYPES.obras,      2, nx, ny, r, theta, 1.0, breath * 0.05);
-            val += w.personas   * evaluateBourkeChladniMode(WAVE_TYPES.personas,   2, nx, ny, r, theta, 1.0, breath * 0.05);
-            val += w.naturaleza * evaluateBourkeChladniMode(WAVE_TYPES.naturaleza, 2, nx, ny, r, theta, 1.0, breath * 0.05);
-
-            const outerBoundary = Math.sin(Math.PI * (r / 1.02));
-            return val * 0.85 + outerBoundary * 0.15;
-        }
-
-        function evaluateDetailPlateWave(x, y, cx, cy, radius, breath = 0.0) {
-            const nx = (x - cx) / radius;
-            const ny = (y - cy) / radius;
-            const r = Math.hypot(nx, ny);
-            const theta = Math.atan2(ny, nx);
-
-            if (r < 0.068) return 1.5;
-            if (r > 1.08) return (r - 1.08) * 3.2;
-
-            if (isolatedPerson) {
-                const wObj = WAVE_TYPES[isolatedPerson.wave];
-                const ringObj = INTENSITY_RINGS[isolatedPerson.ring - 1];
-                const personWave = evaluateBourkeChladniMode(
-                    wObj,
-                    isolatedPerson.ring,
-                    nx,
-                    ny,
-                    r,
-                    theta - isolatedPerson.angle,
-                    isolatedPerson.freqMod,
-                    breath * 0.06
-                );
-                const ringPull = Math.sin(((r - ringObj.radiusNorm) / 0.18) * Math.PI);
-                return personWave * 0.72 + ringPull * 0.28;
-            }
-
-            const people = getFilteredPeopleInActivePlace();
-            if (people.length === 0) return Math.sin(r * Math.PI * 3);
-
-            const counts = { transito: 0, obras: 0, personas: 0, naturaleza: 0 };
-            people.forEach(p => counts[p.wave]++);
-            const total = people.length;
-            const ringLvl = activeRingFilter > 0 ? activeRingFilter : 2;
-
-            let waveSum = 0;
-            if (counts.transito > 0)   waveSum += (counts.transito / total)   * evaluateBourkeChladniMode(WAVE_TYPES.transito,   ringLvl, nx, ny, r, theta, 1.0, breath * 0.05);
-            if (counts.obras > 0)      waveSum += (counts.obras / total)      * evaluateBourkeChladniMode(WAVE_TYPES.obras,      ringLvl, nx, ny, r, theta, 1.0, breath * 0.05);
-            if (counts.personas > 0)   waveSum += (counts.personas / total)   * evaluateBourkeChladniMode(WAVE_TYPES.personas,   ringLvl, nx, ny, r, theta, 1.0, breath * 0.05);
-            if (counts.naturaleza > 0) waveSum += (counts.naturaleza / total) * evaluateBourkeChladniMode(WAVE_TYPES.naturaleza, ringLvl, nx, ny, r, theta, 1.0, breath * 0.05);
-
-            if (activeRingFilter > 0) {
-                const targetR = INTENSITY_RINGS[activeRingFilter - 1].radiusNorm;
-                const distFromRing = Math.abs(r - targetR);
-                if (distFromRing > 0.13) {
-                    return (distFromRing - 0.06) * 2.4;
-                }
-            }
-            return waveSum;
-        }
-
         function stepSandSettlement(energyFactor, breath = 0.0) {
-            if (energyFactor <= 0.001) return;
-            const eps = 2.2;
+            if (energyFactor <= 0.001 || activeParticleCount === 0) return;
+            const eps = 2.0;
 
             if (currentStage === 'intro') {
                 const plate = getSinglePlateGeometry(true);
-                for (let i = 0; i < PARTICLE_COUNT; i++) {
-                    const isDust = (i % 10 === 0);
+                for (let i = 0; i < activeParticleCount; i++) {
+                    const isDust = (i % 14 === 0);
                     let x = px[i], y = py[i];
 
                     const w0 = Math.abs(evaluateIntroPosterWave(x, y, plate.cx, plate.cy, plate.radius, breath));
                     const wx = Math.abs(evaluateIntroPosterWave(x + eps, y, plate.cx, plate.cy, plate.radius, breath)) - w0;
                     const wy = Math.abs(evaluateIntroPosterWave(x, y + eps, plate.cx, plate.cy, plate.radius, breath)) - w0;
 
-                    const pull = isDust ? 0.55 : 4.8;
+                    const pull = isDust ? 1.1 : 5.4;
                     vx[i] -= wx * pull;
                     vy[i] -= wy * pull;
 
-                    const harmonicTremor = vibrationActive
-                        ? Math.sin(simTime * 11.0 + pPhase[i]) * (0.26 + w0 * 1.45)
-                        : 0;
-                    const jitter = (w0 * 3.6 + 0.22) * energyFactor * (isDust ? 1.85 : 0.82);
+                    if (vibrationActive) {
+                        const gLen = Math.hypot(wx, wy) + 0.0001;
+                        const tx = -wy / gLen;
+                        const ty = wx / gLen;
+                        const osc = Math.sin(simTime * 12.0 + pPhase[i]) * (0.28 + w0 * 0.85);
+                        vx[i] += tx * osc * 0.45 + (Math.random() - 0.5) * w0 * 1.2 * energyFactor;
+                        vy[i] += ty * osc * 0.45 + (Math.random() - 0.5) * w0 * 1.2 * energyFactor;
+                    }
 
-                    vx[i] += (Math.random() - 0.5) * jitter + Math.cos(pPhase[i]) * harmonicTremor * 0.22;
-                    vy[i] += (Math.random() - 0.5) * jitter + Math.sin(pPhase[i]) * harmonicTremor * 0.22;
-
-                    vx[i] *= 0.64;
-                    vy[i] *= 0.64;
+                    vx[i] *= 0.60;
+                    vy[i] *= 0.60;
                     px[i] += vx[i];
                     py[i] += vy[i];
                 }
             } else if (currentStage === 'overview') {
                 const { zones } = getOverviewConstellationGeometry();
-                for (let i = 0; i < PARTICLE_COUNT; i++) {
-                    const isDust = (i % 13 === 0);
+                for (let i = 0; i < activeParticleCount; i++) {
+                    const isDust = (i % 16 === 0);
                     const z = zones[pZoneAssign[i]];
+                    const cIdx = pWaveColor[i];
                     let x = px[i], y = py[i];
 
-                    const w0 = Math.abs(evaluateZoneTotalWave(z.key, x, y, z.cx, z.cy, z.radius, breath));
-                    const wx = Math.abs(evaluateZoneTotalWave(z.key, x + eps, y, z.cx, z.cy, z.radius, breath)) - w0;
-                    const wy = Math.abs(evaluateZoneTotalWave(z.key, x, y + eps, z.cx, z.cy, z.radius, breath)) - w0;
+                    const w0 = Math.abs(evaluateZoneTotalWave(z.key, cIdx, x, y, z.cx, z.cy, z.radius, breath));
+                    const wx = Math.abs(evaluateZoneTotalWave(z.key, cIdx, x + eps, y, z.cx, z.cy, z.radius, breath)) - w0;
+                    const wy = Math.abs(evaluateZoneTotalWave(z.key, cIdx, x, y + eps, z.cx, z.cy, z.radius, breath)) - w0;
 
-                    const pull = isDust ? 0.55 : 4.4;
+                    // Fuerza restauradora alta en la vista general para que NUNCA se pierda la onda
+                    const pull = isDust ? 1.35 : 5.8;
                     vx[i] -= wx * pull;
                     vy[i] -= wy * pull;
 
-                    const harmonicTremor = vibrationActive
-                        ? Math.sin(simTime * 12.0 + pPhase[i]) * (0.24 + w0 * 1.35)
-                        : 0;
-                    const jitter = (w0 * 3.5 + 0.20) * energyFactor * (isDust ? 1.75 : 0.82);
+                    if (vibrationActive) {
+                        const gLen = Math.hypot(wx, wy) + 0.0001;
+                        const tx = -wy / gLen;
+                        const ty = wx / gLen;
+                        const osc = Math.sin(simTime * 13.0 + pPhase[i]) * (0.24 + w0 * 0.70);
+                        vx[i] += tx * osc * 0.42 + (Math.random() - 0.5) * w0 * 0.95 * energyFactor;
+                        vy[i] += ty * osc * 0.42 + (Math.random() - 0.5) * w0 * 0.95 * energyFactor;
+                    }
 
-                    vx[i] += (Math.random() - 0.5) * jitter + Math.cos(pPhase[i]) * harmonicTremor * 0.20;
-                    vy[i] += (Math.random() - 0.5) * jitter + Math.sin(pPhase[i]) * harmonicTremor * 0.20;
-
-                    vx[i] *= 0.65;
-                    vy[i] *= 0.65;
-                    px[i] += vx[i];
-                    py[i] += vy[i];
+                    const dx = (px[i] + vx[i]) - z.cx;
+                    const dy = (py[i] + vy[i]) - z.cy;
+                    const dist = Math.hypot(dx, dy);
+                    if (dist > z.radius * 0.985) {
+                        const angleBack = Math.atan2(dy, dx);
+                        px[i] = z.cx + Math.cos(angleBack) * z.radius * 0.96;
+                        py[i] = z.cy + Math.sin(angleBack) * z.radius * 0.96;
+                        vx[i] *= -0.25;
+                        vy[i] *= -0.25;
+                    } else {
+                        vx[i] *= 0.58;
+                        vy[i] *= 0.58;
+                        px[i] += vx[i];
+                        py[i] += vy[i];
+                    }
                 }
             } else {
                 const plate = getSinglePlateGeometry(false);
                 const dbBoost = activeRingFilter > 0 ? INTENSITY_RINGS[activeRingFilter - 1].vibBoost : 1.0;
 
-                for (let i = 0; i < PARTICLE_COUNT; i++) {
-                    const isDust = (i % 14 === 0);
+                for (let i = 0; i < activeParticleCount; i++) {
+                    const isDust = (i % 15 === 0);
                     let x = px[i], y = py[i];
 
                     const w0 = Math.abs(evaluateDetailPlateWave(x, y, plate.cx, plate.cy, plate.radius, breath));
                     const wx = Math.abs(evaluateDetailPlateWave(x + eps, y, plate.cx, plate.cy, plate.radius, breath)) - w0;
                     const wy = Math.abs(evaluateDetailPlateWave(x, y + eps, plate.cx, plate.cy, plate.radius, breath)) - w0;
 
-                    const pull = isDust ? 0.55 : 4.6;
+                    const pull = isDust ? 1.25 : 5.5;
                     vx[i] -= wx * pull;
                     vy[i] -= wy * pull;
 
-                    const harmonicTremor = vibrationActive
-                        ? Math.sin(simTime * 13.0 * dbBoost + pPhase[i]) * (0.28 + w0 * 1.55) * dbBoost
-                        : 0;
-                    const jitter = (w0 * 3.8 + 0.22) * energyFactor * (isDust ? 1.85 : 0.84);
+                    if (vibrationActive) {
+                        const gLen = Math.hypot(wx, wy) + 0.0001;
+                        const tx = -wy / gLen;
+                        const ty = wx / gLen;
+                        const osc = Math.sin(simTime * 13.5 * dbBoost + pPhase[i]) * (0.28 + w0 * 0.85) * dbBoost;
+                        vx[i] += tx * osc * 0.45 + (Math.random() - 0.5) * w0 * 1.15 * energyFactor;
+                        vy[i] += ty * osc * 0.45 + (Math.random() - 0.5) * w0 * 1.15 * energyFactor;
+                    }
 
-                    vx[i] += (Math.random() - 0.5) * jitter + Math.cos(pPhase[i]) * harmonicTremor * 0.24;
-                    vy[i] += (Math.random() - 0.5) * jitter + Math.sin(pPhase[i]) * harmonicTremor * 0.24;
-
-                    vx[i] *= 0.64;
-                    vy[i] *= 0.64;
-                    px[i] += vx[i];
-                    py[i] += vy[i];
+                    const dx = (px[i] + vx[i]) - plate.cx;
+                    const dy = (py[i] + vy[i]) - plate.cy;
+                    const dist = Math.hypot(dx, dy);
+                    if (dist > plate.radius * 0.985) {
+                        const angleBack = Math.atan2(dy, dx);
+                        px[i] = plate.cx + Math.cos(angleBack) * plate.radius * 0.965;
+                        py[i] = plate.cy + Math.sin(angleBack) * plate.radius * 0.965;
+                        vx[i] *= -0.25;
+                        vy[i] *= -0.25;
+                    } else {
+                        vx[i] *= 0.58;
+                        vy[i] *= 0.58;
+                        px[i] += vx[i];
+                        py[i] += vy[i];
+                    }
                 }
             }
         }
@@ -1133,7 +1352,11 @@
         }
 
         function triggerGentleReorganization() {
+            const prevCount = activeParticleCount;
             reassignGrainColorsForStage();
+            if (activeParticleCount > prevCount) {
+                distributeParticlesForCurrentStage();
+            }
             settleEnergy = 0.88;
             for (let s = 0; s < 15; s++) {
                 stepSandSettlement(settleEnergy, 0.0);
@@ -1235,32 +1458,40 @@
         function renderLoop() {
             simTime += 0.035;
 
-            const steadyFloor = vibrationActive ? 0.22 : 0.0;
+            // Interpolación suave entre fondo blanco (0.0) y fondo negro (1.0)
+            const targetTheme = isDarkTheme ? 1.0 : 0.0;
+            themeBlend += (targetTheme - themeBlend) * 0.10;
+
+            const steadyFloor = vibrationActive ? 0.18 : 0.0;
             if (settleEnergy > steadyFloor) {
                 settleEnergy = Math.max(steadyFloor, settleEnergy * 0.92);
             } else {
                 settleEnergy = steadyFloor;
             }
 
-            const breath = vibrationActive ? Math.sin(simTime * 1.8) : 0.0;
+            const breath = vibrationActive ? Math.sin(simTime * 1.6) : 0.0;
             if (settleEnergy > 0.001) {
                 stepSandSettlement(settleEnergy, breath);
             }
 
-            // Fondo blanco papel cálido para realzar los pigmentos y las ondas de arena
-            ctx.fillStyle = '#FAF9F5';
+            // Color de fondo interpolado suavemente entre #FAF9F5 (250,249,245) y #121110 (18,17,16)
+            const bgR = Math.round(250 + (18 - 250) * themeBlend);
+            const bgG = Math.round(249 + (17 - 249) * themeBlend);
+            const bgB = Math.round(245 + (16 - 245) * themeBlend);
+            ctx.fillStyle = `rgb(${bgR}, ${bgG}, ${bgB})`;
             ctx.fillRect(0, 0, width, height);
 
-            // Dibujar los 28,000 granos de arena (Pigmentados por Pictograma o Basalto Oscuro)
-            if (pigmentModeActive) {
+            // Dibujar los granos de arena con la paleta adaptada al contraste del fondo activo
+            if (activeParticleCount > 0) {
+                const useDarkPalette = themeBlend > 0.5;
                 for (let wIdx = 0; wIdx < 4; wIdx++) {
                     const waveObj = WAVE_TYPES[WAVE_KEYS_ORDER[wIdx]];
-                    const shades = waveObj.sandShades;
+                    const shades = useDarkPalette ? waveObj.sandShadesDarkBg : waveObj.sandShadesLightBg;
 
                     for (let sh = 0; sh < 4; sh++) {
                         ctx.fillStyle = shades[sh];
                         ctx.beginPath();
-                        for (let i = sh; i < PARTICLE_COUNT; i += 4) {
+                        for (let i = sh; i < activeParticleCount; i += 4) {
                             if (pWaveColor[i] === wIdx) {
                                 const s = pSize[i];
                                 ctx.rect(px[i], py[i], s, s);
@@ -1268,16 +1499,6 @@
                         }
                         ctx.fill();
                     }
-                }
-            } else {
-                for (let sh = 0; sh < NATURAL_QUARTZ_SHADES.length; sh++) {
-                    ctx.fillStyle = NATURAL_QUARTZ_SHADES[sh];
-                    ctx.beginPath();
-                    for (let i = sh; i < PARTICLE_COUNT; i += NATURAL_QUARTZ_SHADES.length) {
-                        const s = pSize[i];
-                        ctx.rect(px[i], py[i], s, s);
-                    }
-                    ctx.fill();
                 }
             }
 
@@ -1296,77 +1517,160 @@
             requestAnimationFrame(renderLoop);
         }
 
-        // Etapa 1: Los 3 lugares en diversas alturas y tamaños con su promedio en dB sobre fondo blanco
+        function getThemeInk(alpha = 1.0) {
+            const c = Math.round(17 + (247 - 17) * themeBlend);
+            return `rgba(${c}, ${c}, ${c}, ${alpha})`;
+        }
+
+        function getThemeSurface(alpha = 0.94) {
+            const r = Math.round(250 + (22 - 250) * themeBlend);
+            const g = Math.round(249 + (20 - 249) * themeBlend);
+            const b = Math.round(245 + (19 - 245) * themeBlend);
+            return `rgba(${r}, ${g}, ${b}, ${alpha})`;
+        }
+
         function renderOverviewConstellation(boltJitterX, boltJitterY) {
             const { hub, zones } = getOverviewConstellationGeometry();
 
             ctx.save();
 
+            // 1. Conectores desde el borde del círculo central hasta el borde de cada lugar
             zones.forEach(z => {
                 const isHovered = hoveredItem && hoveredItem.type === 'zone' && hoveredItem.key === z.key;
+                const ang = Math.atan2(z.cy - hub.cy, z.cx - hub.cx);
+                const startX = hub.cx + Math.cos(ang) * (hub.radius + 8);
+                const startY = hub.cy + Math.sin(ang) * (hub.radius + 8);
+                const endX = z.cx - Math.cos(ang) * (z.radius + 8);
+                const endY = z.cy - Math.sin(ang) * (z.radius + 8);
+
                 ctx.beginPath();
-                ctx.setLineDash([3, 7]);
-                ctx.strokeStyle = isHovered ? 'rgba(17, 17, 17, 0.78)' : 'rgba(17, 17, 17, 0.25)';
-                ctx.lineWidth = isHovered ? 1.6 : 1.0;
-                ctx.moveTo(hub.cx, hub.cy);
-                ctx.lineTo(z.cx, z.cy);
+                ctx.setLineDash([4, 7]);
+                ctx.strokeStyle = isHovered ? getThemeInk(0.88) : getThemeInk(0.28);
+                ctx.lineWidth = isHovered ? 1.6 : 1.05;
+                ctx.moveTo(startX, startY);
+                ctx.lineTo(endX, endY);
                 ctx.stroke();
             });
             ctx.setLineDash([]);
 
-            const hubPulse = vibrationActive ? Math.sin(simTime * 3.2) * 1.2 : 0;
+            // 2. CÍRCULO CENTRAL MEJORADO (Adaptable a fondo blanco o negro)
+            const hubPulse = vibrationActive ? Math.sin(simTime * 3.0) * 1.2 : 0;
+            const rHub = hub.radius + hubPulse;
+
             ctx.beginPath();
-            ctx.arc(hub.cx, hub.cy, 31 + hubPulse, 0, Math.PI * 2);
-            ctx.fillStyle = 'rgba(250, 249, 245, 0.94)';
-            ctx.fill();
-            ctx.strokeStyle = 'rgba(17, 17, 17, 0.65)';
-            ctx.lineWidth = 1.3;
+            ctx.arc(hub.cx, hub.cy, rHub + 6, 0, Math.PI * 2);
+            ctx.strokeStyle = getThemeInk(0.18);
+            ctx.lineWidth = 1.0;
             ctx.stroke();
 
-            ctx.textAlign = 'center';
-            ctx.fillStyle = '#111111';
-            ctx.font = '600 10.5px Montserrat';
-            ctx.fillText('TOTAL N=62', hub.cx, hub.cy - 3);
-            ctx.font = '500 9.5px Montserrat';
-            ctx.fillStyle = 'rgba(17, 17, 17, 0.72)';
-            ctx.fillText(`${globalAverageDb} dB prom.`, hub.cx, hub.cy + 10);
+            ctx.beginPath();
+            ctx.arc(hub.cx, hub.cy, rHub, 0, Math.PI * 2);
+            ctx.fillStyle = getThemeSurface(0.96);
+            ctx.fill();
+            ctx.strokeStyle = getThemeInk(0.92);
+            ctx.lineWidth = 1.75;
+            ctx.stroke();
 
+            // Anillo interior segmentado con los 4 colores proporcionales a las 30 fichas
+            let startAng = -Math.PI / 2;
+            const globalCounts = {
+                transito: placeHarmonicSummary.sotomayor.waveCounts.transito + placeHarmonicSummary.muelle.waveCounts.transito,
+                obras: placeHarmonicSummary.sotomayor.waveCounts.obras + placeHarmonicSummary.muelle.waveCounts.obras,
+                personas: placeHarmonicSummary.sotomayor.waveCounts.personas + placeHarmonicSummary.muelle.waveCounts.personas,
+                naturaleza: placeHarmonicSummary.sotomayor.waveCounts.naturaleza + placeHarmonicSummary.muelle.waveCounts.naturaleza
+            };
+            WAVE_KEYS_ORDER.forEach(wKey => {
+                const slice = (globalCounts[wKey] / Math.max(1, globalTotalSurveys)) * Math.PI * 2;
+                ctx.beginPath();
+                ctx.arc(hub.cx, hub.cy, rHub - 5, startAng, startAng + slice - 0.06);
+                ctx.strokeStyle = themeBlend > 0.5 ? WAVE_TYPES[wKey].hexDarkBg : WAVE_TYPES[wKey].hex;
+                ctx.lineWidth = 2.6;
+                ctx.stroke();
+                startAng += slice;
+            });
+
+            ctx.textAlign = 'center';
+            ctx.textBaseline = 'middle';
+            ctx.fillStyle = getThemeInk(0.65);
+            ctx.font = '600 8.5px Montserrat';
+            ctx.fillText('TOTAL FICHAS', hub.cx, hub.cy - 22);
+
+            ctx.fillStyle = getThemeInk(1.0);
+            ctx.font = '700 18px Montserrat';
+            ctx.fillText(`N = ${globalTotalSurveys}`, hub.cx, hub.cy - 2);
+
+            ctx.fillStyle = getThemeInk(0.95);
+            ctx.font = '600 11px Montserrat';
+            ctx.fillText(`${globalAverageDb} dB`, hub.cx, hub.cy + 17);
+
+            ctx.fillStyle = getThemeInk(0.58);
+            ctx.font = '500 8px Montserrat';
+            ctx.fillText('PROMEDIO', hub.cx, hub.cy + 30);
+
+            // 3. CÍRCULOS DE CADA LUGAR
             zones.forEach((z, idx) => {
                 const place = PLACES_DATA[z.key];
                 const summary = placeHarmonicSummary[z.key];
+                const hasData = summary.total > 0;
                 const domWave = WAVE_TYPES[summary.dominantWave];
+                const domHex = themeBlend > 0.5 ? domWave.hexDarkBg : domWave.hex;
                 const isHovered = hoveredItem && hoveredItem.type === 'zone' && hoveredItem.key === z.key;
-                const ringVib = vibrationActive ? Math.sin(simTime * 4.5 + idx * 1.7) * 0.95 : 0;
+                const ringVib = (vibrationActive && hasData) ? Math.sin(simTime * 4.2 + idx * 1.7) * 0.8 : 0;
 
                 ctx.beginPath();
-                ctx.arc(z.cx, z.cy, z.radius * 1.02 + ringVib, 0, Math.PI * 2);
-                ctx.strokeStyle = isHovered ? domWave.hex : 'rgba(17, 17, 17, 0.26)';
-                ctx.lineWidth = isHovered ? 2.2 : 1.1;
+                ctx.arc(z.cx, z.cy, z.radius + ringVib, 0, Math.PI * 2);
+                if (!hasData) {
+                    ctx.setLineDash([5, 6]);
+                    ctx.strokeStyle = isHovered ? getThemeInk(0.95) : getThemeInk(0.32);
+                    ctx.lineWidth = isHovered ? 1.8 : 1.1;
+                } else {
+                    ctx.setLineDash([]);
+                    ctx.strokeStyle = isHovered ? domHex : getThemeInk(0.50);
+                    ctx.lineWidth = isHovered ? 2.4 : 1.4;
+                }
                 ctx.stroke();
+                ctx.setLineDash([]);
 
-                drawHexBolt(z.cx + boltJitterX, z.cy + boltJitterY, 8.5 * (z.radius / 115));
+                for (let t = 0; t < 12; t++) {
+                    const ta = (t * Math.PI) / 6;
+                    const rIn = z.radius - 3;
+                    const rOut = z.radius + 3;
+                    ctx.beginPath();
+                    ctx.moveTo(z.cx + Math.cos(ta) * rIn, z.cy + Math.sin(ta) * rIn);
+                    ctx.lineTo(z.cx + Math.cos(ta) * rOut, z.cy + Math.sin(ta) * rOut);
+                    ctx.strokeStyle = getThemeInk(0.28);
+                    ctx.lineWidth = 1;
+                    ctx.stroke();
+                }
 
-                const labelY = z.cy - z.radius - 18;
+                drawHexBolt(z.cx + (hasData ? boltJitterX : 0), z.cy + (hasData ? boltJitterY : 0), 8.5 * (z.radius / 115));
+
+                const topLabelY = z.cy - z.radius - 22;
+                ctx.textBaseline = 'alphabetic';
                 ctx.textAlign = 'center';
-                ctx.fillStyle = '#111111';
-                ctx.font = isHovered ? '600 13px Montserrat' : '600 12px Montserrat';
-                ctx.fillText(`${place.name} (${summary.total}) · ${summary.avgDb} dB`, z.cx, labelY);
+                ctx.fillStyle = getThemeInk(1.0);
+                ctx.font = isHovered ? '700 13px Montserrat' : '600 12.5px Montserrat';
+                ctx.fillText(
+                    hasData ? `${place.name} · ${summary.total} fichas` : `${place.name} · 0 fichas`,
+                    z.cx,
+                    topLabelY
+                );
 
-                ctx.fillStyle = isHovered ? '#111111' : domWave.hexLight;
+                const bottomLabelY = z.cy + z.radius + 22;
+                ctx.fillStyle = isHovered ? getThemeInk(1.0) : (hasData ? domHex : getThemeInk(0.55));
                 ctx.font = isHovered ? '600 10.5px Montserrat' : '500 10.5px Montserrat';
                 ctx.fillText(
-                    isHovered
-                        ? 'Click para abrir encuestas y niveles dB →'
-                        : `Predomina: ${domWave.pictogramName}`,
+                    hasData
+                        ? (isHovered ? 'Click para desglosar fichas y ondas →' : `Promedio ${summary.avgDb} dB · ${summary.minDb}–${summary.maxDb} dB`)
+                        : 'Pendiente levantamiento de fichas',
                     z.cx,
-                    z.cy + z.radius + 20
+                    bottomLabelY
                 );
             });
 
             ctx.restore();
         }
 
-        // Etapa 2: Placa del lugar con sus 3 círculos de volumen en dB y ondas coloreadas por pictograma sobre fondo blanco
         function renderDetailOverlay(boltJitterX, boltJitterY) {
             const plate = getSinglePlateGeometry(false);
             const place = PLACES_DATA[activePlaceKey];
@@ -1375,7 +1679,40 @@
 
             ctx.save();
 
-            // 1. Los 3 Círculos concéntricos del volumen medido con micrófono (BAJO, MEDIO, ALTO dB)
+            // 0. Aro perimetral graduado adaptable a tema blanco o negro
+            ctx.beginPath();
+            ctx.arc(plate.cx, plate.cy, plate.radius, 0, Math.PI * 2);
+            ctx.strokeStyle = getThemeInk(0.55);
+            ctx.lineWidth = 1.6;
+            ctx.stroke();
+
+            for (let deg = 0; deg < 36; deg++) {
+                const a = (deg * 10 * Math.PI) / 180;
+                const isMajor = deg % 3 === 0;
+                const r1 = plate.radius - (isMajor ? 5 : 2.5);
+                const r2 = plate.radius + (isMajor ? 5 : 2.5);
+                ctx.beginPath();
+                ctx.moveTo(plate.cx + Math.cos(a) * r1, plate.cy + Math.sin(a) * r1);
+                ctx.lineTo(plate.cx + Math.cos(a) * r2, plate.cy + Math.sin(a) * r2);
+                ctx.strokeStyle = isMajor ? getThemeInk(0.45) : getThemeInk(0.20);
+                ctx.lineWidth = isMajor ? 1.2 : 0.8;
+                ctx.stroke();
+            }
+
+            if (place.people.length === 0) {
+                drawHexBolt(plate.cx, plate.cy, 10.5);
+                ctx.textAlign = 'center';
+                ctx.fillStyle = getThemeInk(0.95);
+                ctx.font = '600 13px Montserrat';
+                ctx.fillText('Apartado de Buenos Aires sin fichas cargadas', plate.cx, plate.cy + 42);
+                ctx.fillStyle = getThemeInk(0.60);
+                ctx.font = '400 11px Montserrat';
+                ctx.fillText('Densidad de arena: 0 granos (Solo se representan las fichas de la Wiki)', plate.cx, plate.cy + 62);
+                ctx.restore();
+                return;
+            }
+
+            // 1. Los 3 Círculos concéntricos del volumen medido en ficha (BAJO, MEDIO, ALTO dB)
             INTENSITY_RINGS.forEach(ring => {
                 const rPx = plate.radius * ring.radiusNorm;
                 const isSelected = (activeRingFilter === ring.level);
@@ -1385,25 +1722,32 @@
                 ctx.arc(plate.cx, plate.cy, rPx, 0, Math.PI * 2);
 
                 if (isSelected || isHovered) {
-                    ctx.strokeStyle = '#111111';
-                    ctx.lineWidth = 1.85;
+                    ctx.strokeStyle = getThemeInk(0.95);
+                    ctx.lineWidth = 2.0;
                     ctx.setLineDash([]);
                 } else {
-                    ctx.strokeStyle = activeRingFilter === 0 ? 'rgba(17, 17, 17, 0.28)' : 'rgba(17, 17, 17, 0.10)';
-                    ctx.lineWidth = 1.0;
-                    ctx.setLineDash([4, 7]);
+                    ctx.strokeStyle = activeRingFilter === 0 ? getThemeInk(0.32) : getThemeInk(0.12);
+                    ctx.lineWidth = 1.1;
+                    ctx.setLineDash([4, 6]);
                 }
                 ctx.stroke();
                 ctx.setLineDash([]);
 
-                // Etiqueta clara con rango de decibeles (dB) en el eje superior de cada círculo
+                const labelText = ring.short;
+                ctx.font = (isSelected || isHovered) ? '700 9.5px Montserrat' : '600 9px Montserrat';
+                const textW = ctx.measureText(labelText).width;
+                const pillY = plate.cy - rPx;
+
+                ctx.fillStyle = getThemeSurface(0.92);
+                ctx.fillRect(plate.cx - textW / 2 - 6, pillY - 7, textW + 12, 14);
+
                 ctx.textAlign = 'center';
-                ctx.font = (isSelected || isHovered) ? '700 10px Montserrat' : '600 9.2px Montserrat';
-                ctx.fillStyle = (isSelected || isHovered) ? '#111111' : 'rgba(17, 17, 17, 0.65)';
-                ctx.fillText(ring.short, plate.cx, plate.cy - rPx - 6);
+                ctx.textBaseline = 'middle';
+                ctx.fillStyle = (isSelected || isHovered) ? getThemeInk(1.0) : getThemeInk(0.76);
+                ctx.fillText(labelText, plate.cx, pillY);
             });
 
-            // 2. Nodos de personas encuestadas + su onda individual coloreada según su pictograma
+            // 2. Nodos de las fichas reales + su onda individual coloreada según su pictograma
             place.people.forEach(person => {
                 const isIncluded = filteredIds.has(person.id) && (!isolatedPerson || isolatedPerson.id === person.id);
                 const isHighlighted = (hoveredItem && hoveredItem.type === 'person' && hoveredItem.person.id === person.id) ||
@@ -1411,13 +1755,13 @@
 
                 const ringInfo = INTENSITY_RINGS[person.ring - 1];
                 const waveInfo = WAVE_TYPES[person.wave];
+                const waveColorHex = themeBlend > 0.5 ? waveInfo.hexDarkBg : waveInfo.hex;
                 const baseR = plate.radius * ringInfo.radiusNorm;
 
-                // Amplitud de vibración escalada por los decibeles reales medidos con micrófono (person.db)
-                const dbNorm = (person.db - 45) / 43; // 0.0 a 1.0
+                const dbNorm = (person.db - 45) / 45;
                 const livePhase = vibrationActive ? simTime * 5.4 * waveInfo.vibFreq : 0;
                 const nodeRadialTremor = vibrationActive
-                    ? Math.sin(livePhase + person.angle * 3.0) * (0.9 + dbNorm * 2.4)
+                    ? Math.sin(livePhase + person.angle * 3.0) * (0.9 + dbNorm * 2.2)
                     : 0;
 
                 const pxNode = plate.cx + Math.cos(person.angle) * (baseR + nodeRadialTremor);
@@ -1425,8 +1769,8 @@
 
                 if (isIncluded) {
                     ctx.beginPath();
-                    const arcSpan = isHighlighted ? Math.PI * 2 : 0.58;
-                    const steps = isHighlighted ? 160 : 40;
+                    const arcSpan = isHighlighted ? Math.PI * 2 : 0.62;
+                    const steps = isHighlighted ? 160 : 42;
                     const waveAmpPx = (5.5 + dbNorm * 11.5) * (isHighlighted ? 1.45 : 0.85);
 
                     for (let s = 0; s <= steps; s++) {
@@ -1439,28 +1783,26 @@
                         if (s === 0) ctx.moveTo(wx, wy);
                         else ctx.lineTo(wx, wy);
                     }
-                    ctx.strokeStyle = isHighlighted ? waveInfo.hexLight : waveInfo.hex;
-                    ctx.globalAlpha = isHighlighted ? 0.98 : 0.72;
-                    ctx.lineWidth = isHighlighted ? 2.3 : 1.4;
+                    ctx.strokeStyle = waveColorHex;
+                    ctx.globalAlpha = isHighlighted ? 0.98 : 0.78;
+                    ctx.lineWidth = isHighlighted ? 2.4 : 1.5;
                     ctx.stroke();
                     ctx.globalAlpha = 1.0;
                 }
 
-                // Punto coloreado de la encuesta/micrófono según su pictograma
-                const rDot = isHighlighted ? 6.6 : (isIncluded ? 4.4 : 2.0);
+                const rDot = isHighlighted ? 6.8 : (isIncluded ? 4.8 : 2.2);
                 ctx.beginPath();
                 ctx.arc(pxNode, pyNode, rDot, 0, Math.PI * 2);
-                ctx.fillStyle = isHighlighted ? '#111111' : (isIncluded ? waveInfo.hex : 'rgba(17, 17, 17, 0.16)');
+                ctx.fillStyle = isHighlighted ? getThemeInk(1.0) : (isIncluded ? waveColorHex : getThemeInk(0.18));
                 ctx.fill();
 
                 if (isIncluded) {
-                    ctx.lineWidth = isHighlighted ? 2.0 : 1.1;
-                    ctx.strokeStyle = isHighlighted ? waveInfo.hex : '#FAF9F5';
+                    ctx.lineWidth = isHighlighted ? 2.0 : 1.2;
+                    ctx.strokeStyle = isHighlighted ? waveColorHex : getThemeSurface(1.0);
                     ctx.stroke();
                 }
             });
 
-            // 3. Perno metálico central con micro-vibración
             drawHexBolt(plate.cx + boltJitterX, plate.cy + boltJitterY, 10.5);
 
             ctx.restore();
@@ -1471,8 +1813,8 @@
             ctx.translate(cx, cy);
 
             ctx.beginPath();
-            ctx.arc(1.5, 2.2, hexRadius * 1.32, 0, Math.PI * 2);
-            ctx.fillStyle = 'rgba(17, 17, 17, 0.18)';
+            ctx.arc(1.2, 2.0, hexRadius * 1.32, 0, Math.PI * 2);
+            ctx.fillStyle = 'rgba(0, 0, 0, 0.26)';
             ctx.fill();
 
             ctx.beginPath();
@@ -1480,7 +1822,7 @@
             ctx.fillStyle = '#27272A';
             ctx.fill();
             ctx.lineWidth = 1;
-            ctx.strokeStyle = '#111111';
+            ctx.strokeStyle = '#52525B';
             ctx.stroke();
 
             ctx.beginPath();
@@ -1588,29 +1930,19 @@
                 if (btn) btn.classList.toggle('active', activeRingFilter === r);
             }
 
-            // Actualizar etiqueta de modo matemático (n, m) de Bourke / Ponce Campuzano
             const badge = document.getElementById('activeModeFormulaBadge');
             if (badge) {
-                const ringLvl = activeRingFilter > 0 ? activeRingFilter : 2;
-                if (isolatedPerson) {
-                    const wObj = WAVE_TYPES[isolatedPerson.wave];
-                    const mode = wObj.modesByRing[isolatedPerson.ring];
-                    badge.textContent = `Ecuación Chladni ${wObj.pictogramName}: ${mode.label} · Micrófono ${isolatedPerson.db} dB`;
-                } else if (activeWaveFilter !== 'todas') {
-                    const wObj = WAVE_TYPES[activeWaveFilter];
-                    const mode = wObj.modesByRing[ringLvl];
-                    badge.textContent = `Ecuación Chladni ${wObj.pictogramName}: ${mode.label} · ${wObj.waveQuality}`;
+                const rLvl = activeRingFilter > 0 ? activeRingFilter : 2;
+                if (activeWaveFilter === 'todas') {
+                    badge.textContent = `Modo Chladni (n, m): Superposición real (${place.people.length} fichas · Promedio ${summary.avgDb} dB)`;
                 } else {
-                    badge.textContent = `Modo Chladni (n, m): Superposición ponderada · Promedio ${summary.avgDb} dB`;
+                    const wObj = WAVE_TYPES[activeWaveFilter];
+                    const mInfo = wObj.modesByRing[rLvl];
+                    badge.textContent = `Modo Chladni ${wObj.pictogramName} · ${INTENSITY_RINGS[rLvl - 1].name}: ${mInfo.label} — ${wObj.waveQuality}`;
                 }
             }
         }
 
-        /**
-         * ============================================================================
-         * 6. ACTUALIZACIÓN DEL TEXTO DE LAS ESQUINAS (CON LECTURAS EN DECIBELES dB)
-         * ============================================================================
-         */
         function updatePosterTypography() {
             const l1 = document.getElementById('posterLine1');
             const l2 = document.getElementById('posterLine2');
@@ -1624,116 +1956,104 @@
                 if (hoveredItem.type === 'zone') {
                     const p = PLACES_DATA[hoveredItem.key];
                     const s = placeHarmonicSummary[hoveredItem.key];
+                    if (s.total === 0) {
+                        l1.textContent = p.name;
+                        l2.textContent = '0 fichas registradas en la Wiki';
+                        l3.textContent = 'Densidad de arena: 0 granos';
+                        l4.textContent = 'Apartado reservado sin datos ficticios';
+                        l5.textContent = p.subtitle;
+                        c1.textContent = 'Click para ver placa en espera →';
+                        c2.textContent = 'Solo se visualizan las fichas reales de la Wiki';
+                        return;
+                    }
                     l1.textContent = p.name;
-                    l2.textContent = `${s.total} encuestas · Micrófono ${s.avgDb} dB prom.`;
-                    l3.textContent = `Rango: ${s.minDb} a ${s.maxDb} dB (${WAVE_TYPES[s.dominantWave].pictogramName})`;
+                    l2.textContent = `${s.total} fichas · Promedio ${s.avgDb} dB`;
+                    l3.textContent = `Rango micrófono: ${s.minDb}–${s.maxDb} dB`;
                     l4.textContent = `Tránsito ${s.waveCounts.transito} · Obras ${s.waveCounts.obras}`;
                     l5.textContent = `Personas ${s.waveCounts.personas} · Naturaleza ${s.waveCounts.naturaleza}`;
                     c1.textContent = 'Click en este círculo para desglosar →';
-                    c2.textContent = '3 anillos de volumen (dB) y 4 colores de arena';
+                    c2.textContent = `Densidad de arena: ${(s.total * GRAINS_PER_SURVEY).toLocaleString('es-CL')} granos`;
                     return;
                 }
                 if (hoveredItem.type === 'person') {
                     const per = hoveredItem.person;
                     const w = WAVE_TYPES[per.wave];
-                    const ringObj = INTENSITY_RINGS[per.ring - 1];
-                    const mode = w.modesByRing[per.ring];
-                    l1.textContent = `Encuesta ${per.id} · ${per.db} dB`;
-                    l2.textContent = `Pictograma: ${w.pictogramName} ${mode.label}`;
-                    l3.textContent = `${w.waveQuality}`;
-                    l4.textContent = `Volumen Micrófono: ${ringObj.name} (${ringObj.dbRange})`;
-                    l5.textContent = per.note;
-                    c1.textContent = 'Click para aislar este patrón (n, m) en la arena →';
-                    c2.textContent = PLACES_DATA[activePlaceKey].name;
-                    return;
-                }
-                if (hoveredItem.type === 'ring') {
-                    const ringObj = INTENSITY_RINGS[hoveredItem.level - 1];
-                    const place = PLACES_DATA[activePlaceKey];
-                    const inRing = place.people.filter(p => p.ring === hoveredItem.level);
-                    const avgRingDb = inRing.length
-                        ? (inRing.reduce((acc, item) => acc + item.db, 0) / inRing.length).toFixed(1)
-                        : '0.0';
-                    l1.textContent = `${place.name} · Volumen ${ringObj.name}`;
-                    l2.textContent = `${inRing.length} registros · Promedio ${avgRingDb} dB`;
-                    l3.textContent = ringObj.label;
-                    l4.textContent = 'Medición de micrófono en terreno';
-                    l5.textContent = place.subtitle;
-                    c1.textContent = `Click para aislar el anillo ${ringObj.name} (${ringObj.dbRange}) →`;
-                    c2.textContent = '3 niveles: Bajo · Medio · Alto';
+                    const ringInfo = INTENSITY_RINGS[per.ring - 1];
+                    const modeInfo = w.modesByRing[per.ring];
+                    l1.textContent = per.id;
+                    l2.textContent = `Pictograma: ${w.pictogramName} ${modeInfo.label}`;
+                    l3.textContent = `Micrófono: ${per.db} dB (${ringInfo.name})`;
+                    l4.textContent = `${w.waveQuality}`;
+                    l5.textContent = PLACES_DATA[activePlaceKey].name;
+                    c1.textContent = 'Click para aislar esta ficha en la placa →';
+                    c2.textContent = `Rango del anillo: ${ringInfo.dbRange}`;
                     return;
                 }
             }
 
             if (currentStage === 'intro') {
                 l1.textContent = 'Cartografía Cimática';
-                l2.textContent = 'Encuestas y volumen con micrófono (dB)';
-                l3.textContent = `62 registros · Promedio ${globalAverageDb} dB`;
-                l4.textContent = 'Sotomayor, Muelle Prat,';
-                l5.textContent = 'Buenos Aires';
+                l2.textContent = 'Fichas de Percepción · Grupo 2';
+                l3.textContent = `${globalTotalSurveys} fichas reales · Promedio ${globalAverageDb} dB`;
+                l4.textContent = `Plaza Sotomayor (${PLACES_DATA.sotomayor.people.length}) · Muelle Prat (${PLACES_DATA.muelle.people.length})`;
+                l5.textContent = 'Buenos Aires (0 · Próximo registro)';
                 c1.textContent = 'Click en la placa para ingresar al total →';
-                c2.textContent = 'Volumen micrófono: Bajo (45–58 dB) · Medio (59–72 dB) · Alto (73–88 dB)';
+                c2.textContent = 'Volumen micrófono: Bajo (45–60 dB) · Medio (61–74 dB) · Alto (75–90 dB)';
                 return;
             }
 
             if (currentStage === 'overview') {
-                const sSoto = placeHarmonicSummary.sotomayor;
-                const sMuelle = placeHarmonicSummary.muelle;
-                const sBsAs = placeHarmonicSummary.buenosaires;
-                l1.textContent = 'Resonancia Total';
-                l2.textContent = `62 encuestas · Promedio ${globalAverageDb} dB`;
-                l3.textContent = `Sotomayor (24 · ${sSoto.avgDb} dB)`;
-                l4.textContent = `Muelle Prat (20 · ${sMuelle.avgDb} dB),`;
-                l5.textContent = `Buenos Aires (18 · ${sBsAs.avgDb} dB)`;
-                c1.textContent = 'Selecciona uno de los 3 lugares en la placa →';
-                c2.textContent = 'Arena coloreada según proporción de cada pictograma';
+                l1.textContent = 'Resonancia Total Wiki';
+                l2.textContent = `${globalTotalSurveys} fichas · Promedio ${globalAverageDb} dB`;
+                l3.textContent = `Plaza Sotomayor: ${placeHarmonicSummary.sotomayor.total} fichas (${placeHarmonicSummary.sotomayor.avgDb} dB)`;
+                l4.textContent = `Muelle Prat: ${placeHarmonicSummary.muelle.total} fichas (${placeHarmonicSummary.muelle.avgDb} dB)`;
+                l5.textContent = 'Buenos Aires: 0 fichas (En espera)';
+                c1.textContent = 'Selecciona un lugar en la placa →';
+                c2.textContent = 'La forma de la onda se conserva activa en cada territorio';
                 return;
             }
 
-            // Etapa 2: Lugar en detalle
             const place = PLACES_DATA[activePlaceKey];
             const summary = placeHarmonicSummary[activePlaceKey];
             const filtered = getFilteredPeopleInActivePlace();
-            const filteredAvgDb = filtered.length
-                ? (filtered.reduce((acc, item) => acc + item.db, 0) / filtered.length).toFixed(1)
-                : summary.avgDb;
 
             if (isolatedPerson) {
                 const w = WAVE_TYPES[isolatedPerson.wave];
-                const ringObj = INTENSITY_RINGS[isolatedPerson.ring - 1];
-                const mode = w.modesByRing[isolatedPerson.ring];
+                const ringInfo = INTENSITY_RINGS[isolatedPerson.ring - 1];
+                const modeInfo = w.modesByRing[isolatedPerson.ring];
                 l1.textContent = `${place.name} · ${isolatedPerson.id}`;
-                l2.textContent = `${w.pictogramName} ${mode.label} · ${isolatedPerson.db} dB`;
-                l3.textContent = `${w.waveQuality} · Nivel ${ringObj.name}`;
-                l4.textContent = isolatedPerson.note;
-                l5.textContent = 'Patrón Chladni individual aislado';
-                c1.textContent = 'Click para volver al total del lugar →';
-                c2.textContent = `${summary.total} registros en ${place.name}`;
+                l2.textContent = `Pictograma: ${w.pictogramName} ${modeInfo.label}`;
+                l3.textContent = `Volumen: ${isolatedPerson.db} dB (${ringInfo.name})`;
+                l4.textContent = w.waveQuality;
+                l5.textContent = place.subtitle;
+                c1.textContent = 'Click para restaurar el total del lugar →';
+                c2.textContent = `${summary.total} fichas reales en ${place.name}`;
                 return;
             }
 
-            const ringLvl = activeRingFilter > 0 ? activeRingFilter : 2;
             l1.textContent = place.name;
-            l2.textContent = `${filtered.length} de ${summary.total} encuestas · ${filteredAvgDb} dB prom.`;
+            l2.textContent = summary.total > 0
+                ? `${filtered.length} de ${summary.total} fichas · Promedio ${summary.avgDb} dB`
+                : '0 fichas registradas en la Wiki';
             l3.textContent = activeWaveFilter === 'todas'
-                ? `Predomina: ${WAVE_TYPES[summary.dominantWave].pictogramName}`
-                : `Pictograma: ${WAVE_TYPES[activeWaveFilter].pictogramName} ${WAVE_TYPES[activeWaveFilter].modesByRing[ringLvl].label}`;
+                ? (summary.total > 0 ? `Predomina: ${WAVE_TYPES[summary.dominantWave].pictogramName}` : 'Sin arena asignada')
+                : `Pictograma: ${WAVE_TYPES[activeWaveFilter].pictogramName}`;
             l4.textContent = activeRingFilter === 0
-                ? '3 niveles micrófono: Bajo · Medio · Alto (dB)'
+                ? (summary.total > 0 ? `Rango medido: ${summary.minDb}–${summary.maxDb} dB` : 'Esperando mediciones de micrófono')
                 : `${INTENSITY_RINGS[activeRingFilter - 1].label}`;
             l5.textContent = place.subtitle;
-            c1.textContent = 'Filtra arriba por pictograma o volumen en dB →';
-            c2.textContent = 'Click aquí para volver a los 3 territorios';
+            c1.textContent = 'Filtra arriba por pictograma o nivel de dB →';
+            c2.textContent = 'Click aquí para volver a la vista general';
         }
 
         function updateHarmonicEmblem() {
             const svg = document.getElementById('harmonicEmblem');
-            let weights = { naturaleza: 0.34, transito: 0.28, personas: 0.24, obras: 0.14 };
+            let weights = { transito: 0.25, obras: 0.20, personas: 0.25, naturaleza: 0.30 };
 
             if (currentStage === 'detail') {
                 const filtered = getFilteredPeopleInActivePlace();
                 const total = Math.max(1, filtered.length);
-                weights = { naturaleza: 0, transito: 0, personas: 0, obras: 0 };
+                weights = { transito: 0, obras: 0, personas: 0, naturaleza: 0 };
                 filtered.forEach(p => weights[p.wave] += 1 / total);
             }
 
@@ -1741,9 +2061,9 @@
             WAVE_KEYS_ORDER.forEach((k, idx) => {
                 const wInfo = WAVE_TYPES[k];
                 const ratio = weights[k];
-                const radius = 20 + ratio * 26;
+                const radius = 19 + ratio * 27;
                 const sides = Math.max(4, wInfo.emblemSides);
-                const rot = (idx * 19 * Math.PI) / 180;
+                const rot = (idx * 21 * Math.PI) / 180;
 
                 let pts = [];
                 for (let s = 0; s < sides; s++) {
@@ -1752,19 +2072,15 @@
                 }
 
                 const isHighlighted = (activeWaveFilter === 'todas' || activeWaveFilter === k);
-                const opacity = isHighlighted ? 0.94 : 0.22;
-                const strokeColor = pigmentModeActive ? wInfo.hex : '#111111';
-                html += `<polygon points="${pts.join(' ')}" fill="none" stroke="${strokeColor}" stroke-width="1.8" opacity="${opacity}" />`;
+                const opacity = isHighlighted ? 0.95 : 0.22;
+                const strokeW = isHighlighted ? 2.1 : 1.2;
+                const strokeHex = isDarkTheme ? wInfo.hexDarkBg : wInfo.hex;
+                html += `<polygon points="${pts.join(' ')}" fill="none" stroke="${strokeHex}" stroke-width="${strokeW}" opacity="${opacity}" />`;
             });
 
             svg.innerHTML = html;
         }
 
-        /**
-         * ============================================================================
-         * 7. INTERACCIÓN CON EL LIENZO
-         * ============================================================================
-         */
         function setupCanvasInteractions() {
             canvas.addEventListener('mousemove', (e) => {
                 const mx = e.clientX;
@@ -1793,11 +2109,10 @@
                     return;
                 }
 
-                // Etapa 2: Detalle del lugar
                 const plate = getSinglePlateGeometry(false);
                 const place = PLACES_DATA[activePlaceKey];
                 let foundPerson = null;
-                let minDist = 14;
+                let minDist = 15;
 
                 for (let p of place.people) {
                     const rPx = plate.radius * INTENSITY_RINGS[p.ring - 1].radiusNorm;
@@ -1820,7 +2135,7 @@
                 const distCenter = Math.hypot(mx - plate.cx, my - plate.cy);
                 let foundRing = null;
                 for (let ring of INTENSITY_RINGS) {
-                    if (Math.abs(distCenter - plate.radius * ring.radiusNorm) < 9) {
+                    if (Math.abs(distCenter - plate.radius * ring.radiusNorm) < 10) {
                         foundRing = ring;
                         break;
                     }
@@ -1829,7 +2144,6 @@
                 if (foundRing) {
                     canvas.style.cursor = 'pointer';
                     hoveredItem = { type: 'ring', level: foundRing.level };
-                    updatePosterTypography();
                 } else {
                     canvas.style.cursor = 'default';
                     if (hoveredItem) {
