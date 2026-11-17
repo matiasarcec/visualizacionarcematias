@@ -159,6 +159,20 @@
         .cta-pulse {
             animation: subtlePulse 2.8s infinite ease-in-out;
         }
+
+        @keyframes smoothStageFade {
+            0% {
+                opacity: 0;
+                transform: translateY(10px);
+            }
+            100% {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        .stage-fade-in {
+            animation: smoothStageFade 0.85s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+        }
     </style>
 </head>
 <body class="w-screen h-screen overflow-hidden select-none">
@@ -185,11 +199,6 @@
             <span id="themeLabel">Fondo: Blanco</span>
         </button>
 
-        <button onclick="toggleSandVibration()" class="interactive theme-pill">
-            <span id="vibDot" class="w-2 h-2 rounded-full bg-[#16A34A] animate-ping"></span>
-            <span id="vibLabel">Vibración · Activa</span>
-        </button>
-
         <button onclick="toggleWikiModal()" class="interactive theme-pill">
             <span>Fichas Wiki (<span id="wikiBtnCount">30</span>)</span>
         </button>
@@ -199,11 +208,16 @@
          CONTROLES DE LA SECCIÓN PREVIA: CATÁLOGO DE ONDAS POR PICTOGRAMA
          ========================================================================== -->
     <div id="pictogramCatalogControls" class="ui-corner bottom-6 sm:bottom-8 right-7 sm:right-12 hidden flex-col items-end gap-3 poster-text">
-        <div class="interactive flex flex-wrap justify-end items-center gap-1.5">
-            <span class="text-[10px] font-semibold uppercase tracking-[0.12em] opacity-65 mr-1">Intensidad Percibida:</span>
-            <button onclick="setCatalogRingLevel(1)" id="catRing-1" class="ring-pill">Anillo Bajo</button>
-            <button onclick="setCatalogRingLevel(2)" id="catRing-2" class="ring-pill active">Anillo Medio</button>
-            <button onclick="setCatalogRingLevel(3)" id="catRing-3" class="ring-pill">Anillo Alto</button>
+        <div class="interactive flex flex-wrap items-center gap-2">
+            <button onclick="setCatalogRingLevel(1)" id="catRing-1" class="ring-pill">
+                Onda Baja
+            </button>
+            <button onclick="setCatalogRingLevel(2)" id="catRing-2" class="ring-pill active">
+                Onda Media
+            </button>
+            <button onclick="setCatalogRingLevel(3)" id="catRing-3" class="ring-pill">
+                Onda Alta
+            </button>
         </div>
         <button onclick="goToStage('overview')" class="interactive theme-pill font-semibold">
             <span>Continuar a Superposición Total (30) →</span>
@@ -264,12 +278,20 @@
             <span class="hidden" id="wfCount-todas">15</span>
         </div>
 
-        <!-- Fila 2: Los 3 Niveles de Intensidad del Instrumento -->
-        <div class="interactive flex flex-wrap justify-center items-center gap-1.5">
-            <button onclick="setRingFilter(0)" id="rf-0" class="ring-pill active">Todos (3 Anillos)</button>
-            <button onclick="setRingFilter(1)" id="rf-1" class="ring-pill">Bajo (<span id="rfCount-1">2</span>)</button>
-            <button onclick="setRingFilter(2)" id="rf-2" class="ring-pill">Medio (<span id="rfCount-2">6</span>)</button>
-            <button onclick="setRingFilter(3)" id="rf-3" class="ring-pill">Alto (<span id="rfCount-3">7</span>)</button>
+        <!-- Fila 2: Selector de Onda Baja, Media y Alta -->
+        <div class="interactive flex flex-wrap justify-center items-center gap-2">
+            <button onclick="setRingFilter('todos')" id="rf-todos" class="ring-pill active">
+                Todas (<span id="rfCount-todos">15</span>)
+            </button>
+            <button onclick="setRingFilter(1)" id="rf-1" class="ring-pill">
+                Baja (<span id="rfCount-1">2</span>)
+            </button>
+            <button onclick="setRingFilter(2)" id="rf-2" class="ring-pill">
+                Media (<span id="rfCount-2">6</span>)
+            </button>
+            <button onclick="setRingFilter(3)" id="rf-3" class="ring-pill">
+                Alta (<span id="rfCount-3">7</span>)
+            </button>
         </div>
 
         <!-- Etiqueta cuando se aísla a 1 persona -->
@@ -282,7 +304,7 @@
          ESQUINA INFERIOR IZQUIERDA
          Navegación limpia con todos los lugares + Bloque tipográfico principal
          ========================================================================== -->
-    <div class="ui-corner bottom-7 left-7 sm:bottom-11 sm:left-12 max-w-md poster-text">
+    <div id="bottomLeftBlock" class="ui-corner bottom-7 left-7 sm:bottom-11 sm:left-12 max-w-md poster-text transition-all duration-700 ease-out">
 
         <!-- Navegación de etapas y todos los lugares limpia (solo texto, sin encasillar) -->
         <nav id="QuickPlaceNav" class="interactive hidden mb-4 flex flex-wrap items-center gap-x-5 gap-y-1 text-[11px] font-medium tracking-[0.03em] opacity-80">
@@ -315,7 +337,7 @@
                 30 fichas reales · Sotomayor (15) y Muelle Prat (15)
             </div>
             <div id="posterLine4" class="text-sm sm:text-[17px] font-normal opacity-80">
-                3 círculos del instrumento (Bajo · Medio · Alto)
+                Grosor del trazo según cantidad de respuestas
             </div>
             <div id="posterLine5" class="text-sm sm:text-[17px] font-normal opacity-80">
                 Fichas de Terreno · Wiki Grupo 2
@@ -407,15 +429,11 @@
                 hex: '#D97706',
                 hexDarkBg: '#F59E0B',
                 pictogramName: 'Tránsito',
-                waveQuality: 'Trama Reticular de Flujo (n=2, m=4)',
+                waveQuality: 'Cuadrícula Vial · Calles y Cruces',
                 lobes: 4,
                 emblemSides: 6,
                 vibFreq: 1.55,
-                modesByRing: {
-                    1: { n: 2, m: 2, kRadial: 2.0 },
-                    2: { n: 3, m: 3, kRadial: 3.0 },
-                    3: { n: 4, m: 4, kRadial: 4.0 }
-                }
+                mode: { n: 1, m: 3, kRadial: 3.0 }
             },
             obras: {
                 key: 'obras',
@@ -423,15 +441,11 @@
                 hex: '#EA580C',
                 hexDarkBg: '#F97316',
                 pictogramName: 'Obras',
-                waveQuality: 'Estrella Radial Fragmentada (n=4, m=8)',
+                waveQuality: 'Estrella Radial de Impacto y Choque',
                 lobes: 8,
                 emblemSides: 8,
                 vibFreq: 2.15,
-                modesByRing: {
-                    1: { n: 4, m: 2, kRadial: 2.2 },
-                    2: { n: 6, m: 3, kRadial: 3.2 },
-                    3: { n: 8, m: 4, kRadial: 4.2 }
-                }
+                mode: { n: 4, m: 2.2, kRadial: 3.2 }
             },
             personas: {
                 key: 'personas',
@@ -439,15 +453,11 @@
                 hex: '#0284C7',
                 hexDarkBg: '#38BDF8',
                 pictogramName: 'Personas',
-                waveQuality: 'Frentes Hiperbólicos Abiertos (n=1, m=2)',
+                waveQuality: 'Arcos Vocales Enfrentados · Diálogo',
                 lobes: 2,
                 emblemSides: 3,
                 vibFreq: 0.92,
-                modesByRing: {
-                    1: { n: 1, m: 1, kRadial: 1.3 },
-                    2: { n: 1, m: 2, kRadial: 1.8 },
-                    3: { n: 2, m: 2, kRadial: 2.3 }
-                }
+                mode: { n: 1.0, m: 2.0, kRadial: 1.9 }
             },
             naturaleza: {
                 key: 'naturaleza',
@@ -455,29 +465,13 @@
                 hex: '#16A34A',
                 hexDarkBg: '#4ADE80',
                 pictogramName: 'Naturaleza',
-                waveQuality: 'Roseta Cuadrilobular Concéntrica (n=2, m=5)',
+                waveQuality: 'Roseta Orgánica de Pétalos y Olas',
                 lobes: 4,
                 emblemSides: 4,
                 vibFreq: 0.72,
-                modesByRing: {
-                    1: { n: 1, m: 2, kRadial: 1.8 },
-                    2: { n: 2, m: 3, kRadial: 2.6 },
-                    3: { n: 3, m: 4, kRadial: 3.4 }
-                }
+                mode: { n: 1, m: 4, kRadial: 2.5 }
             }
         };
-
-        /**
-         * LOS 3 CÍRCULOS CONCÉNTRICOS DEL INSTRUMENTO DE PERCEPCIÓN SONORA:
-         * - Anillo 1 (Bajo · Interior r=0.33)
-         * - Anillo 2 (Medio · Intermedio r=0.62)
-         * - Anillo 3 (Alto · Exterior r=0.90)
-         */
-        const INTENSITY_RINGS = [
-            { level: 1, short: 'BAJO',  name: 'Bajo',  label: 'Anillo Bajo (Interior)',  radiusNorm: 0.33, vibBoost: 0.65 },
-            { level: 2, short: 'MEDIO', name: 'Medio', label: 'Anillo Medio (Centro)',   radiusNorm: 0.62, vibBoost: 1.05 },
-            { level: 3, short: 'ALTO',  name: 'Alto',  label: 'Anillo Alto (Exterior)', radiusNorm: 0.90, vibBoost: 1.55 }
-        ];
 
         /**
          * FICHAS DE TERRENO — PROYECTO DE VISUALIZACIÓN GRUPO 2
@@ -541,43 +535,43 @@
         /**
          * ============================================================================
          * 5. ECUACIÓN DIFERENCIADA POR FAMILIA CIMÁTICA (DIE AKUSTIK / BOURKE)
-         * Garantiza 4 siluetas visuales inconfundibles entre sí:
-         * 1. Tránsito: Cuadrícula cartesiana rotada (corredores rectilíneos cruzados)
-         * 2. Obras: Corona estrellada polar de 8/12 puntas con anillos de corte
-         * 3. Personas: Hipérbolas abiertas bilaterales (x² - y² = cte)
-         * 4. Naturaleza: Anillos concéntricos modulados por pétalos sinusoidales suaves
          * ============================================================================
          */
-        function evaluateBourkeChladniMode(waveTypeObj, ringLevel, nx, ny, rNorm, theta, freqMod = 1.0) {
-            const mode = waveTypeObj.modesByRing[ringLevel] || waveTypeObj.modesByRing[2];
+        function evaluateBourkeChladniMode(waveTypeObj, nx, ny, rNorm, theta, freqMod = 1.0, ringLevel = 2) {
+            const mode = waveTypeObj.mode;
             const key = waveTypeObj.key;
+            const ringScale = ringLevel === 1 ? 0.76 : (ringLevel === 3 ? 1.28 : 1.0);
 
             if (key === 'transito') {
-                // 1. TRÁNSITO: Trama reticular ortogonal-diagonal (corredores rectos cruzados)
-                const k = (1.5 + mode.n * 0.55) * Math.PI * freqMod;
-                const u = (nx + ny) * 0.7071;
-                const v = (nx - ny) * 0.7071;
-                return Math.cos(k * u) * Math.cos(k * v);
+                const L = 0.68 * freqMod * ringScale;
+                const u = nx * L;
+                const v = ny * L;
+                return Math.cos(mode.n * Math.PI * u) * Math.cos(mode.m * Math.PI * v) +
+                       Math.cos(mode.m * Math.PI * u) * Math.cos(mode.n * Math.PI * v);
             }
 
             if (key === 'obras') {
-                // 2. OBRAS: Estrella radial de alta frecuencia (rayos agudos + anillos de impacto)
-                const spokes = (2 + mode.n) * freqMod;
-                const rings = (1.2 + mode.m * 0.45) * Math.PI;
-                return Math.cos(spokes * theta) * Math.sin(rings * rNorm);
+                const spokes = Math.max(3, Math.round(mode.n * freqMod * ringScale));
+                const shockRings = mode.m * Math.PI * rNorm * 0.92 * ringScale;
+                return Math.cos(spokes * theta) * Math.cos(shockRings) - 0.24 * Math.cos(2 * spokes * theta);
             }
 
             if (key === 'personas') {
-                // 3. PERSONAS: Frentes hiperbólicos abiertos opuestos (como Die Akustik pág. 23)
-                const scale = (1.15 + mode.m * 0.38) * freqMod;
-                const hyp = (nx * nx - ny * ny) * scale;
-                return Math.cos(Math.PI * hyp) - 0.35 * Math.cos(Math.PI * nx * scale * 0.7);
+                const scale = 0.72 * freqMod * ringScale;
+                const u = (nx + ny) * 0.7071 * scale;
+                const v = (nx - ny) * 0.7071 * scale;
+                return Math.cos(mode.n * Math.PI * u) * Math.cos(mode.m * Math.PI * v) -
+                       Math.cos(mode.m * Math.PI * u) * Math.cos(mode.n * Math.PI * v);
             }
 
-            // 4. NATURALEZA: Anillos concéntricos orgánicos con 4 lóbulos curvos suaves
-            const lobes = 4;
-            const wavePhase = mode.kRadial * freqMod * Math.PI * rNorm + 0.38 * Math.sin(lobes * theta);
-            return Math.sin(wavePhase);
+            const L = 0.76 * freqMod * ringScale;
+            const u = nx * L;
+            const v = ny * L;
+            const bourkeRosette =
+                Math.cos(mode.n * Math.PI * u) * Math.cos(mode.m * Math.PI * v) -
+                Math.cos(mode.m * Math.PI * u) * Math.cos(mode.n * Math.PI * v);
+            const waterRipple = Math.sin(mode.kRadial * ringScale * Math.PI * rNorm + 0.42 * Math.cos(4 * theta));
+            return bourkeRosette * 0.68 + waterRipple * 0.32;
         }
 
         /**
@@ -603,11 +597,14 @@
         const pRingLevel = new Uint8Array(MAX_PARTICLES);
         const pPhase = new Float32Array(MAX_PARTICLES);
         const pShadeVariant = new Uint8Array(MAX_PARTICLES);
+        // Offset transversal [-1, 1] y factor de grosor por partícula según la variable activa
+        const pRidgeOffset = new Float32Array(MAX_PARTICLES);
+        const pStrokeWeight = new Float32Array(MAX_PARTICLES);
 
         let currentStage = 'intro';
         let activePlaceKey = 'sotomayor';
         let activeWaveFilter = 'todas';
-        let activeRingFilter = 0;
+        let activeRingFilter = 'todos';
         let catalogRingLevel = 2;
         let isolatedPerson = null;
         let hoveredItem = null;
@@ -616,6 +613,7 @@
         let acousticTime = 0;
         let isDarkTheme = false;
         let themeBlend = 0.0;
+        let stageRevealAlpha = 1.0;
 
         const placeHarmonicSummary = {};
         let globalTotalSurveys = 0;
@@ -779,24 +777,54 @@
             if (currentStage === 'intro') {
                 records = [...PLACES_DATA.sotomayor.people, ...PLACES_DATA.muelle.people];
             } else if (currentStage === 'pictograms') {
+                const globalCounts = {
+                    transito:   placeHarmonicSummary.sotomayor.waveCounts.transito   + placeHarmonicSummary.muelle.waveCounts.transito,
+                    obras:      placeHarmonicSummary.sotomayor.waveCounts.obras      + placeHarmonicSummary.muelle.waveCounts.obras,
+                    personas:   placeHarmonicSummary.sotomayor.waveCounts.personas   + placeHarmonicSummary.muelle.waveCounts.personas,
+                    naturaleza: placeHarmonicSummary.sotomayor.waveCounts.naturaleza + placeHarmonicSummary.muelle.waveCounts.naturaleza
+                };
                 const keys = ['transito', 'obras', 'personas', 'naturaleza'];
                 keys.forEach((k, idx) => {
-                    for (let c = 0; c < 7; c++) {
+                    const countForPicto = Math.max(2, globalCounts[k]);
+                    for (let c = 0; c < countForPicto; c++) {
                         records.push({
                             wave: k,
                             ring: catalogRingLevel,
-                            zoneIdx: idx
+                            zoneIdx: idx,
+                            pictoCount: countForPicto,
+                            maxCountRef: 9
                         });
                     }
                 });
             } else if (currentStage === 'overview') {
-                PLACES_DATA.sotomayor.people.forEach(p => records.push({ ...p, zoneIdx: 0 }));
-                PLACES_DATA.muelle.people.forEach(p => records.push({ ...p, zoneIdx: 1 }));
+                PLACES_DATA.sotomayor.people.forEach(p => records.push({
+                    ...p,
+                    zoneIdx: 0,
+                    pictoCount: placeHarmonicSummary.sotomayor.waveCounts[p.wave],
+                    maxCountRef: 6
+                }));
+                PLACES_DATA.muelle.people.forEach(p => records.push({
+                    ...p,
+                    zoneIdx: 1,
+                    pictoCount: placeHarmonicSummary.muelle.waveCounts[p.wave],
+                    maxCountRef: 6
+                }));
             } else {
+                const placeCounts = placeHarmonicSummary[activePlaceKey].waveCounts;
                 if (isolatedPerson) {
-                    records = [{ ...isolatedPerson, zoneIdx: 0 }];
+                    records = [{
+                        ...isolatedPerson,
+                        zoneIdx: 0,
+                        pictoCount: placeCounts[isolatedPerson.wave] || 1,
+                        maxCountRef: 6
+                    }];
                 } else {
-                    records = getFilteredPeopleInActivePlace().map(p => ({ ...p, zoneIdx: 0 }));
+                    records = getFilteredPeopleInActivePlace().map(p => ({
+                        ...p,
+                        zoneIdx: 0,
+                        pictoCount: placeCounts[p.wave] || 1,
+                        maxCountRef: 6
+                    }));
                 }
             }
 
@@ -812,11 +840,28 @@
                 return;
             }
 
+            // Conteo global por pictograma para la portada
+            const introTotals = {
+                transito:   placeHarmonicSummary.sotomayor.waveCounts.transito   + placeHarmonicSummary.muelle.waveCounts.transito,
+                obras:      placeHarmonicSummary.sotomayor.waveCounts.obras      + placeHarmonicSummary.muelle.waveCounts.obras,
+                personas:   placeHarmonicSummary.sotomayor.waveCounts.personas   + placeHarmonicSummary.muelle.waveCounts.personas,
+                naturaleza: placeHarmonicSummary.sotomayor.waveCounts.naturaleza + placeHarmonicSummary.muelle.waveCounts.naturaleza
+            };
+
             for (let i = 0; i < activeParticleCount; i++) {
                 const rec = records[i % countSurveys];
                 pZoneAssign[i] = rec.zoneIdx || 0;
                 pWaveColor[i] = WAVE_TYPES[rec.wave].colorIndex;
                 pRingLevel[i] = rec.ring;
+
+                // El grosor del trazo depende exclusivamente de la cantidad de respuestas (personas)
+                const c = rec.pictoCount !== undefined ? rec.pictoCount : introTotals[rec.wave];
+                const maxRef = rec.maxCountRef || 9;
+                const normThickness = Math.max(0.12, Math.min(1.0, (c - 1) / Math.max(1, maxRef - 1)));
+
+                pStrokeWeight[i] = normThickness;
+                const baseGrain = (i % 5 === 0) ? 1.45 : 1.08;
+                pSize[i] = baseGrain + normThickness * 1.15;
             }
         }
 
@@ -825,6 +870,11 @@
                 pSize[i] = (i % 5 === 0) ? 1.80 : 1.35;
                 pPhase[i] = (i * 0.6180339887) % (Math.PI * 2);
                 pShadeVariant[i] = i % 4;
+                // Distribución Gaussiana suave entre -1 y 1 para esculpir el ancho del trazo de arena
+                const u1 = ((i * 127) % 997) / 997;
+                const u2 = ((i * 311) % 991) / 991;
+                pRidgeOffset[i] = (u1 + u2) - 1.0;
+                pStrokeWeight[i] = 0.5;
             }
             distributeParticlesForCurrentStage();
         }
@@ -877,21 +927,19 @@
             if (r < 0.065) return 1.5;
             if (r > 1.06) return (r - 1.06) * 3.2;
 
-            // Fusión equilibrada de las 4 ondas en la placa de inicio
-            const wT = evaluateBourkeChladniMode(WAVE_TYPES.transito,   2, nx, ny, r, theta, 1.0);
-            const wO = evaluateBourkeChladniMode(WAVE_TYPES.obras,      2, nx, ny, r, theta, 1.0);
-            const wP = evaluateBourkeChladniMode(WAVE_TYPES.personas,   2, nx, ny, r, theta, 1.0);
-            const wN = evaluateBourkeChladniMode(WAVE_TYPES.naturaleza, 2, nx, ny, r, theta, 1.0);
+            const wT = evaluateBourkeChladniMode(WAVE_TYPES.transito,   nx, ny, r, theta, 1.0);
+            const wO = evaluateBourkeChladniMode(WAVE_TYPES.obras,      nx, ny, r, theta, 1.0);
+            const wP = evaluateBourkeChladniMode(WAVE_TYPES.personas,   nx, ny, r, theta, 1.0);
+            const wN = evaluateBourkeChladniMode(WAVE_TYPES.naturaleza, nx, ny, r, theta, 1.0);
 
-            const fusedField = (wT + wO + wP + wN) * 0.25;
+            const fusedField = (8 * wT + 5 * wO + 8 * wP + 9 * wN) / 30;
             const ownKey = ['transito', 'obras', 'personas', 'naturaleza'][particleColorIdx] || 'naturaleza';
-            const ownWave = evaluateBourkeChladniMode(WAVE_TYPES[ownKey], 2, nx, ny, r, theta, 1.0);
+            const ownWave = evaluateBourkeChladniMode(WAVE_TYPES[ownKey], nx, ny, r, theta, 1.0);
 
-            // 55% campo fusionado común + 45% trazo propio de cada color para leer la superposición
-            return fusedField * 0.55 + ownWave * 0.45;
+            return fusedField * 0.45 + ownWave * 0.55;
         }
 
-        function evaluatePictogramPureWave(colorIdx, ringLvl, x, y, cx, cy, radius) {
+        function evaluatePictogramPureWave(colorIdx, x, y, cx, cy, radius) {
             const nx = (x - cx) / radius;
             const ny = (y - cy) / radius;
             const r = Math.hypot(nx, ny);
@@ -901,10 +949,10 @@
             if (r > 0.96) return (r - 0.96) * 3.5;
 
             const waveKey = ['transito', 'obras', 'personas', 'naturaleza'][colorIdx] || 'naturaleza';
-            return evaluateBourkeChladniMode(WAVE_TYPES[waveKey], ringLvl, nx, ny, r, theta, 1.0);
+            return evaluateBourkeChladniMode(WAVE_TYPES[waveKey], nx, ny, r, theta, 1.0, catalogRingLevel);
         }
 
-        function evaluateZoneTotalWave(placeKey, colorIdx, ringLvl, x, y, cx, cy, radius) {
+        function evaluateZoneTotalWave(placeKey, colorIdx, x, y, cx, cy, radius) {
             const nx = (x - cx) / radius;
             const ny = (y - cy) / radius;
             const r = Math.hypot(nx, ny);
@@ -916,18 +964,16 @@
             const summary = placeHarmonicSummary[placeKey];
             const w = summary.weights;
 
-            // Ponderación cuadrática por cantidad de respuestas: la categoría más respondida
-            // toma mayor presencia geométrica y esculpe el patrón dominante del lugar
             const pT = Math.pow(w.transito, 1.35);
             const pO = Math.pow(w.obras, 1.35);
             const pP = Math.pow(w.personas, 1.35);
             const pN = Math.pow(w.naturaleza, 1.35);
             const pSum = Math.max(0.001, pT + pO + pP + pN);
 
-            const waveTransito   = evaluateBourkeChladniMode(WAVE_TYPES.transito,   summary.avgRing, nx, ny, r, theta, 1.0);
-            const waveObras      = evaluateBourkeChladniMode(WAVE_TYPES.obras,      summary.avgRing, nx, ny, r, theta, 1.0);
-            const wavePersonas   = evaluateBourkeChladniMode(WAVE_TYPES.personas,   summary.avgRing, nx, ny, r, theta, 1.0);
-            const waveNaturaleza = evaluateBourkeChladniMode(WAVE_TYPES.naturaleza, summary.avgRing, nx, ny, r, theta, 1.0);
+            const waveTransito   = evaluateBourkeChladniMode(WAVE_TYPES.transito,   nx, ny, r, theta, 1.0);
+            const waveObras      = evaluateBourkeChladniMode(WAVE_TYPES.obras,      nx, ny, r, theta, 1.0);
+            const wavePersonas   = evaluateBourkeChladniMode(WAVE_TYPES.personas,   nx, ny, r, theta, 1.0);
+            const waveNaturaleza = evaluateBourkeChladniMode(WAVE_TYPES.naturaleza, nx, ny, r, theta, 1.0);
 
             const superposedTotal =
                 (pT / pSum) * waveTransito +
@@ -937,14 +983,13 @@
 
             const waveKey = ['transito', 'obras', 'personas', 'naturaleza'][colorIdx] || summary.dominantWave;
             const ownShare = w[waveKey] || 0.25;
-            const ownWave = evaluateBourkeChladniMode(WAVE_TYPES[waveKey], ringLvl || summary.avgRing, nx, ny, r, theta, 1.0);
+            const ownWave = evaluateBourkeChladniMode(WAVE_TYPES[waveKey], nx, ny, r, theta, 1.0);
 
-            // A mayor proporción de respuestas de un pictograma, más fielmente dibuja su propia cresta nodal
             const ownInfluence = 0.22 + ownShare * 0.55;
             return superposedTotal * (1 - ownInfluence) + ownWave * ownInfluence;
         }
 
-        function evaluateDetailPlateWave(x, y, cx, cy, radius, particleColorIdx, particleRing) {
+        function evaluateDetailPlateWave(x, y, cx, cy, radius, particleColorIdx, particleRingLvl = 2) {
             const nx = (x - cx) / radius;
             const ny = (y - cy) / radius;
             const r = Math.hypot(nx, ny);
@@ -953,39 +998,28 @@
             if (r < 0.075) return 1.5;
             if (r > 0.96) return (r - 0.96) * 3.5;
 
+            const targetRing = activeRingFilter === 'todos' ? particleRingLvl : activeRingFilter;
+
             if (isolatedPerson) {
                 const wObj = WAVE_TYPES[isolatedPerson.wave];
-                const ringObj = INTENSITY_RINGS[isolatedPerson.ring - 1];
-                const personWave = evaluateBourkeChladniMode(
+                return evaluateBourkeChladniMode(
                     wObj,
-                    isolatedPerson.ring,
                     nx,
                     ny,
                     r,
                     theta - isolatedPerson.angle,
-                    isolatedPerson.freqMod
+                    isolatedPerson.freqMod,
+                    isolatedPerson.ring
                 );
-                const ringPull = Math.sin(((r - ringObj.radiusNorm) / 0.20) * Math.PI);
-                return personWave * 0.75 + ringPull * 0.25;
-            }
-
-            if (activeRingFilter > 0) {
-                const targetR = INTENSITY_RINGS[activeRingFilter - 1].radiusNorm;
-                const distFromRing = Math.abs(r - targetR);
-                if (distFromRing > 0.14) {
-                    return (distFromRing - 0.06) * 2.6;
-                }
             }
 
             if (activeWaveFilter !== 'todas') {
                 const wObj = WAVE_TYPES[activeWaveFilter];
-                const ringLvl = activeRingFilter > 0 ? activeRingFilter : (particleRing || 2);
-                return evaluateBourkeChladniMode(wObj, ringLvl, nx, ny, r, theta, 1.0);
+                return evaluateBourkeChladniMode(wObj, nx, ny, r, theta, 1.0, targetRing);
             }
 
             const summary = placeHarmonicSummary[activePlaceKey];
             const w = summary.weights;
-            const ringLvl = activeRingFilter > 0 ? activeRingFilter : summary.avgRing;
 
             const pT = Math.pow(w.transito, 1.35);
             const pO = Math.pow(w.obras, 1.35);
@@ -994,14 +1028,14 @@
             const pSum = Math.max(0.001, pT + pO + pP + pN);
 
             const superposedField =
-                (pT / pSum) * evaluateBourkeChladniMode(WAVE_TYPES.transito,   ringLvl, nx, ny, r, theta, 1.0) +
-                (pO / pSum) * evaluateBourkeChladniMode(WAVE_TYPES.obras,      ringLvl, nx, ny, r, theta, 1.0) +
-                (pP / pSum) * evaluateBourkeChladniMode(WAVE_TYPES.personas,   ringLvl, nx, ny, r, theta, 1.0) +
-                (pN / pSum) * evaluateBourkeChladniMode(WAVE_TYPES.naturaleza, ringLvl, nx, ny, r, theta, 1.0);
+                (pT / pSum) * evaluateBourkeChladniMode(WAVE_TYPES.transito,   nx, ny, r, theta, 1.0, targetRing) +
+                (pO / pSum) * evaluateBourkeChladniMode(WAVE_TYPES.obras,      nx, ny, r, theta, 1.0, targetRing) +
+                (pP / pSum) * evaluateBourkeChladniMode(WAVE_TYPES.personas,   nx, ny, r, theta, 1.0, targetRing) +
+                (pN / pSum) * evaluateBourkeChladniMode(WAVE_TYPES.naturaleza, nx, ny, r, theta, 1.0, targetRing);
 
             const waveKey = ['transito', 'obras', 'personas', 'naturaleza'][particleColorIdx] || 'naturaleza';
             const ownShare = w[waveKey] || 0.25;
-            const individualWave = evaluateBourkeChladniMode(WAVE_TYPES[waveKey], particleRing || ringLvl, nx, ny, r, theta, 1.0);
+            const individualWave = evaluateBourkeChladniMode(WAVE_TYPES[waveKey], nx, ny, r, theta, 1.0, targetRing);
 
             const ownInfluence = 0.22 + ownShare * 0.55;
             return superposedField * (1 - ownInfluence) + individualWave * ownInfluence;
@@ -1015,39 +1049,58 @@
         function moveParticleToNodalLine(i, evalFn, cx, cy, radius, maxRRatio, vibAmp, timeSec, energyFactor) {
             let x = px[i];
             let y = py[i];
-            const eps = 1.6;
+            const eps = 1.4;
 
             // Evaluar onda firmada y su derivada centrada (sin sesgo direccional)
             const f0 = evalFn(x, y);
+            const absF0 = Math.abs(f0);
             const dfx = (evalFn(x + eps, y) - evalFn(x - eps, y)) / (2 * eps);
             const dfy = (evalFn(x, y + eps) - evalFn(x, y - eps)) / (2 * eps);
-            const gradMagSq = dfx * dfx + dfy * dfy + 0.00008;
-            const gradMag = Math.sqrt(gradMagSq);
+            const gradMagSq = dfx * dfx + dfy * dfy;
+            const gradMag = Math.sqrt(gradMagSq + 0.00005);
 
-            // Paso tipo Newton-Raphson amortiguado hacia la línea nodal exacta f(x,y) = 0
-            const stepToNode = Math.max(-3.2, Math.min(3.2, f0 / gradMag)) * 0.58;
-            vx[i] -= (dfx / gradMag) * stepToNode;
-            vy[i] -= (dfy / gradMag) * stepToNode;
+            // Ancho de la banda nodal según la variable activa (Cantidad de Personas o Intensidad):
+            // - Valor bajo -> trazo fino de 0.025
+            // - Valor alto -> trazo grueso y denso de 0.34
+            const strokeW = pStrokeWeight[i];
+            const targetBandHalfWidth = 0.022 + Math.pow(strokeW, 1.35) * 0.32;
+            const targetF = pRidgeOffset[i] * targetBandHalfWidth;
+            const diffFromBand = f0 - targetF;
 
-            // Micro-vibración estacionaria de suma cero (no acumula deriva)
+            // Si la partícula cae en el vientre/antinodo de máxima vibración donde la derivada se anula,
+            // la placa la expulsa rápidamente hacia la línea nodal (tal como explica Chladni en Die Akustik)
+            if (gradMag < 0.0035 && absF0 > 0.12) {
+                const kickAngle = pPhase[i] + timeSec * 7.0;
+                vx[i] += Math.cos(kickAngle) * 2.6;
+                vy[i] += Math.sin(kickAngle) * 2.6;
+            } else {
+                // Paso de proyección directa hacia su posición dentro del grosor del trazo f(x,y) = targetF
+                const stepToNode = Math.max(-3.6, Math.min(3.6, diffFromBand / gradMag)) * 0.68;
+                vx[i] -= (dfx / gradMag) * stepToNode;
+                vy[i] -= (dfy / gradMag) * stepToNode;
+            }
+
+            // Micro-vibración estacionaria de suma cero sobre la línea nodal
             if (vibAmp > 0) {
                 const osc = Math.sin(timeSec * 16.0 + pPhase[i]);
                 const tx = -dfy / gradMag;
                 const ty = dfx / gradMag;
                 const nx = dfx / gradMag;
                 const ny = dfy / gradMag;
-                vx[i] += (tx * 0.42 + nx * 0.25) * osc * vibAmp;
-                vy[i] += (ty * 0.42 + ny * 0.25) * osc * vibAmp;
+                // En el nodo (absF0 pequeño) vibra suavemente en el lugar; en el antinodo salta hacia el nodo
+                const antinodeBoost = 1.0 + Math.min(1.5, Math.abs(diffFromBand) * 1.8);
+                vx[i] += (tx * 0.36 + nx * 0.20) * osc * vibAmp * antinodeBoost;
+                vy[i] += (ty * 0.36 + ny * 0.20) * osc * vibAmp * antinodeBoost;
             }
 
             if (energyFactor > 0.008) {
-                const jitter = (Math.abs(f0) * 2.4 + 0.15) * energyFactor;
+                const jitter = (absF0 * 2.6 + 0.15) * energyFactor;
                 vx[i] += (Math.random() - 0.5) * jitter;
                 vy[i] += (Math.random() - 0.5) * jitter;
             }
 
-            vx[i] *= 0.48;
-            vy[i] *= 0.48;
+            vx[i] *= 0.44;
+            vy[i] *= 0.44;
             x += vx[i];
             y += vy[i];
 
@@ -1060,11 +1113,11 @@
 
             if (dist > maxR) {
                 const ang = Math.atan2(dy, dx);
-                const targetDist = maxR - ((i % 17) / 17) * (radius * 0.16);
+                const targetDist = maxR - ((i % 19) / 19) * (radius * 0.22);
                 x = cx + Math.cos(ang) * targetDist;
                 y = cy + Math.sin(ang) * targetDist;
-                vx[i] *= -0.25;
-                vy[i] *= -0.25;
+                vx[i] *= -0.2;
+                vy[i] *= -0.2;
             } else if (dist < minR) {
                 const ang = (dist > 0.001) ? Math.atan2(dy, dx) : pPhase[i];
                 x = cx + Math.cos(ang) * (minR + 2.5);
@@ -1099,18 +1152,17 @@
                 }
             } else if (currentStage === 'pictograms') {
                 const plates = getPictogramCatalogGeometry();
-                const ringBoost = INTENSITY_RINGS[catalogRingLevel - 1].vibBoost;
                 for (let i = 0; i < activeParticleCount; i++) {
                     const p = plates[pZoneAssign[i]];
                     const cIdx = pWaveColor[i];
                     moveParticleToNodalLine(
                         i,
-                        (x, y) => evaluatePictogramPureWave(cIdx, catalogRingLevel, x, y, p.cx, p.cy, p.radius),
+                        (x, y) => evaluatePictogramPureWave(cIdx, x, y, p.cx, p.cy, p.radius),
                         p.cx,
                         p.cy,
                         p.radius,
                         0.93,
-                        vibActive * 0.32 * ringBoost,
+                        vibActive * 0.32,
                         timeSec,
                         energyFactor
                     );
@@ -1120,16 +1172,14 @@
                 for (let i = 0; i < activeParticleCount; i++) {
                     const z = zones[pZoneAssign[i]];
                     const cIdx = pWaveColor[i];
-                    const rLvl = pRingLevel[i] || 2;
-                    const ringBoost = INTENSITY_RINGS[rLvl - 1].vibBoost;
                     moveParticleToNodalLine(
                         i,
-                        (x, y) => evaluateZoneTotalWave(z.key, cIdx, rLvl, x, y, z.cx, z.cy, z.radius),
+                        (x, y) => evaluateZoneTotalWave(z.key, cIdx, x, y, z.cx, z.cy, z.radius),
                         z.cx,
                         z.cy,
                         z.radius,
                         0.93,
-                        vibActive * 0.30 * ringBoost,
+                        vibActive * 0.30,
                         timeSec,
                         energyFactor
                     );
@@ -1139,7 +1189,6 @@
                 for (let i = 0; i < activeParticleCount; i++) {
                     const cIdx = pWaveColor[i];
                     const rLvl = pRingLevel[i] || 2;
-                    const ringBoost = INTENSITY_RINGS[rLvl - 1].vibBoost;
                     moveParticleToNodalLine(
                         i,
                         (x, y) => evaluateDetailPlateWave(x, y, plate.cx, plate.cy, plate.radius, cIdx, rLvl),
@@ -1147,7 +1196,7 @@
                         plate.cy,
                         plate.radius,
                         0.93,
-                        vibActive * 0.34 * ringBoost,
+                        vibActive * 0.34,
                         timeSec,
                         energyFactor
                     );
@@ -1167,19 +1216,6 @@
             for (let s = 0; s < 16; s++) {
                 stepSandSettlement(settleEnergy, acousticTime);
                 settleEnergy *= 0.90;
-            }
-        }
-
-        function toggleSandVibration() {
-            continuousVibrationEnabled = !continuousVibrationEnabled;
-            const dot = document.getElementById('vibDot');
-            const label = document.getElementById('vibLabel');
-            if (continuousVibrationEnabled) {
-                dot.className = 'w-2 h-2 rounded-full bg-[#16A34A] animate-ping';
-                label.textContent = 'Vibración · Activa';
-            } else {
-                dot.className = 'w-2 h-2 rounded-full bg-neutral-400';
-                label.textContent = 'Vibración · Pausada';
             }
         }
 
@@ -1223,6 +1259,8 @@
             const targetBlend = isDarkTheme ? 1.0 : 0.0;
             themeBlend += (targetBlend - themeBlend) * 0.10;
 
+            stageRevealAlpha += (1.0 - stageRevealAlpha) * 0.055;
+
             stepSandSettlement(settleEnergy, acousticTime);
             if (settleEnergy > 0.003) {
                 settleEnergy *= 0.90;
@@ -1232,6 +1270,8 @@
             ctx.fillStyle = getThemeSurface(1.0);
             ctx.fillRect(0, 0, width, height);
 
+            const sandAlpha = 0.94 * Math.min(1.0, 0.25 + stageRevealAlpha * 0.75);
+
             if (activeParticleCount > 0) {
                 for (let cIdx = 0; cIdx < 4; cIdx++) {
                     const group = PIGMENT_RGB[cIdx];
@@ -1240,7 +1280,7 @@
                             group.light[shade],
                             group.dark[shade],
                             themeBlend,
-                            0.94
+                            sandAlpha
                         );
                         ctx.beginPath();
                         for (let i = 0; i < activeParticleCount; i++) {
@@ -1254,8 +1294,8 @@
                 }
             }
 
-            const boltJitterX = continuousVibrationEnabled ? Math.cos(acousticTime * 24) * 0.28 : 0;
-            const boltJitterY = continuousVibrationEnabled ? Math.sin(acousticTime * 28) * 0.28 : 0;
+            const boltJitterX = 0;
+            const boltJitterY = 0;
 
             if (currentStage === 'intro') {
                 const plate = getSinglePlateGeometry(true);
@@ -1327,7 +1367,11 @@
 
         function renderPictogramCatalogOverlay(boltJitterX, boltJitterY) {
             const plates = getPictogramCatalogGeometry();
+            const alpha = Math.max(0.01, Math.min(1.0, stageRevealAlpha));
+            const slideY = (1 - alpha) * 10;
+
             ctx.save();
+            ctx.globalAlpha = alpha;
 
             // Recta horizontal en el medio que conecta y alinea todos los círculos
             if (plates.length > 0) {
@@ -1344,47 +1388,19 @@
 
             plates.forEach(p => {
                 const waveObj = WAVE_TYPES[p.key];
-                const modeInfo = waveObj.modesByRing[catalogRingLevel];
                 const isHovered = hoveredItem && hoveredItem.type === 'pictoPlate' && hoveredItem.key === p.key;
                 const colorHex = isDarkTheme ? waveObj.hexDarkBg : waveObj.hex;
 
+                // Única circunferencia estática sin animación
                 ctx.beginPath();
                 ctx.arc(p.cx, p.cy, p.radius, 0, Math.PI * 2);
-                ctx.strokeStyle = isHovered ? colorHex : getThemeInk(0.28);
-                ctx.lineWidth = isHovered ? 2.0 : 1.1;
+                ctx.strokeStyle = isHovered ? colorHex : getThemeInk(0.32);
+                ctx.lineWidth = isHovered ? 1.8 : 1.1;
                 ctx.stroke();
-
-                const ringObj = INTENSITY_RINGS[catalogRingLevel - 1];
-                const activeRingR = p.radius * ringObj.radiusNorm;
-                ctx.beginPath();
-                ctx.setLineDash([3, 6]);
-                ctx.arc(p.cx, p.cy, activeRingR, 0, Math.PI * 2);
-                ctx.strokeStyle = isHovered ? colorHex : getThemeInk(0.24);
-                ctx.lineWidth = 1.0;
-                ctx.stroke();
-                ctx.setLineDash([]);
-
-                ctx.textAlign = 'center';
-                ctx.font = '700 8.5px Montserrat';
-                ctx.fillStyle = colorHex;
-                ctx.fillText(`ANILLO ${ringObj.short}`, p.cx, p.cy - activeRingR - 4);
-
-                for (let d = 0; d < 12; d++) {
-                    const a = (d * 30 * Math.PI) / 180;
-                    const isMajor = d % 3 === 0;
-                    const rIn = p.radius * (isMajor ? 0.94 : 0.965);
-                    const rOut = p.radius * (isMajor ? 1.03 : 1.01);
-                    ctx.beginPath();
-                    ctx.moveTo(p.cx + Math.cos(a) * rIn, p.cy + Math.sin(a) * rIn);
-                    ctx.lineTo(p.cx + Math.cos(a) * rOut, p.cy + Math.sin(a) * rOut);
-                    ctx.strokeStyle = getThemeInk(isMajor ? 0.45 : 0.22);
-                    ctx.lineWidth = isMajor ? 1.2 : 0.8;
-                    ctx.stroke();
-                }
 
                 drawHexBolt(p.cx + boltJitterX, p.cy + boltJitterY, 7.5);
 
-                const topY = p.cy - p.radius - 20;
+                const topY = p.cy - p.radius - 20 + slideY;
                 ctx.font = '700 13px Montserrat';
                 const textW = ctx.measureText(waveObj.pictogramName).width;
                 const totalHeaderW = 10 + 18 + textW;
@@ -1407,7 +1423,11 @@
 
         function renderOverviewConstellation(boltJitterX, boltJitterY) {
             const { hub, zones } = getOverviewConstellationGeometry();
+            const alpha = Math.max(0.01, Math.min(1.0, stageRevealAlpha));
+            const slideOffset = (1 - alpha) * 10;
+
             ctx.save();
+            ctx.globalAlpha = alpha;
 
             zones.forEach(z => {
                 const isHovered = hoveredItem && hoveredItem.type === 'zone' && hoveredItem.key === z.key;
@@ -1444,15 +1464,15 @@
             ctx.textAlign = 'center';
             ctx.fillStyle = getThemeInk(0.55);
             ctx.font = '700 8.5px Montserrat';
-            ctx.fillText('SUPERPOSICIÓN', hub.cx, hub.cy - 9);
+            ctx.fillText('SUPERPOSICIÓN', hub.cx, hub.cy - 9 + slideOffset);
 
             ctx.fillStyle = getThemeInk(1.0);
             ctx.font = '700 15px Montserrat';
-            ctx.fillText(`N = ${globalTotalSurveys}`, hub.cx, hub.cy + 7);
+            ctx.fillText(`N = ${globalTotalSurveys}`, hub.cx, hub.cy + 7 + slideOffset);
 
             ctx.fillStyle = getThemeInk(0.68);
             ctx.font = '600 8.5px Montserrat';
-            ctx.fillText('FICHAS WIKI', hub.cx, hub.cy + 19);
+            ctx.fillText('FICHAS WIKI', hub.cx, hub.cy + 19 + slideOffset);
 
             zones.forEach(z => {
                 const place = PLACES_DATA[z.key];
@@ -1501,7 +1521,7 @@
                     Math.max(5.5, 8.5 * (z.radius / 115))
                 );
 
-                const labelY = z.cy - z.radius - 16;
+                const labelY = z.cy - z.radius - 16 + slideOffset;
                 ctx.textAlign = 'center';
                 ctx.fillStyle = getThemeInk(1.0);
                 ctx.font = isHovered ? '700 14px Montserrat' : '600 13px Montserrat';
@@ -1512,9 +1532,9 @@
                 const bottomInfo = z.key === 'buenosaires'
                     ? '0 fichas en la Wiki · Sin arena asignada'
                     : (isHovered
-                        ? 'Click para abrir sus 3 círculos de intensidad →'
+                        ? 'Click para abrir su detalle de ondas →'
                         : `Predomina: ${WAVE_TYPES[summary.dominantWave].pictogramName} · ${summary.total} fichas`);
-                ctx.fillText(bottomInfo, z.cx, z.cy + z.radius + 24);
+                ctx.fillText(bottomInfo, z.cx, z.cy + z.radius + 24 + slideOffset);
             });
 
             ctx.restore();
@@ -1523,55 +1543,15 @@
         function renderDetailOverlay(boltJitterX, boltJitterY) {
             const plate = getSinglePlateGeometry(false);
             const place = PLACES_DATA[activePlaceKey];
-            const filteredPeople = getFilteredPeopleInActivePlace();
-            const filteredIds = new Set(filteredPeople.map(p => p.id));
 
             ctx.save();
 
+            // Una sola circunferencia estática sin anillos internos ni animación
             ctx.beginPath();
             ctx.arc(plate.cx, plate.cy, plate.radius * 0.96, 0, Math.PI * 2);
-            ctx.strokeStyle = getThemeInk(0.28);
-            ctx.lineWidth = 1.1;
+            ctx.strokeStyle = getThemeInk(0.32);
+            ctx.lineWidth = 1.15;
             ctx.stroke();
-
-            for (let d = 0; d < 36; d++) {
-                const a = (d * 10 * Math.PI) / 180;
-                const isMajor = d % 9 === 0;
-                const rIn = plate.radius * (isMajor ? 0.94 : 0.952);
-                const rOut = plate.radius * (isMajor ? 0.98 : 0.968);
-                ctx.beginPath();
-                ctx.moveTo(plate.cx + Math.cos(a) * rIn, plate.cy + Math.sin(a) * rIn);
-                ctx.lineTo(plate.cx + Math.cos(a) * rOut, plate.cy + Math.sin(a) * rOut);
-                ctx.strokeStyle = getThemeInk(isMajor ? 0.48 : 0.20);
-                ctx.lineWidth = isMajor ? 1.2 : 0.7;
-                ctx.stroke();
-            }
-
-            INTENSITY_RINGS.forEach(ring => {
-                const rPx = plate.radius * ring.radiusNorm;
-                const isSelected = (activeRingFilter === ring.level);
-                const isHovered = (hoveredItem && hoveredItem.type === 'ring' && hoveredItem.level === ring.level);
-
-                ctx.beginPath();
-                ctx.arc(plate.cx, plate.cy, rPx, 0, Math.PI * 2);
-
-                if (isSelected || isHovered) {
-                    ctx.strokeStyle = getThemeInk(0.95);
-                    ctx.lineWidth = 1.9;
-                    ctx.setLineDash([]);
-                } else {
-                    ctx.strokeStyle = activeRingFilter === 0 ? getThemeInk(0.26) : getThemeInk(0.09);
-                    ctx.lineWidth = 1.0;
-                    ctx.setLineDash([4, 6]);
-                }
-                ctx.stroke();
-                ctx.setLineDash([]);
-
-                ctx.textAlign = 'center';
-                ctx.font = (isSelected || isHovered) ? '700 9.5px Montserrat' : '600 8.5px Montserrat';
-                ctx.fillStyle = (isSelected || isHovered) ? getThemeInk(1.0) : getThemeInk(0.68);
-                ctx.fillText(`ANILLO ${ring.short}`, plate.cx, plate.cy - rPx - 6);
-            });
 
             if (place.people.length === 0) {
                 ctx.textAlign = 'center';
@@ -1579,55 +1559,6 @@
                 ctx.fillStyle = getThemeInk(0.55);
                 ctx.fillText('0 fichas registradas en la Wiki para este lugar', plate.cx, plate.cy + 44);
             }
-
-            place.people.forEach(person => {
-                const isIncluded = filteredIds.has(person.id) && (!isolatedPerson || isolatedPerson.id === person.id);
-                const isHighlighted = (hoveredItem && hoveredItem.type === 'person' && hoveredItem.person.id === person.id) ||
-                                      (isolatedPerson && isolatedPerson.id === person.id);
-
-                const ringInfo = INTENSITY_RINGS[person.ring - 1];
-                const waveInfo = WAVE_TYPES[person.wave];
-                const baseR = plate.radius * ringInfo.radiusNorm;
-
-                const livePhase = continuousVibrationEnabled ? acousticTime * 7.0 * waveInfo.vibFreq : 0;
-                const pxNode = plate.cx + Math.cos(person.angle) * baseR;
-                const pyNode = plate.cy + Math.sin(person.angle) * baseR;
-
-                if (isIncluded) {
-                    ctx.beginPath();
-                    const arcSpan = isHighlighted ? Math.PI * 2 : 0.62;
-                    const steps = isHighlighted ? 160 : 38;
-                    const waveAmpPx = (5 + person.ring * 3.8) * (isHighlighted ? 1.45 : 0.85);
-
-                    for (let s = 0; s <= steps; s++) {
-                        const a = (person.angle - arcSpan / 2) + (s / steps) * arcSpan;
-                        const env = isHighlighted ? 1.0 : Math.sin((s / steps) * Math.PI);
-                        const osc = Math.sin((a - person.angle) * waveInfo.lobes * 2.4 * person.freqMod + livePhase);
-                        const rOsc = baseR + osc * waveAmpPx * env;
-                        const wx = plate.cx + Math.cos(a) * rOsc;
-                        const wy = plate.cy + Math.sin(a) * rOsc;
-                        if (s === 0) ctx.moveTo(wx, wy);
-                        else ctx.lineTo(wx, wy);
-                    }
-                    ctx.strokeStyle = isDarkTheme ? waveInfo.hexDarkBg : waveInfo.hex;
-                    ctx.globalAlpha = isHighlighted ? 0.98 : 0.72;
-                    ctx.lineWidth = isHighlighted ? 2.4 : 1.45;
-                    ctx.stroke();
-                    ctx.globalAlpha = 1.0;
-                }
-
-                const rDot = isHighlighted ? 6.5 : (isIncluded ? 4.3 : 2.0);
-                ctx.beginPath();
-                ctx.arc(pxNode, pyNode, rDot, 0, Math.PI * 2);
-                ctx.fillStyle = isIncluded ? (isDarkTheme ? waveInfo.hexDarkBg : waveInfo.hex) : getThemeInk(0.18);
-                ctx.fill();
-
-                if (isHighlighted || isIncluded) {
-                    ctx.lineWidth = isHighlighted ? 2.0 : 1.0;
-                    ctx.strokeStyle = getThemeSurface(0.95);
-                    ctx.stroke();
-                }
-            });
 
             drawHexBolt(plate.cx + boltJitterX, plate.cy + boltJitterY, 10.5);
             ctx.restore();
@@ -1720,21 +1651,11 @@
             }
         }
 
-        function setCatalogRingLevel(level) {
-            catalogRingLevel = level;
-            [1, 2, 3].forEach(l => {
-                const btn = document.getElementById('catRing-' + l);
-                if (btn) btn.classList.toggle('active', catalogRingLevel === l);
-            });
-            distributeParticlesForCurrentStage();
-            triggerGentleReorganization();
-            updatePosterTypography();
-        }
-
         function goToStage(stageName) {
             currentStage = stageName;
             isolatedPerson = null;
             hoveredItem = null;
+            stageRevealAlpha = 0.0;
 
             const backBtn = document.getElementById('backBtn');
             const detailFilters = document.getElementById('detailFiltersCorner');
@@ -1742,8 +1663,16 @@
             const quickNav = document.getElementById('QuickPlaceNav');
             const introActionWrap = document.getElementById('introActionWrap');
             const clearPersonBtn = document.getElementById('clearPersonBtn');
+            const bottomLeftBlock = document.getElementById('bottomLeftBlock');
 
             clearPersonBtn.classList.add('hidden');
+
+            [bottomLeftBlock, pictoControls, detailFilters].forEach(el => {
+                if (!el) return;
+                el.classList.remove('stage-fade-in');
+                void el.offsetWidth;
+                el.classList.add('stage-fade-in');
+            });
 
             if (stageName === 'intro') {
                 backBtn.classList.add('hidden');
@@ -1788,7 +1717,7 @@
         function enterPlaceDetail(placeKey) {
             activePlaceKey = placeKey;
             activeWaveFilter = 'todas';
-            activeRingFilter = 0;
+            activeRingFilter = 'todos';
             isolatedPerson = null;
             goToStage('detail');
             updateFilterButtonsState();
@@ -1798,9 +1727,20 @@
             const all = PLACES_DATA[activePlaceKey].people;
             return all.filter(p => {
                 const matchWave = (activeWaveFilter === 'todas' || p.wave === activeWaveFilter);
-                const matchRing = (activeRingFilter === 0 || p.ring === activeRingFilter);
+                const matchRing = (activeRingFilter === 'todos' || p.ring === activeRingFilter);
                 return matchWave && matchRing;
             });
+        }
+
+        function setCatalogRingLevel(level) {
+            catalogRingLevel = level;
+            [1, 2, 3].forEach(r => {
+                const btn = document.getElementById('catRing-' + r);
+                if (btn) btn.classList.toggle('active', r === level);
+            });
+            distributeParticlesForCurrentStage();
+            triggerGentleReorganization();
+            updatePosterTypography();
         }
 
         function setWaveFilter(waveKey) {
@@ -1814,8 +1754,8 @@
             updateHarmonicEmblem();
         }
 
-        function setRingFilter(ringLevel) {
-            activeRingFilter = (activeRingFilter === ringLevel && ringLevel !== 0) ? 0 : ringLevel;
+        function setRingFilter(ringVal) {
+            activeRingFilter = ringVal;
             isolatedPerson = null;
             document.getElementById('clearPersonBtn').classList.add('hidden');
             updateFilterButtonsState();
@@ -1850,17 +1790,10 @@
             document.getElementById('wfCount-todas').textContent = summary.total;
             ['transito', 'obras', 'personas', 'naturaleza'].forEach(wKey => {
                 const count = place.people.filter(p =>
-                    p.wave === wKey && (activeRingFilter === 0 || p.ring === activeRingFilter)
+                    p.wave === wKey && (activeRingFilter === 'todos' || p.ring === activeRingFilter)
                 ).length;
                 document.getElementById('wfCount-' + wKey).textContent = count;
             });
-
-            for (let r = 1; r <= 3; r++) {
-                const count = place.people.filter(p =>
-                    p.ring === r && (activeWaveFilter === 'todas' || p.wave === activeWaveFilter)
-                ).length;
-                document.getElementById('rfCount-' + r).textContent = count;
-            }
 
             ['transito', 'obras', 'personas', 'naturaleza'].forEach(wKey => {
                 const btn = document.getElementById('wf-' + wKey);
@@ -1872,10 +1805,22 @@
                 btn.style.textUnderlineOffset = '5px';
             });
 
-            for (let r = 0; r <= 3; r++) {
-                const btn = document.getElementById('rf-' + r);
-                if (btn) btn.classList.toggle('active', activeRingFilter === r);
-            }
+            const waveSubset = place.people.filter(p =>
+                activeWaveFilter === 'todas' || p.wave === activeWaveFilter
+            );
+            const rfTodos = document.getElementById('rfCount-todos');
+            if (rfTodos) rfTodos.textContent = waveSubset.length;
+
+            [1, 2, 3].forEach(r => {
+                const c = waveSubset.filter(p => p.ring === r).length;
+                const el = document.getElementById('rfCount-' + r);
+                if (el) el.textContent = c;
+            });
+
+            ['todos', 1, 2, 3].forEach(rKey => {
+                const btn = document.getElementById('rf-' + rKey);
+                if (btn) btn.classList.toggle('active', activeRingFilter === rKey);
+            });
         }
 
         /**
@@ -1895,12 +1840,15 @@
             if (hoveredItem) {
                 if (hoveredItem.type === 'pictoPlate') {
                     const w = WAVE_TYPES[hoveredItem.key];
-                    const ringInfo = INTENSITY_RINGS[catalogRingLevel - 1];
+                    const sotoCount = placeHarmonicSummary.sotomayor.waveCounts[hoveredItem.key];
+                    const muelleCount = placeHarmonicSummary.muelle.waveCounts[hoveredItem.key];
+                    const totalPictoCount = sotoCount + muelleCount;
+
                     l1.textContent = `Onda ${w.pictogramName}`;
                     l2.textContent = `${w.waveQuality}`;
-                    l3.textContent = `Intensidad simulada: ${ringInfo.label}`;
-                    l4.textContent = `Simulación perceptual desde el sonido escuchado en la calle`;
-                    l5.textContent = `Sotomayor (${placeHarmonicSummary.sotomayor.waveCounts[hoveredItem.key]}) · Muelle Prat (${placeHarmonicSummary.muelle.waveCounts[hoveredItem.key]})`;
+                    l3.textContent = `${totalPictoCount} respuestas registradas en total`;
+                    l4.textContent = `Plaza Sotomayor (${sotoCount}) · Muelle Prat (${muelleCount})`;
+                    l5.textContent = `Grosor del trazo según cantidad de respuestas`;
                     c1.textContent = 'Click para pasar a la superposición total →';
                     c2.textContent = '';
                     return;
@@ -1921,19 +1869,6 @@
                     c2.textContent = '';
                     return;
                 }
-                if (hoveredItem.type === 'person') {
-                    const per = hoveredItem.person;
-                    const w = WAVE_TYPES[per.wave];
-                    const ringObj = INTENSITY_RINGS[per.ring - 1];
-                    l1.textContent = `${per.id}`;
-                    l2.textContent = `Onda ${w.pictogramName} · ${w.waveQuality}`;
-                    l3.textContent = `Ubicación: ${ringObj.label}`;
-                    l4.textContent = `Simulación perceptual desde el registro de terreno`;
-                    l5.textContent = `${PLACES_DATA[activePlaceKey].name} · Orientación ${Math.round((per.angle * 180) / Math.PI)}°`;
-                    c1.textContent = 'Click para aislar la onda pura de este registro →';
-                    c2.textContent = '';
-                    return;
-                }
             }
 
             if (currentStage === 'intro') {
@@ -1948,12 +1883,11 @@
             }
 
             if (currentStage === 'pictograms') {
-                const ringInfo = INTENSITY_RINGS[catalogRingLevel - 1];
                 l1.textContent = 'Ondas por Pictograma';
-                l2.textContent = `Intensidad activa: ${ringInfo.label}`;
-                l3.textContent = 'Tránsito (n=2, m=4) · Obras (n=3, m=6)';
-                l4.textContent = 'Personas (n=1, m=2) · Naturaleza (n=2, m=5)';
-                l5.textContent = 'Ecuación de Chladni (Die Akustik / Bourke)';
+                l2.textContent = 'Cada pictograma esculpe su patrón único de Chladni';
+                l3.textContent = 'Tránsito: Cuadrícula vial · Obras: Estrella de impacto';
+                l4.textContent = 'Personas: Arcos de voz · Naturaleza: Roseta de pétalos';
+                l5.textContent = 'Grosor del trazo según cantidad de respuestas';
                 c1.textContent = 'Click para avanzar a la superposición total →';
                 c2.textContent = '';
                 return;
@@ -1964,8 +1898,8 @@
                 l2.textContent = `${globalTotalSurveys} ondas superpuestas en el territorio`;
                 l3.textContent = `Plaza Sotomayor (${PLACES_DATA.sotomayor.people.length} fichas · Predomina Tránsito)`;
                 l4.textContent = `Muelle Prat (${PLACES_DATA.muelle.people.length} fichas · Predomina Naturaleza)`;
-                l5.textContent = 'Simulación de percepción sonora · Centro (Bajo) a Borde (Alto)';
-                c1.textContent = 'Selecciona un lugar para ver sus 3 círculos →';
+                l5.textContent = 'Grosor del trazo proporcional a las respuestas';
+                c1.textContent = 'Selecciona un lugar para desglosar sus ondas →';
                 c2.textContent = '';
                 return;
             }
@@ -1974,31 +1908,18 @@
             const summary = placeHarmonicSummary[activePlaceKey];
             const filtered = getFilteredPeopleInActivePlace();
 
-            if (isolatedPerson) {
-                const w = WAVE_TYPES[isolatedPerson.wave];
-                const ringObj = INTENSITY_RINGS[isolatedPerson.ring - 1];
-                l1.textContent = `${place.name} · ${isolatedPerson.id}`;
-                l2.textContent = `Onda ${w.pictogramName} · ${w.waveQuality}`;
-                l3.textContent = `Ubicación radial: ${ringObj.label}`;
-                l4.textContent = 'Simulación perceptual desde lo escuchado en la calle';
-                l5.textContent = 'Onda individual aislada sobre la placa';
-                c1.textContent = 'Click para restaurar la superposición del lugar →';
-                c2.textContent = `${summary.total} fichas totales en ${place.name}`;
-                return;
-            }
-
             l1.textContent = place.name;
             l2.textContent = summary.total === 0
                 ? '0 fichas registradas en la Wiki'
-                : `Superposición activa: ${filtered.length} de ${summary.total} ondas`;
+                : (activeWaveFilter === 'todas'
+                    ? `Superposición activa: ${filtered.length} de ${summary.total} respuestas`
+                    : `${ WAVE_TYPES[activeWaveFilter].waveQuality }`);
             l3.textContent = summary.total === 0
                 ? 'Sin ondas en superposición'
                 : (activeWaveFilter === 'todas'
-                    ? `Predomina: Onda ${WAVE_TYPES[summary.dominantWave].pictogramName}`
-                    : `Onda aislada: ${WAVE_TYPES[activeWaveFilter].pictogramName} (${WAVE_TYPES[activeWaveFilter].waveQuality})`);
-            l4.textContent = activeRingFilter === 0
-                ? '3 círculos del instrumento (Bajo · Medio · Alto)'
-                : `Ubicación activa: ${INTENSITY_RINGS[activeRingFilter - 1].label}`;
+                    ? `Predomina: Onda ${WAVE_TYPES[summary.dominantWave].pictogramName} (${summary.waveCounts[summary.dominantWave]} respuestas)`
+                    : `Onda ${WAVE_TYPES[activeWaveFilter].pictogramName}: ${filtered.length} respuestas`);
+            l4.textContent = 'Grosor del trazo según cantidad de respuestas';
             l5.textContent = `${place.subtitle}`;
             c1.textContent = 'Click aquí para volver al total de lugares →';
             c2.textContent = '';
@@ -2090,47 +2011,10 @@
                     return;
                 }
 
-                const plate = getSinglePlateGeometry(false);
-                const place = PLACES_DATA[activePlaceKey];
-                let foundPerson = null;
-                let minDist = 14;
-
-                for (let p of place.people) {
-                    const rPx = plate.radius * INTENSITY_RINGS[p.ring - 1].radiusNorm;
-                    const pxNode = plate.cx + Math.cos(p.angle) * rPx;
-                    const pyNode = plate.cy + Math.sin(p.angle) * rPx;
-                    const d = Math.hypot(mx - pxNode, my - pyNode);
-                    if (d < minDist) {
-                        minDist = d;
-                        foundPerson = p;
-                    }
-                }
-
-                if (foundPerson) {
-                    canvas.style.cursor = 'pointer';
-                    hoveredItem = { type: 'person', person: foundPerson };
+                canvas.style.cursor = 'default';
+                if (hoveredItem) {
+                    hoveredItem = null;
                     updatePosterTypography();
-                    return;
-                }
-
-                const distCenter = Math.hypot(mx - plate.cx, my - plate.cy);
-                let foundRing = null;
-                for (let ring of INTENSITY_RINGS) {
-                    if (Math.abs(distCenter - plate.radius * ring.radiusNorm) < 10) {
-                        foundRing = ring;
-                        break;
-                    }
-                }
-
-                if (foundRing) {
-                    canvas.style.cursor = 'pointer';
-                    hoveredItem = { type: 'ring', level: foundRing.level };
-                } else {
-                    canvas.style.cursor = 'default';
-                    if (hoveredItem) {
-                        hoveredItem = null;
-                        updatePosterTypography();
-                    }
                 }
             });
 
@@ -2150,18 +2034,6 @@
                         enterPlaceDetail(hoveredItem.key);
                     }
                     return;
-                }
-
-                if (currentStage === 'detail' && hoveredItem) {
-                    if (hoveredItem.type === 'person') {
-                        if (isolatedPerson && isolatedPerson.id === hoveredItem.person.id) {
-                            clearIsolatedPerson();
-                        } else {
-                            isolateSinglePerson(hoveredItem.person);
-                        }
-                    } else if (hoveredItem.type === 'ring') {
-                        setRingFilter(hoveredItem.level);
-                    }
                 }
             });
         }
